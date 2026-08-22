@@ -17,7 +17,8 @@ import {
   Check,
   FileText,
   Smartphone,
-  ArrowLeft
+  ArrowLeft,
+  Volume2
 } from 'lucide-react';
 import { DayProgress, UserProfile } from '../types';
 import { ColshopiLogo } from './ColshopiLogo';
@@ -33,6 +34,7 @@ interface UserProfileModalProps {
   currentDay?: number;
   onOpenAdminPanel?: () => void;
   onInstallApp?: () => void;
+  onOpenWelcomeAudio?: () => void;
   onLogout?: () => void;
 }
 
@@ -45,6 +47,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   currentDay = 1,
   onOpenAdminPanel,
   onInstallApp,
+  onOpenWelcomeAudio,
   onLogout
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -251,6 +254,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-md"
               >
                 <span>👑 Abrir Panel de Control Administrativo ColShopi</span>
+              </button>
+            )}
+
+            {/* Listen to Marie's Welcome Audio */}
+            {onOpenWelcomeAudio && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenWelcomeAudio();
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-50 via-cyan-50 to-teal-50 hover:from-emerald-100 hover:to-cyan-100 text-emerald-950 border border-emerald-300/80 font-bold flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-xs"
+              >
+                <Volume2 className="w-4 h-4 text-emerald-700" />
+                <span>🎙️ Escuchar Mensaje de Bienvenida de Marié</span>
               </button>
             )}
 

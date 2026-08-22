@@ -25,12 +25,14 @@ interface MarieChatProps {
   userProfile: UserProfile;
   onOpenOrder: () => void;
   onOpenRecipe: (recipeId: string) => void;
+  onOpenWelcomeAudio?: () => void;
 }
 
 export const MarieChat: React.FC<MarieChatProps> = ({
   userProfile,
   onOpenOrder,
-  onOpenRecipe
+  onOpenRecipe,
+  onOpenWelcomeAudio
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const saved = localStorage.getItem('tyrofem_chat_messages');
@@ -186,43 +188,40 @@ export const MarieChat: React.FC<MarieChatProps> = ({
         </div>
       </div>
 
-      {/* Simulated Audio Note Player Widget */}
-      <div className="bg-white rounded-2xl p-4 border border-emerald-200/80 shadow-xs flex items-center justify-between gap-4">
+      {/* Audio Note & Welcome Message Widget */}
+      <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 rounded-2xl p-4 border border-emerald-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={togglePlayAudio}
-            className="w-10 h-10 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white flex items-center justify-center transition-transform active:scale-95 shadow-md shadow-emerald-800/20 shrink-0 cursor-pointer"
+            onClick={onOpenWelcomeAudio || togglePlayAudio}
+            className="w-11 h-11 rounded-2xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white flex items-center justify-center transition-transform active:scale-95 shadow-md shadow-emerald-800/20 shrink-0 cursor-pointer"
+            title="Escuchar Audio Oficial de Marié"
           >
-            {isPlayingAudio ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+            <Play className="w-5 h-5 ml-0.5" />
           </button>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-slate-800">Nota de Voz de Marié 🎙️</span>
-              <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-semibold">
-                0:45 min
+              <span className="text-xs font-bold text-slate-900">Audio Oficial de Bienvenida de Marié 🎙️</span>
+              <span className="text-[10px] text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full font-bold border border-emerald-300">
+                MP3 Oficial
               </span>
             </div>
-            <p className="text-[11px] text-slate-500">
-              {isPlayingAudio ? 'Reproduciendo explicación nutricional de Tyruss Full...' : 'Escucha cómo actúa Tyruss Full en tu tiroides y digestión'}
+            <p className="text-[11px] text-slate-600">
+              Escucha las instrucciones clínicas de Marié para tu toma de Tyruss Full.
             </p>
           </div>
         </div>
 
-        {/* Audio Waveform Bars */}
-        <div className="hidden sm:flex items-center gap-1 h-6 shrink-0">
-          {[40, 70, 90, 60, 100, 50, 80, 45, 95, 60, 85, 30].map((h, i) => (
-            <div
-              key={i}
-              className={`w-1 rounded-full transition-all duration-200 ${
-                isPlayingAudio && audioProgress >= (i / 12) * 100 
-                  ? 'bg-emerald-600' 
-                  : 'bg-slate-200'
-              }`}
-              style={{ height: `${h}%` }}
-            />
-          ))}
-        </div>
+        {onOpenWelcomeAudio && (
+          <button
+            type="button"
+            onClick={onOpenWelcomeAudio}
+            className="self-end sm:self-center px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+          >
+            <Volume2 className="w-3.5 h-3.5" />
+            <span>Abrir Reproductor</span>
+          </button>
+        )}
       </div>
 
       {/* Chat Messages Container */}

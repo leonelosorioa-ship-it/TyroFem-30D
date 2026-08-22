@@ -19,6 +19,7 @@ interface MarieProfileCardProps {
   onOpenChat: () => void;
   onOpenOrder?: () => void;
   onOpenVipPerks?: () => void;
+  onOpenWelcomeAudio?: () => void;
   variant?: 'full' | 'compact' | 'hero';
 }
 
@@ -26,6 +27,7 @@ export const MarieProfileCard: React.FC<MarieProfileCardProps> = ({
   onOpenChat,
   onOpenOrder,
   onOpenVipPerks,
+  onOpenWelcomeAudio,
   variant = 'full',
 }) => {
   return (
@@ -98,6 +100,17 @@ export const MarieProfileCard: React.FC<MarieProfileCardProps> = ({
                 <MessageCircle className="w-4 h-4" />
                 <span>Chatear con Marié en la App</span>
               </button>
+
+              {onOpenWelcomeAudio && (
+                <button
+                  type="button"
+                  onClick={onOpenWelcomeAudio}
+                  className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500/30 to-teal-500/30 hover:from-emerald-500/40 hover:to-teal-500/40 text-emerald-300 font-bold text-xs transition-all border border-emerald-400/40 flex items-center gap-1.5 cursor-pointer shadow-sm"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                  <span>🎙️ Escuchar Audio de Marié</span>
+                </button>
+              )}
 
               <a
                 href="https://wa.link/6zpm18"

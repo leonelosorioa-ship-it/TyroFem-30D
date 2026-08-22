@@ -39,6 +39,7 @@ import { ColshopiVipPerksModal } from './components/ColshopiVipPerksModal';
 import { WhatsAppShareButton } from './components/WhatsAppShareButton';
 import { AdminPanel } from './components/AdminPanel';
 import { UserSuspendedModal } from './components/UserSuspendedModal';
+import { MarieWelcomeAudioModal } from './components/MarieWelcomeAudioModal';
 import { promptPWAInstall } from './utils/pwaManager';
 import { findUserByCodeOrEmail } from './data/usersDatabase';
 import { CALENDAR_DAYS } from './data/calendarData';
@@ -111,6 +112,7 @@ export default function App() {
   const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
   const [isVipPerksModalOpen, setIsVipPerksModalOpen] = useState(false);
   const [isPwaInstallModalOpen, setIsPwaInstallModalOpen] = useState(false);
+  const [isWelcomeAudioModalOpen, setIsWelcomeAudioModalOpen] = useState(false);
   const [isReorderTrigger, setIsReorderTrigger] = useState(false);
   const [isAdminViewOpen, setIsAdminViewOpen] = useState<boolean>(() => {
     return userProfile?.isAdmin === true;
@@ -170,10 +172,8 @@ export default function App() {
     } catch (e) {
       // silent
     }
-    // Auto-prompt PWA Install Modal after login and entering 30-day plan
-    setTimeout(() => {
-      setIsPwaInstallModalOpen(true);
-    }, 1000);
+    // Automatically trigger Marie Welcome Audio Popup Modal upon onboarding registration completion
+    setIsWelcomeAudioModalOpen(true);
   };
 
   // Handle saving day progress
@@ -423,6 +423,7 @@ export default function App() {
             userProfile={userProfile}
             onOpenOrder={() => handleOpenOrder(false)}
             onOpenRecipe={handleOpenRecipe}
+            onOpenWelcomeAudio={() => setIsWelcomeAudioModalOpen(true)}
           />
         )}
 
@@ -455,6 +456,7 @@ export default function App() {
                   onOpenChat={() => handleNavigateTab('chat')}
                   onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
                   onOpenVipPerks={() => setIsVipPerksModalOpen(true)}
+                  onOpenWelcomeAudio={() => setIsWelcomeAudioModalOpen(true)}
                 />
               </div>
 
@@ -648,6 +650,7 @@ export default function App() {
         currentDay={currentDay}
         onOpenAdminPanel={() => setIsAdminViewOpen(true)}
         onInstallApp={handleTriggerPWAInstall}
+        onOpenWelcomeAudio={() => setIsWelcomeAudioModalOpen(true)}
         onLogout={handleLogout}
       />
 
@@ -679,6 +682,17 @@ export default function App() {
       <PWAInstallModal
         isOpen={isPwaInstallModalOpen}
         onClose={() => setIsPwaInstallModalOpen(false)}
+      />
+
+      {/* Marie Official Welcome Audio Popup Modal */}
+      <MarieWelcomeAudioModal
+        isOpen={isWelcomeAudioModalOpen}
+        onClose={() => setIsWelcomeAudioModalOpen(false)}
+        userProfile={userProfile}
+        onContinueToPlan={() => {
+          setIsWelcomeAudioModalOpen(false);
+          setActiveTab('calendario');
+        }}
       />
 
       {/* Rich Corporate Brand Footer */}
