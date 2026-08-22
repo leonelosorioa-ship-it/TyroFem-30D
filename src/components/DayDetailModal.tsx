@@ -133,46 +133,46 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   const isFullyCompleted = tyrussTaken && water2L && antiinflammatoryMeal;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-emerald-100 overflow-hidden my-6">
-        {/* Header Ribbon */}
-        <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-6 relative">
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto pt-3 sm:pt-6 pb-12 animate-fadeIn">
+      <div className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-emerald-100/80 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+        {/* Header Ribbon - Fixed */}
+        <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-4 sm:p-6 shrink-0 relative border-b border-emerald-900/40">
+          <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 z-20">
             <button
               onClick={onClose}
-              className="inline-flex items-center gap-1 text-xs font-bold text-slate-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition-colors cursor-pointer"
               title="Volver al calendario"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               <span>Volver</span>
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+              className="p-1.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
+          <div className="flex items-center gap-2 mb-1 pr-24">
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
               Día {dayPlan.dayNumber} de 30
             </span>
-            <span className="text-xs text-emerald-200 font-medium truncate">
+            <span className="text-[11px] sm:text-xs text-emerald-200 font-medium truncate">
               {dayPlan.phaseName}
             </span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-bold font-serif-luxury mt-1">
+          <h2 className="text-base sm:text-2xl font-bold font-serif-luxury mt-1 pr-16 sm:pr-0">
             {dayPlan.title}
           </h2>
-          <p className="text-xs text-emerald-100/90 mt-1">
+          <p className="text-[11px] sm:text-xs text-emerald-100/90 mt-0.5">
             {dayPlan.theme}
           </p>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+        {/* Modal Body - Scrollable */}
+        <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1 overscroll-contain">
           {/* Tip de la Nutricionista Marié */}
           <div className="bg-gradient-to-br from-emerald-50/90 via-teal-50/50 to-white border border-emerald-200/80 rounded-2xl p-4 sm:p-5 relative shadow-xs">
             <div className="flex items-start gap-3.5">

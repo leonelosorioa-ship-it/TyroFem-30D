@@ -94,62 +94,62 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   return (
     <div 
       id="order-modal-overlay"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto animate-fade-in"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto pt-3 sm:pt-6 pb-12 animate-fadeIn"
       onClick={onClose}
     >
       <div 
         id="order-modal-content"
-        className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-emerald-100 overflow-hidden my-4 sm:my-6"
+        className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-emerald-100/80 overflow-hidden my-auto flex flex-col max-h-[92vh]"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#081b17] via-emerald-950 to-slate-900 text-white p-5 sm:p-6 relative">
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+        {/* Header - Fixed at top of modal */}
+        <div className="bg-gradient-to-r from-[#081b17] via-emerald-950 to-slate-900 text-white p-4 sm:p-6 shrink-0 relative border-b border-emerald-900/50">
+          <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 z-20">
             <button
               onClick={onClose}
-              className="inline-flex items-center gap-1 text-xs font-bold text-slate-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition-colors cursor-pointer"
               title="Volver a la pantalla anterior"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               <span>Volver</span>
             </button>
             <button
               id="btn-close-order-modal"
               onClick={onClose}
-              className="p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+              className="p-1.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
               aria-label="Cerrar ventana"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap pr-24">
+            <span className="text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400 text-slate-950">
               ColShopi Tienda By Leps Digital
             </span>
-            <span className="text-[11px] text-cyan-300 font-semibold flex items-center gap-1">
-              <Phone className="w-3 h-3" />
+            <span className="text-[10px] sm:text-[11px] text-cyan-300 font-semibold flex items-center gap-1">
+              <Phone className="w-3 h-3 text-cyan-400 shrink-0" />
               <span>Línea Oficial: +57 310 400 7428</span>
             </span>
           </div>
 
-          <div className="flex items-start gap-3 mt-2">
+          <div className="flex items-start gap-3 mt-1 pr-14 sm:pr-0">
             <div className="hidden sm:block shrink-0">
               <MariePhoto size="sm" showBadge={false} />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold font-serif-luxury text-white">
+              <h2 className="text-base sm:text-2xl font-bold font-serif-luxury text-white leading-tight">
                 {isReorder ? 'Recompra y Continuidad Tyruss Full' : 'Pedir Tyruss Full & Reactivar Protocolo 🌿'}
               </h2>
-              <p className="text-xs text-emerald-200/90 mt-1 max-w-xl">
+              <p className="text-[11px] sm:text-xs text-emerald-200/90 mt-1 leading-snug max-w-xl">
                 Despacho Nacional con <strong>Pago Contra Entrega</strong>, <strong>Envío Gratis</strong> y Registro INVIMA RSA-0021928-2022.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="p-4 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+        {/* Body - Scrollable content */}
+        <div className="p-4 sm:p-6 space-y-5 overflow-y-auto flex-1 overscroll-contain">
           
           {/* IMPORTANT NOTICE: 30 CALENDAR DAYS EXPIRATION & REACTIVATION */}
           <div className="bg-gradient-to-r from-cyan-950/90 via-slate-900 to-emerald-950 text-white rounded-2xl p-4 sm:p-5 border border-cyan-500/40 shadow-sm relative overflow-hidden space-y-2">

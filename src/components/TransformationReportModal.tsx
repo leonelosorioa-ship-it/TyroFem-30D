@@ -86,33 +86,33 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
   const shareText = `¡Hola Marié! 💚 Acabo de descargar mi Informe de Transformación de 30 Días de TyroFem con Tyruss Full de ColShopi Tienda.\n\n📊 Resumen de mi evolución:\n• Alumna: ${userProfile.name}\n• Código VIP: #${userProfile.accessCode || '849201'}\n• Adherencia al Reto: ${adherencePercent}% (${completedDaysCount}/30 días)\n• Nivel de Energía Promedio: ${avgEnergy}/5.0\n• Desinflamación Digestiva: ${digestionSuccessRate}%\n\n¡Gracias por tu acompañamiento! ✨`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200 animate-scaleUp flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn overflow-y-auto pt-3 sm:pt-6 pb-12">
+      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200 animate-scaleUp flex flex-col max-h-[92vh] my-auto">
         
-        {/* Top Header */}
-        <div className="bg-gradient-to-r from-[#070b10] via-slate-900 to-[#070b10] text-white p-5 border-b border-cyan-500/30 relative shrink-0">
+        {/* Top Header - Fixed */}
+        <div className="bg-gradient-to-r from-[#070b10] via-slate-900 to-[#070b10] text-white p-4 sm:p-5 border-b border-cyan-500/30 relative shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <ColshopiLogo size="sm" showGlow={true} />
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-cyan-300 uppercase tracking-wider bg-cyan-950 px-2 py-0.5 rounded border border-cyan-400/40">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[9px] sm:text-[10px] font-black text-cyan-300 uppercase tracking-wider bg-cyan-950 px-2 py-0.5 rounded border border-cyan-400/40">
                     Expediente Clínico Oficial
                   </span>
-                  <span className="text-[10px] font-bold text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded border border-amber-400/40">
+                  <span className="text-[9px] sm:text-[10px] font-bold text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded border border-amber-400/40">
                     VIP #{userProfile.accessCode || '849201'}
                   </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-bold text-white font-serif-luxury mt-0.5">
+                <h3 className="text-sm sm:text-lg font-bold text-white font-serif-luxury mt-0.5">
                   Informe de Transformación de 30 Días
                 </h3>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={onClose}
-                className="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
                 title="Volver a la pantalla anterior"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
@@ -122,14 +122,14 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
                 onClick={onClose}
                 className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Scrollable Report Content Preview */}
-        <div className="p-5 overflow-y-auto flex-1 space-y-5 bg-slate-50/50">
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-5 bg-slate-50/50 overscroll-contain">
           
           {/* Patient Card */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">

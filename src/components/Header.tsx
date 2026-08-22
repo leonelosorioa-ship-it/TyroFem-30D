@@ -92,13 +92,14 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {canInstallPWA && (
+            {onInstallPWA && (
               <button
                 onClick={onInstallPWA}
-                className="hidden md:flex items-center gap-1 text-[10px] bg-emerald-700/60 hover:bg-emerald-600 px-2 py-0.5 rounded text-white transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-[10px] bg-gradient-to-r from-emerald-800/90 to-teal-800/90 hover:from-emerald-700 hover:to-teal-700 border border-emerald-400/50 px-2 py-0.5 rounded-full text-emerald-200 font-bold transition-all cursor-pointer shadow-xs active:scale-95"
+                title="Instalar TyroFem 30D en tu pantalla de inicio"
               >
-                <Smartphone className="w-3 h-3" />
-                Instalar App
+                <Smartphone className="w-3 h-3 text-cyan-300 animate-pulse" />
+                <span>Instalar App</span>
               </button>
             )}
           </div>

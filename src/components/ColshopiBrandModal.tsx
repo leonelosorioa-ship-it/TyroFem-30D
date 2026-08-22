@@ -30,35 +30,35 @@ export const ColshopiBrandModal: React.FC<ColshopiBrandModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-[#090e14] text-white rounded-3xl border border-cyan-500/40 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto pt-3 sm:pt-6 pb-12 animate-fadeIn">
+      <div className="relative w-full max-w-2xl bg-[#090e14] text-white rounded-2xl sm:rounded-3xl border border-cyan-500/40 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
         {/* Ambient Glow */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-60 h-60 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Modal Header */}
-        <div className="relative z-10 p-5 sm:p-6 border-b border-cyan-500/20 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
-            <ColshopiLogo size="md" showGlow={true} />
+        {/* Modal Header - Fixed */}
+        <div className="relative z-10 p-4 sm:p-6 border-b border-cyan-500/20 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <ColshopiLogo size="sm" showGlow={true} />
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-white font-serif-luxury">
+                <h2 className="text-base sm:text-lg font-bold text-white font-serif-luxury">
                   ColShopi Tienda
                 </h2>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-400/30">
+                <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-400/30">
                   By Leps Digital
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-medium">
+              <p className="text-[11px] sm:text-xs text-slate-400 font-medium">
                 Cuidamos de ti • Tu bienestar es nuestra prioridad 💙
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={onClose}
-              className="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
               title="Volver a la pantalla anterior"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -66,15 +66,15 @@ export const ColshopiBrandModal: React.FC<ColshopiBrandModalProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {/* Modal Scrollable Content */}
-        <div className="relative z-10 p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 text-xs sm:text-sm">
+        <div className="relative z-10 p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 text-xs sm:text-sm overscroll-contain">
           {/* Brand Mission Statement Banner */}
           <div className="p-4 sm:p-5 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 space-y-2">
             <div className="flex items-center gap-2 text-cyan-300 font-bold text-xs">

@@ -71,17 +71,17 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-gradient-to-b from-[#0b1520] via-[#081018] to-[#04080c] rounded-3xl border border-cyan-500/40 shadow-2xl text-white overflow-hidden my-6">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn overflow-y-auto pt-3 sm:pt-6 pb-12">
+      <div className="relative w-full max-w-2xl bg-gradient-to-b from-[#0b1520] via-[#081018] to-[#04080c] rounded-2xl sm:rounded-3xl border border-cyan-500/40 shadow-2xl text-white overflow-hidden my-auto max-h-[92vh] flex flex-col">
         {/* Glow Header */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Close and Back Button */}
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+        <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5">
           <button
             onClick={onClose}
-            className="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 transition-colors cursor-pointer"
             title="Volver a la pantalla anterior"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -89,40 +89,40 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
           </button>
           <button
             onClick={onClose}
-            className="p-2 rounded-full bg-slate-900/80 text-slate-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
+            className="p-1.5 rounded-full bg-slate-900/80 text-slate-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Header Content */}
-        <div className="relative z-10 p-6 sm:p-8 border-b border-cyan-500/20">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-            <MariePhoto size="lg" showBadge={true} showNeonBg={true} />
+        {/* Header Content - Fixed */}
+        <div className="relative z-10 p-4 sm:p-6 border-b border-cyan-500/20 shrink-0">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+            <MariePhoto size="md" showBadge={true} showNeonBg={true} />
 
-            <div className="space-y-2 text-center sm:text-left flex-1">
+            <div className="space-y-1.5 text-center sm:text-left flex-1 pr-12 sm:pr-0">
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                <span className="text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-2.5 py-0.5 rounded-full border border-cyan-400/40">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-2.5 py-0.5 rounded-full border border-cyan-400/40">
                   Comunidad VIP Oficial
                 </span>
-                <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-400/40">
+                <span className="text-[9px] sm:text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-400/40">
                   Código: #{userAccessCode}
                 </span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-bold text-white font-serif-luxury">
+              <h2 className="text-base sm:text-2xl font-bold text-white font-serif-luxury">
                 Privilegios & Ventajas de ser Clienta VIP de ColShopi Tienda
               </h2>
 
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-slate-300 leading-relaxed">
                 ¡Hola, <strong className="text-emerald-300">{userName}</strong>! Queremos que sientas la diferencia de comprar en la <strong>única Tienda Online Naturista con App Exclusiva</strong> para cuidar tu salud y acompañar tu tratamiento.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Advantages List */}
-        <div className="relative z-10 p-6 sm:p-8 space-y-4 max-h-[50vh] overflow-y-auto">
+        {/* Advantages List - Scrollable */}
+        <div className="relative z-10 p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 overscroll-contain">
           {vipAdvantages.map((adv, idx) => (
             <div 
               key={idx}

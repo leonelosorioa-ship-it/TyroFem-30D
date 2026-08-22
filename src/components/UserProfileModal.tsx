@@ -62,11 +62,11 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-scaleUp">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto pt-3 sm:pt-6 pb-12 animate-fadeIn">
+      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-scaleUp my-auto flex flex-col max-h-[92vh]">
         
-        {/* Header Ribbon */}
-        <div className="bg-gradient-to-r from-[#070b10] via-slate-900 to-[#070b10] text-white p-5 border-b border-cyan-500/25 relative">
+        {/* Header Ribbon - Fixed */}
+        <div className="bg-gradient-to-r from-[#070b10] via-slate-900 to-[#070b10] text-white p-4 sm:p-5 border-b border-cyan-500/25 relative shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <ColshopiLogo size="sm" showGlow={true} />
@@ -74,16 +74,16 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-wider block">
                   Credencial de Compradora VIP
                 </span>
-                <h3 className="text-base font-bold text-white font-serif-luxury">
+                <h3 className="text-sm sm:text-base font-bold text-white font-serif-luxury">
                   Expediente & Datos de Acceso
                 </h3>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={onClose}
-                className="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
                 title="Volver a la pantalla anterior"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
@@ -93,14 +93,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 onClick={onClose}
                 className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Content Body */}
-        <div className="p-5 sm:p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        {/* Content Body - Scrollable */}
+        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1 overscroll-contain">
           
           {/* VIP Pass Card */}
           <div className="rounded-2xl p-4 bg-gradient-to-br from-slate-900 to-[#0c161d] text-white border border-cyan-500/30 relative overflow-hidden space-y-3">

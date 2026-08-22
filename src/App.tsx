@@ -29,6 +29,7 @@ import { MarieChat } from './components/MarieChat';
 import { OrderModal } from './components/OrderModal';
 import { NutritionalInfoModal } from './components/NutritionalInfoModal';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
+import { PWAInstallModal } from './components/PWAInstallModal';
 import { ColshopiBrandModal } from './components/ColshopiBrandModal';
 import { ColshopiCorporateBanner } from './components/ColshopiCorporateBanner';
 import { ColshopiLogo } from './components/ColshopiLogo';
@@ -105,6 +106,7 @@ export default function App() {
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
   const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
   const [isVipPerksModalOpen, setIsVipPerksModalOpen] = useState(false);
+  const [isPwaInstallModalOpen, setIsPwaInstallModalOpen] = useState(false);
   const [isReorderTrigger, setIsReorderTrigger] = useState(false);
 
   // Save changes to localStorage
@@ -131,6 +133,10 @@ export default function App() {
     } catch (e) {
       // silent
     }
+    // Auto-prompt PWA Install Modal after login and entering 30-day plan
+    setTimeout(() => {
+      setIsPwaInstallModalOpen(true);
+    }, 1000);
   };
 
   // Handle saving day progress
@@ -174,6 +180,7 @@ export default function App() {
           onOpenNutritionalInfo={() => setIsNutritionalModalOpen(true)}
           onOpenOrder={() => handleOpenOrder(false)}
           onOpenChat={() => {}}
+          onInstallPWA={() => setIsPwaInstallModalOpen(true)}
         />
         <main className="flex-1 max-w-5xl mx-auto w-full p-4">
           <OnboardingQuiz onComplete={handleOnboardingComplete} />
@@ -181,6 +188,12 @@ export default function App() {
         <footer className="text-center py-4 text-xs text-slate-500 border-t border-slate-200/80 bg-white">
           <p>© 2026 ColShopi Tienda By Leps Digital • TyroFem 30D con Tyruss Full • Registro INVIMA RSA-0021928-2022</p>
         </footer>
+
+        {/* PWA Install Modal */}
+        <PWAInstallModal
+          isOpen={isPwaInstallModalOpen}
+          onClose={() => setIsPwaInstallModalOpen(false)}
+        />
 
         {/* Nutritional Modal available during onboarding */}
         <NutritionalInfoModal
@@ -222,6 +235,7 @@ export default function App() {
         onOpenChat={() => handleNavigateTab('chat')}
         onOpenBrandModal={() => setIsBrandModalOpen(true)}
         onOpenUserProfile={() => setIsUserProfileModalOpen(true)}
+        onInstallPWA={() => setIsPwaInstallModalOpen(true)}
       />
 
       {/* Main Tab Navigation Header (Desktop / Tablet) */}
@@ -590,8 +604,12 @@ export default function App() {
         progressMap={progressMap}
       />
 
-      {/* PWA Installation Helper */}
-      <PWAInstallBanner />
+        {/* PWA Installation Helper & Modal */}
+        <PWAInstallBanner onOpenInstallModal={() => setIsPwaInstallModalOpen(true)} />
+        <PWAInstallModal
+          isOpen={isPwaInstallModalOpen}
+          onClose={() => setIsPwaInstallModalOpen(false)}
+        />
 
       {/* Rich Corporate Brand Footer */}
       <footer className="text-slate-400 border-t border-slate-800 bg-[#070b10] py-8 px-4 text-xs mb-14 sm:mb-0">

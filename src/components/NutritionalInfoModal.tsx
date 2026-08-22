@@ -28,59 +28,59 @@ export const NutritionalInfoModal: React.FC<NutritionalInfoModalProps> = ({
   const [activeTab, setActiveTab] = useState<'tabla' | 'ingredientes' | 'invima' | 'obsequio'>('tabla');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
-      <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-emerald-100 overflow-hidden my-6">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-950 text-white p-6 relative">
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto pt-3 sm:pt-6 pb-12 animate-fadeIn">
+      <div className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-emerald-100/80 overflow-hidden my-auto flex flex-col max-h-[92vh]">
+        {/* Header - Fixed */}
+        <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-950 text-white p-4 sm:p-6 shrink-0 relative border-b border-emerald-900/40">
+          <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 z-20">
             <button
               onClick={onClose}
-              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 transition-colors cursor-pointer"
               title="Volver a la pantalla anterior"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               <span>Volver</span>
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+              className="p-1.5 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
+          <div className="flex items-center gap-2 mb-1 pr-24">
+            <span className="text-[10px] sm:text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
               Ficha Técnica & Respaldo Científico
             </span>
-            <span className="text-xs text-emerald-200">
+            <span className="text-[10px] sm:text-xs text-emerald-200 truncate">
               Laboratorio Unmerco / ColShopi
             </span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-bold font-serif-luxury mt-1">
+          <h2 className="text-base sm:text-2xl font-bold font-serif-luxury mt-1 pr-16 sm:pr-0">
             Información Nutricional & Calidad Tyruss Full
           </h2>
-          <p className="text-xs text-emerald-100/90 mt-1">
+          <p className="text-[11px] sm:text-xs text-emerald-100/90 mt-1">
             Registro INVIMA: <strong>{NUTRITIONAL_FACTS.invimaRecord}</strong> • 100% Libre de Soya y Sin Maltodextrina
           </p>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-slate-200 bg-slate-50 px-6 gap-2 overflow-x-auto">
+        {/* Tab Navigation - Fixed */}
+        <div className="flex border-b border-slate-200 bg-slate-50 px-3 sm:px-6 gap-1 sm:gap-2 overflow-x-auto shrink-0">
           {[
-            { id: 'tabla', label: 'Tabla Nutricional Oficial', icon: '📊' },
-            { id: 'ingredientes', label: 'Superalimentos Clave', icon: '🌿' },
-            { id: 'invima', label: 'Respaldo INVIMA & Seguridad', icon: '🛡️' },
-            { id: 'obsequio', label: 'Loción Termoactiva (Regalo)', icon: '🎁' },
+            { id: 'tabla', label: 'Tabla Nutricional', icon: '📊' },
+            { id: 'ingredientes', label: 'Superalimentos', icon: '🌿' },
+            { id: 'invima', label: 'Respaldo INVIMA', icon: '🛡️' },
+            { id: 'obsequio', label: 'Loción Regalo 🎁', icon: '✨' },
           ].map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setActiveTab(t.id as any)}
-              className={`py-3.5 px-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
+              className={`py-3 px-2.5 sm:px-3 text-xs font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                 activeTab === t.id
-                  ? 'border-emerald-700 text-emerald-900 bg-white'
+                  ? 'border-emerald-700 text-emerald-900 bg-white shadow-2xs'
                   : 'border-transparent text-slate-500 hover:text-emerald-700'
               }`}
             >
@@ -90,8 +90,8 @@ export const NutritionalInfoModal: React.FC<NutritionalInfoModalProps> = ({
           ))}
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6">
+        {/* Modal Body - Scrollable */}
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 overscroll-contain space-y-6">
           {/* TAB 1: TABLA NUTRICIONAL */}
           {activeTab === 'tabla' && (
             <div className="space-y-4">
