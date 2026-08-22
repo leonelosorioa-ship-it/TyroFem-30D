@@ -1,0 +1,6 @@
+{
+  "name": "TyroFem 30D - Guía Nutricional & Balance Hormonal",
+  "description": "Aplicación interactiva y PWA para balance hormonal, tiroides, metabolismo y bienestar femenino por la Nutricionista Marié de ColShopi Tienda con Tyruss Full.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
