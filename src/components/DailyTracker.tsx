@@ -32,6 +32,7 @@ import { getMaxUnlockedDay } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
 import { ExecutiveSummaryPanel } from './ExecutiveSummaryPanel';
+import { ExecutiveEnergyChartPanel } from './ExecutiveEnergyChartPanel';
 
 interface DailyTrackerProps {
   userProfile: UserProfile;
@@ -257,6 +258,19 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         onSelectSubTab={(tab) => setActiveSubTab(tab)}
         onOpenReport={() => setIsReportModalOpen(true)}
         onSelectDay={(day) => setSelectedDay(day)}
+      />
+
+      {/* Top Executive Energy & Metabolic Evolution Recharts Line Chart Panel */}
+      <ExecutiveEnergyChartPanel
+        progressMap={progressMap}
+        currentDay={currentDay}
+        unlockedMaxDay={unlockedMaxDay}
+        userProfile={userProfile}
+        onExploreFullCurve={() => setActiveSubTab('curva')}
+        onSelectDay={(day) => {
+          setSelectedDay(day);
+          setActiveSubTab('registro');
+        }}
       />
 
       {/* Header Overview Card */}
