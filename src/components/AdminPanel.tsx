@@ -478,7 +478,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
             </span>
           </div>
 
-          {filteredUsers.length === 0 ? (
+          {users.length === 0 ? (
+            <div className="py-16 px-4 text-center space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-center mx-auto text-emerald-400">
+                <Users className="w-7 h-7" />
+              </div>
+              <h4 className="text-sm font-bold text-white">Base de datos lista para el Lanzamiento Oficial</h4>
+              <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                Aún no hay usuarias registradas. A medida que las compradoras adquieran su <strong>Tyruss Full (500g)</strong> y canjeen su código VIP de 6 dígitos en el cuestionario de bienvenida, aparecerán aquí en tiempo real con su progreso y adherencia.
+              </p>
+              <div className="pt-2 flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsNewUserModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 font-bold text-xs px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Registrar Usuaria Manualmente</span>
+                </button>
+              </div>
+            </div>
+          ) : filteredUsers.length === 0 ? (
             <div className="py-16 text-center space-y-3">
               <Users className="w-12 h-12 text-slate-700 mx-auto" />
               <h4 className="text-sm font-bold text-slate-300">No se encontraron usuarias con los filtros aplicados</h4>

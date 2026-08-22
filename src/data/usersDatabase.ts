@@ -40,140 +40,31 @@ export function isAdminCredentials(email?: string, code?: string): boolean {
 
 const STORAGE_KEY_USERS_DB = 'tyrofem_registered_users_db';
 
-// Initial realistic Colombian buyers registered with Tyruss Full to populate the database
-const INITIAL_SEED_USERS: RegisteredUser[] = [
-  {
-    id: 'usr_849201',
-    name: 'Sandra Patricia Morales V.',
-    email: 'sandra.morales78@gmail.com',
-    phone: '+57 312 458 9201',
-    accessCode: '849201',
-    ageGroup: '35-44 años',
-    primaryAngle: 'tiroides_metabolismo',
-    symptoms: ['Metabolismo lento a pesar de comer poco', 'Fatiga crónica y letargo matutino', 'Caída de cabello'],
-    startDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    currentDay: 15,
-    completedDays: 14,
-    adherencePercent: 93,
-    status: 'activa',
-    registeredAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    lastActivityAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    notes: 'Compradora 3 Frascos Tyruss Full. Excelente adherencia y reporte de energía.'
-  },
-  {
-    id: 'usr_623914',
-    name: 'Claudia Elena Restrepo Gómez',
-    email: 'claudia.restrepo.med@hotmail.com',
-    phone: '+57 301 582 3914',
-    accessCode: '623914',
-    ageGroup: '45-54 años',
-    primaryAngle: 'desbalance_menopausia',
-    symptoms: ['Sofocos repentinos y oleadas de calor', 'Insomnio o sueño ligero no reparador', 'Resequedad en la piel'],
-    startDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
-    currentDay: 22,
-    completedDays: 20,
-    adherencePercent: 91,
-    status: 'activa',
-    registeredAt: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000).toISOString(),
-    lastActivityAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    notes: 'Fase 4 Recompra activada. Ya solicitó segundo pedido.'
-  },
-  {
-    id: 'usr_518472',
-    name: 'María Alejandra Cárdenas',
-    email: 'aleja.cardenas.bog@gmail.com',
-    phone: '+57 318 741 8472',
-    accessCode: '518472',
-    ageGroup: '25-34 años',
-    primaryAngle: 'ciclos_spm',
-    symptoms: ['Cólicos fuertes y dolor pélvico', 'Retención severa de líquidos', 'Atracones o ansiedad por azúcar'],
-    startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    currentDay: 8,
-    completedDays: 7,
-    adherencePercent: 88,
-    status: 'activa',
-    registeredAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
-    lastActivityAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-    notes: 'Reto iniciado Semana 2. Refiere reducción del 40% en inflamación.'
-  },
-  {
-    id: 'usr_934165',
-    name: 'Esperanza Duarte Silva',
-    email: 'esperanza.duarte.cali@yahoo.es',
-    phone: '+57 315 934 1650',
-    accessCode: '934165',
-    ageGroup: '55+ años',
-    primaryAngle: 'digestion_detox',
-    symptoms: ['Estreñimiento o evacuaciones dolorosas', 'Vientre inflamado después de cada comida', 'Pesadez estomacal'],
-    startDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    currentDay: 4,
-    completedDays: 3,
-    adherencePercent: 75,
-    status: 'activa',
-    registeredAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    lastActivityAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    notes: 'Inició con Batido Verde TyroFem. Transito intestinal mejorado.'
-  },
-  {
-    id: 'usr_412893',
-    name: 'Yurani Tatiana Muñoz',
-    email: 'yura.munoz.test@gmail.com',
-    phone: '+57 320 412 8931',
-    accessCode: '412893',
-    ageGroup: '35-44 años',
-    primaryAngle: 'tiroides_metabolismo',
-    symptoms: ['Fatiga crónica y letargo matutino', 'Piel muy seca o áspera'],
-    startDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    currentDay: 11,
-    completedDays: 4,
-    adherencePercent: 36,
-    status: 'suspendida',
-    statusReason: 'Infracción: Detección de múltiples accesos simultáneos y compartición no autorizada del código VIP.',
-    registeredAt: new Date(Date.now() - 11 * 24 * 60 * 60 * 1000).toISOString(),
-    lastActivityAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-    notes: 'Suspendida por soporte ColShopi. En revisión con la clienta.'
-  },
-  {
-    id: 'usr_735628',
-    name: 'Gloria Inés Benítez',
-    email: 'gloria.benitez.ibague@gmail.com',
-    phone: '+57 311 735 6284',
-    accessCode: '735628',
-    ageGroup: '45-54 años',
-    primaryAngle: 'desbalance_menopausia',
-    symptoms: ['Ansiedad o cambios de humor inexplicables', 'Sofocos repentinos'],
-    startDate: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
-    currentDay: 19,
-    completedDays: 1,
-    adherencePercent: 5,
-    status: 'inhabilitada',
-    statusReason: 'Inhabilitada permanentemente: Solicitud de anulación de compra y reclamo no justificado.',
-    registeredAt: new Date(Date.now() - 19 * 24 * 60 * 60 * 1000).toISOString(),
-    lastActivityAt: new Date(Date.now() - 120 * 60 * 60 * 1000).toISOString(),
-    notes: 'Cuenta bloqueada definitivamente por la administración de ColShopi.'
-  }
-];
+// Known mock user IDs from development to purge automatically
+const MOCK_USER_IDS = ['usr_849201', 'usr_623914', 'usr_518472', 'usr_934165', 'usr_412893', 'usr_735628'];
 
 /**
- * Obtener todas las usuarias registradas en la base de datos
+ * Obtener todas las usuarias registradas en la base de datos real
  */
 export function getRegisteredUsers(): RegisteredUser[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_USERS_DB);
     if (!raw) {
-      // Initialize with seed users
-      localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(INITIAL_SEED_USERS));
-      return INITIAL_SEED_USERS;
+      return [];
     }
     const parsed: RegisteredUser[] = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(INITIAL_SEED_USERS));
-      return INITIAL_SEED_USERS;
+    if (!Array.isArray(parsed)) {
+      return [];
     }
-    return parsed;
+    // Filter out any leftover development mock users
+    const cleanUsers = parsed.filter(u => !MOCK_USER_IDS.includes(u.id));
+    if (cleanUsers.length !== parsed.length) {
+      localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(cleanUsers));
+    }
+    return cleanUsers;
   } catch (error) {
     console.error('Error fetching registered users', error);
-    return INITIAL_SEED_USERS;
+    return [];
   }
 }
 
