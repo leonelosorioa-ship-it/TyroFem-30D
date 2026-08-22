@@ -100,13 +100,13 @@ export const MarieProfileCard: React.FC<MarieProfileCardProps> = ({
               </button>
 
               <a
-                href="https://wa.me/573104007428?text=Hola%20Marié,%20te%20escribo%20desde%20la%20App%20ColShopi%20TyroFem%2030D"
+                href="https://wa.link/6zpm18"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="py-2.5 px-4 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold text-xs transition-colors border border-emerald-400/40 flex items-center gap-1.5"
               >
                 <PhoneCall className="w-3.5 h-3.5" />
-                <span>WhatsApp (+57 310 400 7428)</span>
+                <span>WhatsApp Marié (+57 310 400 7428)</span>
               </a>
 
               {onOpenVipPerks && (

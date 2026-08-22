@@ -208,7 +208,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </button>
 
             <a
-              href="https://wa.me/573104007428?text=Hola%20Marié,%20quiero%20consultar%20sobre%20mi%20código%20VIP%20o%20actualizar%20mis%20datos%20en%20TyroFem%2030D"
+              href="https://wa.link/6zpm18"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold flex items-center justify-center gap-2 transition-colors text-center cursor-pointer"

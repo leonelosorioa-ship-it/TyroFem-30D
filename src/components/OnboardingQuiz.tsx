@@ -123,9 +123,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
 
   // WhatsApp Pre-filled message generator
   const getWhatsAppRequestUrl = () => {
-    const userNameParam = name.trim() ? name.trim() : '';
-    const text = `Hola Marié, ya recibí mi producto Tyruss Full y quiero el acceso gratis a la App TyroFem 30D, mi nombre es: ${userNameParam}`;
-    return `https://wa.me/573104007428?text=${encodeURIComponent(text)}`;
+    return 'https://wa.link/6zpm18';
   };
 
   // Code validation handler with strict 50 authorized codes verification

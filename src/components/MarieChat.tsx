@@ -166,13 +166,13 @@ export const MarieChat: React.FC<MarieChatProps> = ({
           {/* WhatsApp & Reset Buttons */}
           <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
             <a
-              href="https://wa.me/573104007428?text=Hola%20Marié,%20estoy%20en%20la%20App%20TyroFem%2030D%20y%20quiero%20hacerte%20una%20consulta"
+              href="https://wa.link/6zpm18"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              <span>WhatsApp Directo (+57 310 400 7428)</span>
+              <span>WhatsApp Directo con Marié</span>
             </a>
 
             <button

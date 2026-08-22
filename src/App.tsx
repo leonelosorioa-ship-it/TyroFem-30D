@@ -34,6 +34,7 @@ import { ColshopiLogo } from './components/ColshopiLogo';
 import { MarieProfileCard } from './components/MarieProfileCard';
 import { UserProfileModal } from './components/UserProfileModal';
 import { ColshopiVipPerksModal } from './components/ColshopiVipPerksModal';
+import { WhatsAppShareButton } from './components/WhatsAppShareButton';
 import { CALENDAR_DAYS } from './data/calendarData';
 import { RECIPES_DATA } from './data/recipesData';
 
@@ -491,6 +492,14 @@ export default function App() {
           setActiveTab('chat');
         }}
         userProfile={userProfile}
+      />
+
+      {/* Permanent WhatsApp Share Floating Button (Viralization & Direct Marie Link) */}
+      <WhatsAppShareButton
+        userProfile={userProfile}
+        currentDay={currentDay}
+        completedDaysCount={completedDaysCount}
+        progressMap={progressMap}
       />
 
       {/* PWA Installation Helper */}
