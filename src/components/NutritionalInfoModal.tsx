@@ -7,7 +7,8 @@ import {
   FileText, 
   Heart, 
   CheckCircle2,
-  Award
+  Award,
+  ArrowLeft
 } from 'lucide-react';
 import { NUTRITIONAL_FACTS, SUPERFOOD_INGREDIENTS, FREE_GIFT_INFO } from '../data/nutritionData';
 
@@ -31,12 +32,22 @@ export const NutritionalInfoModal: React.FC<NutritionalInfoModalProps> = ({
       <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-emerald-100 overflow-hidden my-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-950 text-white p-6 relative">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              title="Volver a la pantalla anterior"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Volver</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-bold uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">

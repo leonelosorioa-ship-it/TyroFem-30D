@@ -13,7 +13,8 @@ import {
   Flame,
   Coffee,
   ChevronRight,
-  Smile
+  Smile,
+  ArrowLeft
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayPlan, DayProgress, UserProfile } from '../types';
@@ -136,12 +137,22 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-emerald-100 overflow-hidden my-6">
         {/* Header Ribbon */}
         <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-6 relative">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="inline-flex items-center gap-1 text-xs font-bold text-slate-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              title="Volver al calendario"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Volver</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">

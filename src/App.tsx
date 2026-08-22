@@ -14,7 +14,8 @@ import {
   Award,
   ChevronRight,
   Send,
-  Leaf
+  Leaf,
+  ArrowLeft
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayPlan, DayProgress, UserProfile } from './types';
@@ -65,8 +66,36 @@ export default function App() {
     return {};
   });
 
-  // Navigation tab
+  // Navigation tab and history stack
   const [activeTab, setActiveTab] = useState<'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos'>('calendario');
+  const [navigationHistory, setNavigationHistory] = useState<('calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos')[]>([]);
+
+  const TAB_LABELS: Record<string, { label: string; icon: any }> = {
+    calendario: { label: 'Calendario 30D', icon: CalendarIcon },
+    tracker: { label: 'Mi Registro Diario', icon: Activity },
+    recetas: { label: 'Recetario de Batidos', icon: BookOpen },
+    chat: { label: 'Pregúntale a Marié', icon: MessageCircle },
+    pedidos: { label: 'Promociones & Pedidos', icon: ShoppingBag }
+  };
+
+  const handleNavigateTab = (newTab: 'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos') => {
+    if (newTab === activeTab) return;
+    setNavigationHistory(prev => [...prev.filter(t => t !== newTab), activeTab]);
+    setActiveTab(newTab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleGoBack = () => {
+    if (navigationHistory.length > 0) {
+      const prevTab = navigationHistory[navigationHistory.length - 1];
+      setNavigationHistory(prev => prev.slice(0, -1));
+      setActiveTab(prevTab);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setActiveTab('calendario');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Modals state
   const [selectedDayPlan, setSelectedDayPlan] = useState<DayPlan | null>(null);
@@ -190,7 +219,7 @@ export default function App() {
         completedDaysCount={completedDaysCount}
         onOpenNutritionalInfo={() => setIsNutritionalModalOpen(true)}
         onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
-        onOpenChat={() => setActiveTab('chat')}
+        onOpenChat={() => handleNavigateTab('chat')}
         onOpenBrandModal={() => setIsBrandModalOpen(true)}
         onOpenUserProfile={() => setIsUserProfileModalOpen(true)}
       />
@@ -211,7 +240,7 @@ export default function App() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => handleNavigateTab(tab.id as any)}
                   className={`py-2.5 px-3.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
                     isActive
                       ? 'bg-emerald-700 text-white shadow-xs'
@@ -249,13 +278,43 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-5xl mx-auto w-full p-4 sm:p-6 mt-2">
+        {/* Universal Back Navigation Bar (Available in every section to return to previous section) */}
+        {activeTab !== 'calendario' && (
+          <div className="mb-4 bg-white/90 backdrop-blur-md rounded-2xl p-2.5 sm:p-3 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3 animate-fadeIn">
+            <button
+              type="button"
+              onClick={handleGoBack}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-900 border border-slate-200 hover:border-emerald-300 font-bold text-xs shadow-2xs transition-all active:scale-95 cursor-pointer"
+              title="Volver a la sección anterior"
+            >
+              <ArrowLeft className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>
+                Volver a {navigationHistory.length > 0 ? TAB_LABELS[navigationHistory[navigationHistory.length - 1]]?.label : 'Calendario 30D'}
+              </span>
+            </button>
+
+            <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium overflow-hidden text-ellipsis whitespace-nowrap">
+              <button 
+                onClick={() => handleNavigateTab('calendario')}
+                className="hover:text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Inicio</span>
+              </button>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="font-bold text-slate-800 truncate">
+                {TAB_LABELS[activeTab]?.label}
+              </span>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'calendario' && (
           <CalendarView
             userProfile={userProfile}
             progressMap={progressMap}
             onSelectDay={(day) => setSelectedDayPlan(day)}
             onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
-            onOpenChat={() => setActiveTab('chat')}
+            onOpenChat={() => handleNavigateTab('chat')}
           />
         )}
 
@@ -266,7 +325,7 @@ export default function App() {
             currentDay={currentDay}
             onSaveProgress={handleSaveDayProgress}
             onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
-            onOpenChat={() => setActiveTab('chat')}
+            onOpenChat={() => handleNavigateTab('chat')}
           />
         )}
 
@@ -274,7 +333,7 @@ export default function App() {
           <RecipeBook
             initialRecipeId={targetRecipeId}
             onOpenOrder={() => handleOpenOrder(false)}
-            onOpenChat={() => setActiveTab('chat')}
+            onOpenChat={() => handleNavigateTab('chat')}
           />
         )}
 
@@ -288,6 +347,21 @@ export default function App() {
 
         {activeTab === 'pedidos' && (
           <div className="space-y-6 pb-20">
+            {/* Prominent Return Button for Pedidos Section */}
+            <div className="flex items-center justify-between bg-emerald-50/90 border border-emerald-200 rounded-2xl p-3 px-4 shadow-xs">
+              <button
+                type="button"
+                onClick={handleGoBack}
+                className="inline-flex items-center gap-2 text-xs font-bold text-emerald-950 hover:text-emerald-900 bg-white hover:bg-emerald-100/70 px-3.5 py-2 rounded-xl border border-emerald-300 shadow-2xs transition-all active:scale-95 cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4 text-emerald-700" />
+                <span>Volver a la sección anterior ({navigationHistory.length > 0 ? TAB_LABELS[navigationHistory[navigationHistory.length - 1]]?.label : 'Calendario 30D'})</span>
+              </button>
+              <span className="text-[11px] font-semibold text-emerald-800 hidden sm:inline">
+                ColShopi Tienda By Leps Digital
+              </span>
+            </div>
+
             {/* Full Official Corporate Banner */}
             <ColshopiCorporateBanner 
               onOpenBrandModal={() => setIsBrandModalOpen(true)}
@@ -297,7 +371,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-1">
                 <MarieProfileCard 
-                  onOpenChat={() => setActiveTab('chat')}
+                  onOpenChat={() => handleNavigateTab('chat')}
                   onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
                   onOpenVipPerks={() => setIsVipPerksModalOpen(true)}
                 />

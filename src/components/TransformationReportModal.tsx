@@ -15,7 +15,8 @@ import {
   Droplet,
   Sun,
   Flame,
-  Check
+  Check,
+  ArrowLeft
 } from 'lucide-react';
 import { DayProgress, UserProfile } from '../types';
 import { ColshopiLogo } from './ColshopiLogo';
@@ -108,12 +109,22 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onClose}
+                className="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+                title="Volver a la pantalla anterior"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Volver</span>
+              </button>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 

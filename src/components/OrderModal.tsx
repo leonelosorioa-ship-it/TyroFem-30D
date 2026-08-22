@@ -15,7 +15,8 @@ import {
   Leaf,
   Clock,
   RefreshCw,
-  Send
+  Send,
+  ArrowLeft
 } from 'lucide-react';
 import { OFFICIAL_PACKAGES, FREE_GIFT_INFO, BATIDO_VERDE_INFO, COLSHOPI_INFO } from '../data/nutritionData';
 import { ProductPackage, UserProfile } from '../types';
@@ -103,14 +104,24 @@ export const OrderModal: React.FC<OrderModalProps> = ({
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-[#081b17] via-emerald-950 to-slate-900 text-white p-5 sm:p-6 relative">
-          <button
-            id="btn-close-order-modal"
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
-            aria-label="Cerrar ventana"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="inline-flex items-center gap-1 text-xs font-bold text-slate-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              title="Volver a la pantalla anterior"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Volver</span>
+            </button>
+            <button
+              id="btn-close-order-modal"
+              onClick={onClose}
+              className="p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+              aria-label="Cerrar ventana"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">

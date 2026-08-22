@@ -12,7 +12,8 @@ import {
   ArrowRight,
   ShoppingBag,
   Award,
-  Star
+  Star,
+  ArrowLeft
 } from 'lucide-react';
 import { ColshopiLogo } from './ColshopiLogo';
 import { MariePhoto } from './MariePhoto';
@@ -76,13 +77,23 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
         <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-slate-900/80 text-slate-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Close and Back Button */}
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-1 text-xs font-bold text-slate-300 hover:text-white px-2.5 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 transition-colors cursor-pointer"
+            title="Volver a la pantalla anterior"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Volver</span>
+          </button>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full bg-slate-900/80 text-slate-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Header Content */}
         <div className="relative z-10 p-6 sm:p-8 border-b border-cyan-500/20">

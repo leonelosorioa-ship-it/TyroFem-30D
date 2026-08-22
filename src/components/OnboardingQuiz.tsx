@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { 
   Sparkles, 
   ArrowRight, 
+  ArrowLeft,
   CheckCircle2, 
   Heart, 
   ShieldCheck, 
@@ -218,6 +219,17 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   <span className="text-[10px] font-black text-cyan-300 uppercase tracking-wider bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-400/40">
                     Acceso Exclusivo Compradoras
                   </span>
+                  {step > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setStep((step - 1) as any)}
+                      className="inline-flex items-center gap-1 text-[11px] text-cyan-300 hover:text-white bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                      title="Volver al paso anterior"
+                    >
+                      <ArrowLeft className="w-3 h-3" />
+                      <span>Volver al Paso {step - 1}</span>
+                    </button>
+                  )}
                 </div>
                 <h2 className="text-base sm:text-lg font-bold text-white font-serif-luxury mt-0.5">
                   TyroFem 30D • Activación de Protocolo
@@ -669,14 +681,24 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleFinish}
-                    className="w-full py-4 px-6 rounded-2xl font-bold text-base bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-800 text-white flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20 active:scale-98 transition-all cursor-pointer"
-                  >
-                    <span>Comenzar Día 1 de mi Reto</span>
-                    <Sparkles className="w-5 h-5 text-amber-300" />
-                  </button>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setStep(3)}
+                      className="py-3.5 px-4 rounded-2xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Atrás</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleFinish}
+                      className="flex-1 py-4 px-6 rounded-2xl font-bold text-base bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-800 text-white flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20 active:scale-98 transition-all cursor-pointer"
+                    >
+                      <span>Comenzar Día 1 de mi Reto</span>
+                      <Sparkles className="w-5 h-5 text-amber-300" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

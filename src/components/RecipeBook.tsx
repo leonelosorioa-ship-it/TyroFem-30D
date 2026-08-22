@@ -9,7 +9,8 @@ import {
   Heart, 
   Share2,
   ChevronRight,
-  Filter
+  Filter,
+  ArrowLeft
 } from 'lucide-react';
 import { Recipe } from '../types';
 import { RECIPES_DATA } from '../data/recipesData';
