@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   X, 
   ShieldCheck, 
@@ -12,25 +12,53 @@ import {
   MessageCircle, 
   Award,
   CheckCircle2,
-  Lock
+  Lock,
+  Download,
+  Check,
+  FileText
 } from 'lucide-react';
-import { UserProfile } from '../types';
+import { DayProgress, UserProfile } from '../types';
 import { ColshopiLogo } from './ColshopiLogo';
+import { generateTransformationReportPDF } from '../utils/pdfGenerator';
 
 interface UserProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   userProfile: UserProfile;
   completedDays: number;
+  progressMap?: Record<number, DayProgress>;
+  currentDay?: number;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   isOpen,
   onClose,
   userProfile,
-  completedDays
+  completedDays,
+  progressMap = {},
+  currentDay = 1
 }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleDownloadPDF = () => {
+    setIsDownloading(true);
+    try {
+      generateTransformationReportPDF({
+        userProfile,
+        progressMap,
+        currentDay
+      });
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 2500);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
@@ -150,15 +178,42 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
           </div>
 
-          {/* Support Line */}
-          <div className="pt-2 flex items-center justify-between text-xs">
+          {/* Actions: Download PDF & WhatsApp */}
+          <div className="pt-2 space-y-2 text-xs">
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
+              className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-xs ${
+                downloadSuccess
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white'
+              }`}
+            >
+              {downloadSuccess ? (
+                <>
+                  <Check className="w-4 h-4 text-white" />
+                  <span>¡Informe PDF Descargado!</span>
+                </>
+              ) : isDownloading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Generando PDF...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Descargar Informe de Transformación 30D (PDF)</span>
+                </>
+              )}
+            </button>
+
             <a
               href="https://wa.me/573104007428?text=Hola%20Marié,%20quiero%20consultar%20sobre%20mi%20código%20VIP%20o%20actualizar%20mis%20datos%20en%20TyroFem%2030D"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2 transition-colors text-center"
+              className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold flex items-center justify-center gap-2 transition-colors text-center cursor-pointer"
             >
-              <MessageCircle className="w-4 h-4 fill-white text-emerald-600" />
+              <MessageCircle className="w-4 h-4 text-emerald-600" />
               <span>Contactar a Marié por WhatsApp (+57 310 400 7428)</span>
             </a>
           </div>

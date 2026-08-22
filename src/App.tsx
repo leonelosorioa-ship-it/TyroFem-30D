@@ -473,6 +473,8 @@ export default function App() {
         onClose={() => setIsUserProfileModalOpen(false)}
         userProfile={userProfile}
         completedDays={completedDaysCount}
+        progressMap={progressMap}
+        currentDay={currentDay}
       />
 
       {/* ColShopi Admin 50 Codes Database Modal */}

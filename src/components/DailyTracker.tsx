@@ -13,11 +13,16 @@ import {
   Star,
   ChevronRight,
   TrendingUp,
-  Heart
+  Heart,
+  FileText,
+  Download,
+  Check
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayProgress, UserProfile } from '../types';
 import { EnergyTrendChart } from './EnergyTrendChart';
+import { TransformationReportModal } from './TransformationReportModal';
+import { generateTransformationReportPDF } from '../utils/pdfGenerator';
 
 interface DailyTrackerProps {
   userProfile: UserProfile;
@@ -55,9 +60,26 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   const [sleepStars, setSleepStars] = useState<number>(currentDayData.sleepStars || 4);
   const [waterGlasses, setWaterGlasses] = useState<number>(currentDayData.water2L ? 8 : 4);
   const [notes, setNotes] = useState<string>(currentDayData.notes || '');
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isQuickDownloading, setIsQuickDownloading] = useState(false);
 
   const completedDays = (Object.values(progressMap) as DayProgress[]).filter(p => p.completedAt || (p.tyrussTaken && p.water2L)).length;
   const progressPercent = Math.round((completedDays / 30) * 100);
+
+  const handleDirectDownloadPDF = () => {
+    setIsQuickDownloading(true);
+    try {
+      generateTransformationReportPDF({
+        userProfile,
+        progressMap,
+        currentDay
+      });
+      setTimeout(() => setIsQuickDownloading(false), 2000);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setIsQuickDownloading(false);
+    }
+  };
 
   const handleUpdate = (updatedFields: Partial<DayProgress>) => {
     const updated: DayProgress = {
@@ -148,16 +170,44 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
             </p>
           </div>
 
-          {/* Mini Action buttons */}
-          <div className="flex items-center gap-2">
+          {/* Action buttons */}
+          <div className="flex items-center flex-wrap gap-2">
+            <button
+              onClick={() => setIsReportModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+              title="Generar y previsualizar tu Informe de Transformación de 30 Días en PDF"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Informe de Transformación 30D</span>
+            </button>
+
+            <button
+              onClick={handleDirectDownloadPDF}
+              disabled={isQuickDownloading}
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded-xl text-xs font-bold transition-colors border border-emerald-300 cursor-pointer"
+              title="Descarga directa del archivo PDF"
+            >
+              {isQuickDownloading ? (
+                <>
+                  <span className="w-3 h-3 border-2 border-emerald-800 border-t-transparent rounded-full animate-spin" />
+                  <span>Descargando...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Descargar PDF</span>
+                </>
+              )}
+            </button>
+
             <a
               href={`https://wa.me/573104007428?text=${encodeURIComponent(shareText)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold transition-colors border border-emerald-200"
+              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-colors border border-slate-200"
             >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>Compartir con Marié</span>
+              <Share2 className="w-3.5 h-3.5 text-slate-500" />
+              <span>Marié</span>
             </a>
           </div>
         </div>
@@ -360,6 +410,76 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         currentDay={currentDay} 
       />
 
+      {/* Official 30-Day Transformation Report (PDF Card Banner) */}
+      <div className="bg-gradient-to-br from-slate-900 via-[#0a1520] to-emerald-950 rounded-3xl p-6 border border-cyan-500/30 text-white shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-400/40">
+                Documento Clínico Oficial TyroFem
+              </span>
+              <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-400/40">
+                VIP #{userProfile.accessCode || '849201'}
+              </span>
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-white font-serif-luxury">
+              Informe de Transformación de 30 Días (PDF) 📄
+            </h3>
+            <p className="text-xs text-slate-300 max-w-xl">
+              Genera tu expediente descargable que consolida tu adherencia al reto, evolución de niveles de energía, desinflamación digestiva y dictamen de la <strong>Nutricionista Marié</strong>.
+            </p>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2.5 shrink-0">
+            <button
+              onClick={() => setIsReportModalOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold transition-colors border border-cyan-500/40 flex items-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <FileText className="w-4 h-4 text-cyan-400" />
+              <span>Ver Informe Completo</span>
+            </button>
+
+            <button
+              onClick={handleDirectDownloadPDF}
+              disabled={isQuickDownloading}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+            >
+              {isQuickDownloading ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                  <span>Generando...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>Descargar PDF</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Snapshot Metrics inside the Card */}
+        <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 text-center">
+          <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+            <span className="text-[10px] text-slate-400 block font-bold uppercase">Adherencia</span>
+            <strong className="text-emerald-400 text-sm font-extrabold">{progressPercent}%</strong>
+          </div>
+          <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+            <span className="text-[10px] text-slate-400 block font-bold uppercase">Energía Media</span>
+            <strong className="text-amber-400 text-sm font-extrabold">
+              {(Object.values(progressMap) as DayProgress[]).length > 0 
+                ? ((Object.values(progressMap) as DayProgress[]).map(p => p.energyLevel || 4).reduce((a, b) => a + b, 0) / (Object.values(progressMap) as DayProgress[]).length).toFixed(1)
+                : '4.2'}/5
+            </strong>
+          </div>
+          <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+            <span className="text-[10px] text-slate-400 block font-bold uppercase">Metabolismo</span>
+            <strong className="text-cyan-300 text-sm font-extrabold">Optimizado ✨</strong>
+          </div>
+        </div>
+      </div>
+
       {/* 30-Day Milestone Rewards / Badges */}
       <div className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
@@ -418,6 +538,15 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
           Pregúntale a Marié 💬
         </button>
       </div>
+
+      {/* 30-Day Transformation Clinical Report Modal */}
+      <TransformationReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        userProfile={userProfile}
+        progressMap={progressMap}
+        currentDay={currentDay}
+      />
     </div>
   );
 };

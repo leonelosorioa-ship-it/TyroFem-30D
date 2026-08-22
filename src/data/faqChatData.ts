@@ -164,8 +164,8 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
     }
   },
   {
-    triggers: ['informe', 'informe clinico', 'reporte', 'correo', 'resultado', '30 dias', 'evaluacion'],
-    response: '📋 **Informe Clínico de Evolución Tiroidea, Balance Hormonal & Biometría Metabólica TyroFem 30D:**\n\nAl completar tus 30 días de acompañamiento con Tyruss Full, generaremos para ti este informe confidencial con:\n\n✔ Gráfica comparativa de niveles de energía (Día 1 vs Día 30).\n✔ Evolución de digestión y desinflamación abdominal.\n✔ Reducción de síntomas y estabilización hormonal.\n✔ Recomendaciones y plan de mantenimiento nutricional de Marié.\n\nSe enviará automáticamente al correo electrónico principal que registraste al activar tu código.',
+    triggers: ['informe', 'informe clinico', 'reporte', 'correo', 'resultado', '30 dias', 'evaluacion', 'pdf', 'descargar'],
+    response: '📋 **Informe de Transformación de 30 Días (PDF Descargable Oficial):**\n\n¡Ya puedes generar y descargar tu informe en formato PDF directamente desde la pestaña **"Mi Registro Diario"**!\n\nTu informe incluye:\n✔ Resumen de adherencia al reto y cumplimiento de tomas de Tyruss Full.\n✔ Curva y gráfica de niveles de energía (Día 1 al 30).\n✔ Porcentaje de desinflamación digestiva y confort gástrico.\n✔ Dictamen nutricional de Marié y sello de validez ColShopi Tienda By Leps Digital.\n\nPuedes descargarlo a tu dispositivo con el botón **"Descargar PDF"** o abrirlo en pantalla con **"Ver Informe Completo"**.',
     quickReplies: [
       '¿Cómo ver mi código registrado?',
       '¿Qué alimentos evitar para la tiroides?',
