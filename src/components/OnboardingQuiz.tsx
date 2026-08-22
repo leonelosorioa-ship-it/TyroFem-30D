@@ -254,19 +254,19 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
               <div className="bg-gradient-to-br from-slate-900 to-[#0c161d] text-white rounded-2xl p-4 sm:p-5 border border-cyan-500/30 relative overflow-hidden space-y-3">
                 <div className="absolute -top-12 -right-12 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
                 
-                <div className="flex items-center gap-4">
-                  <div className="shrink-0">
-                    <MariePhoto size="sm" showBadge={false} showNeonBg={true} />
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <div className="shrink-0 flex flex-col items-center">
+                    <MariePhoto size="md" showBadge={false} />
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0 text-center sm:text-left">
+                    <div className="flex items-center justify-center sm:justify-start gap-2">
                       <h3 className="text-sm sm:text-base font-bold text-white">
                         ¡Bienvenida a ColShopi Tienda! Soy Marié 💚
                       </h3>
                     </div>
-                    <p className="text-xs text-cyan-200/90 leading-relaxed mt-0.5">
-                      Somos la <strong>única Tienda Online Naturista con una App Exclusiva</strong> para acompañar tu tratamiento. Para activar tus 30 días, ingresa tu <strong>código VIP de 6 dígitos numéricos</strong>.
+                    <p className="text-xs text-cyan-200/90 leading-relaxed mt-1">
+                      Somos la <strong>única Tienda Online Naturista con una App Exclusiva</strong> para acompañar tu tratamiento con Tyruss Full. Para activar tu protocolo de 30 días, ingresa tu <strong>código VIP de 6 dígitos</strong>.
                     </p>
                   </div>
                 </div>
