@@ -1,16 +1,16 @@
 {
-  "name": "TyroFem™ 30D Mujer - Balance Hormonal & Tiroides",
-  "short_name": "TyroFem 30D",
-  "description": "Protocolo de 30 días para balance hormonal, tiroides, metabolismo y acompañamiento nutricional con Marié de ColShopi Tienda.",
+  "name": "ColShopi Tienda - TyroFem 30D con Tyruss Full",
+  "short_name": "ColShopi Tienda",
+  "description": "App Exclusiva de ColShopi Tienda By Leps Digital para acompañamiento nutricional de TyroFem 30D y Tyruss Full con la Nutricionista Marié.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
-  "background_color": "#06281e",
-  "theme_color": "#065F46",
+  "background_color": "#070b10",
+  "theme_color": "#00e5ff",
   "orientation": "portrait",
-  "categories": ["health", "lifestyle", "medical"],
+  "categories": ["health", "lifestyle", "shopping"],
   "icons": [
     {
       "src": "/icon-192.png",

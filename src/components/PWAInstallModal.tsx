@@ -107,17 +107,17 @@ export const PWAInstallModal: React.FC<PWAInstallModalProps> = ({ isOpen, onClos
           </div>
 
           {/* App Presentation Card */}
-          <div className="flex flex-col items-center text-center space-y-2 py-2 bg-slate-950/60 rounded-2xl p-4 border border-emerald-500/20">
-            {/* Glowing App Icon */}
+          <div className="flex flex-col items-center text-center space-y-2 py-2 bg-slate-950/60 rounded-2xl p-4 border border-cyan-500/20">
+            {/* Glowing App Icon - ColShopi Tienda */}
             <div className="relative group">
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-950 p-0.5 shadow-lg shadow-emerald-500/30 flex items-center justify-center border border-emerald-400/50">
-                <div className="w-full h-full rounded-[14px] bg-[#062018] flex flex-col items-center justify-center p-2 relative overflow-hidden">
-                  <div className="text-2xl sm:text-3xl mb-0.5 animate-pulse">🌿</div>
-                  <span className="text-[10px] sm:text-[11px] font-black text-emerald-300 tracking-wider">TyroFem</span>
-                  <span className="text-[8px] font-bold text-amber-300 bg-amber-400/20 px-1 rounded">30D</span>
-                </div>
+              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-cyan-600 via-slate-900 to-black p-0.5 shadow-lg shadow-cyan-500/30 flex items-center justify-center border border-cyan-400/50">
+                <img
+                  src="/icon-192.png"
+                  alt="ColShopi Tienda By Leps Digital"
+                  className="w-full h-full rounded-[14px] object-cover"
+                />
               </div>
-              <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-slate-950 p-1 rounded-full border-2 border-[#0f1720]">
+              <div className="absolute -bottom-1 -right-1 bg-cyan-400 text-slate-950 p-1 rounded-full border-2 border-[#0f1720]">
                 <Sparkles className="w-3 h-3 text-slate-950" />
               </div>
             </div>
@@ -125,10 +125,10 @@ export const PWAInstallModal: React.FC<PWAInstallModalProps> = ({ isOpen, onClos
             {/* App Titles */}
             <div>
               <h4 className="text-base sm:text-lg font-black text-white tracking-tight">
-                TyroFem™ 30D Mujer
+                ColShopi Tienda • TyroFem™ 30D
               </h4>
-              <p className="text-xs text-emerald-300/90 font-medium">
-                Balance Hormonal, Tiroides & Metabolismo
+              <p className="text-xs text-cyan-300/90 font-medium">
+                App Exclusiva • Balance Hormonal & Tiroides
               </p>
               <div className="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1.5 mt-1">
                 <Globe className="w-3 h-3 text-cyan-400" />
