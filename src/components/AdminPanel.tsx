@@ -114,7 +114,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
     };
   }, []);
 
-  const codesSummary = useMemo(() => getCodesStatusSummary(), [users]);
+  const codesSummary = useMemo(() => getCodesStatusSummary(users), [users]);
 
   // Statistics calculation
   const totalUsers = users.length;

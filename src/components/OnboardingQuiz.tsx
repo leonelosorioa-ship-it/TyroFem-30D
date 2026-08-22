@@ -249,7 +249,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
     }
 
     // 2. Check if the code was already redeemed / used by another user
-    if (isCodeAlreadyUsed(cleanCode)) {
+    if (isCodeAlreadyUsed(cleanCode, undefined, cleanEmail)) {
       setCodeError(
         '⚠️ Este código de 6 dígitos ya fue canjeado y activado previamente por otra compradora. Cada código es de USO ÚNICO e intransferible. Si necesitas activar tu acceso para tu nuevo pedido, escríbenos a WhatsApp para asignarte un código libre.'
       );

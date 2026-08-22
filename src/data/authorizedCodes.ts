@@ -51,14 +51,21 @@ export function isAuthorizedCode(code: string): boolean {
 /**
  * Verifica si un código ya fue canjeado previamente por otra usuaria
  */
-export function isCodeAlreadyUsed(code: string, currentSavedCode?: string): boolean {
+export function isCodeAlreadyUsed(code: string, currentSavedCode?: string, currentEmail?: string): boolean {
   const cleanCode = code.replace(/\D/g, '').trim();
   // Si la usuaria actual ya tiene este código en su sesión, no la bloqueamos a ella misma
   if (currentSavedCode && currentSavedCode === cleanCode) {
     return false;
   }
   const registry = getRedeemedCodesRegistry();
-  return Boolean(registry[cleanCode]);
+  const found = registry[cleanCode];
+  if (!found) return false;
+
+  if (currentEmail && found.userEmail && found.userEmail.toLowerCase() === currentEmail.toLowerCase().trim()) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -69,32 +76,61 @@ export function markCodeAsRedeemed(code: string, info: { userName: string; userP
   if (!isAuthorizedCode(cleanCode)) return false;
 
   const registry = getRedeemedCodesRegistry();
-  registry[cleanCode] = {
+  const redemption: CodeRedemptionInfo = {
     code: cleanCode,
     redeemedAt: new Date().toISOString(),
     userName: info.userName,
     userPhone: info.userPhone,
     userEmail: info.userEmail
   };
+  registry[cleanCode] = redemption;
 
   try {
     localStorage.setItem(STORAGE_KEY_USED_CODES, JSON.stringify(registry));
-    return true;
   } catch (error) {
-    console.error('Error saving code redemption', error);
-    return false;
+    console.error('Error saving code redemption to localStorage', error);
   }
+
+  // Background sync to server API
+  fetch('/api/codes/redeem', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(redemption)
+  }).catch(err => {
+    console.warn('Could not sync code redemption to server:', err);
+  });
+
+  return true;
 }
 
 /**
- * Obtiene lista de códigos disponibles y usados
+ * Obtiene lista de códigos disponibles y usados calculando la unión entre el registro local y la lista de usuarias
  */
-export function getCodesStatusSummary() {
-  const registry = getRedeemedCodesRegistry();
+export function getCodesStatusSummary(registeredUsers?: Array<{ accessCode?: string; name?: string; phone?: string; email?: string; registeredAt?: string }>) {
+  const registry = { ...getRedeemedCodesRegistry() };
+
+  // Sync users into registry summary
+  if (registeredUsers && Array.isArray(registeredUsers)) {
+    registeredUsers.forEach(u => {
+      if (u.accessCode && isAuthorizedCode(u.accessCode)) {
+        const cleanCode = u.accessCode.replace(/\D/g, '').trim();
+        if (!registry[cleanCode]) {
+          registry[cleanCode] = {
+            code: cleanCode,
+            redeemedAt: u.registeredAt || new Date().toISOString(),
+            userName: u.name || 'Compradora VIP',
+            userPhone: u.phone || '',
+            userEmail: u.email || ''
+          };
+        }
+      }
+    });
+  }
+
   const total = MASTER_AUTHORIZED_CODES.length;
   const usedCodesList = Object.keys(registry);
   const usedCount = usedCodesList.length;
-  const availableCount = total - usedCount;
+  const availableCount = Math.max(0, total - usedCount);
 
   return {
     total,

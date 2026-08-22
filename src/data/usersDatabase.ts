@@ -157,6 +157,38 @@ export function syncUserSessionToServer(userProfile: UserProfile | null, progres
     progressMap: progressMap || {}
   };
 
+  // Also update local users DB cache
+  try {
+    const cleanEmail = (userProfile.email || '').toLowerCase().trim();
+    const cleanCode = (userProfile.accessCode || '').trim();
+    let completedDays = 0;
+    if (progressMap && typeof progressMap === 'object') {
+      const days = Object.values(progressMap) as any[];
+      completedDays = days.filter(d => d.completedAt || (d.tyrussTaken && d.water2L) || d.isLockedAfterSubmit).length;
+    }
+    const adherencePercent = Math.min(100, Math.round((completedDays / 30) * 100));
+
+    const users = getRegisteredUsers();
+    const existingIndex = users.findIndex(
+      u => (cleanEmail && u.email.toLowerCase() === cleanEmail) || (cleanCode && u.accessCode === cleanCode)
+    );
+
+    if (existingIndex >= 0) {
+      users[existingIndex] = {
+        ...users[existingIndex],
+        completedDays: Math.max(completedDays, users[existingIndex].completedDays || 0),
+        adherencePercent: Math.max(adherencePercent, users[existingIndex].adherencePercent || 0),
+        lastActivityAt: new Date().toISOString()
+      };
+      localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tyrofem_users_updated'));
+      }
+    }
+  } catch (e) {
+    // silent
+  }
+
   fetch('/api/users/sync', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

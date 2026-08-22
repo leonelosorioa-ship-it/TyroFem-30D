@@ -10,9 +10,10 @@ async function startServer() {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
 
-  // Storage path for registered users database
+  // Storage path for registered users database and codes
   const DATA_DIR = path.join(process.cwd(), 'data');
   const USERS_FILE = path.join(DATA_DIR, 'registered_users.json');
+  const CODES_FILE = path.join(DATA_DIR, 'redeemed_codes.json');
 
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -33,6 +34,21 @@ async function startServer() {
     usersCache = [];
   }
 
+  // Load or initialize redeemed codes in memory
+  let redeemedCodesCache: Record<string, any> = {};
+  try {
+    if (fs.existsSync(CODES_FILE)) {
+      const raw = fs.readFileSync(CODES_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        redeemedCodesCache = parsed;
+      }
+    }
+  } catch (err) {
+    console.error('Error reading codes file:', err);
+    redeemedCodesCache = {};
+  }
+
   function persistUsers() {
     try {
       fs.writeFileSync(USERS_FILE, JSON.stringify(usersCache, null, 2), 'utf-8');
@@ -40,6 +56,31 @@ async function startServer() {
       console.error('Error persisting users file:', err);
     }
   }
+
+  function persistCodes() {
+    try {
+      fs.writeFileSync(CODES_FILE, JSON.stringify(redeemedCodesCache, null, 2), 'utf-8');
+    } catch (err) {
+      console.error('Error persisting codes file:', err);
+    }
+  }
+
+  // Auto-sync codes from users cache if any user has an access code
+  usersCache.forEach((u: any) => {
+    if (u.accessCode && u.accessCode !== '250816') {
+      const cleanCode = u.accessCode.trim();
+      if (!redeemedCodesCache[cleanCode]) {
+        redeemedCodesCache[cleanCode] = {
+          code: cleanCode,
+          redeemedAt: u.registeredAt || new Date().toISOString(),
+          userName: u.name,
+          userPhone: u.phone,
+          userEmail: u.email
+        };
+      }
+    }
+  });
+  persistCodes();
 
   // API routes FIRST
   app.get('/api/health', (req, res) => {
@@ -110,6 +151,17 @@ async function startServer() {
       usersCache.unshift(newUser);
     }
 
+    if (cleanCode && cleanCode !== '250816') {
+      redeemedCodesCache[cleanCode] = {
+        code: cleanCode,
+        redeemedAt: now,
+        userName: user.name || 'Compradora VIP',
+        userPhone: user.phone || '',
+        userEmail: cleanEmail || ''
+      };
+      persistCodes();
+    }
+
     persistUsers();
     res.json({ success: true, count: usersCache.length, user: existingIndex >= 0 ? usersCache[existingIndex] : usersCache[0] });
   });
@@ -128,6 +180,17 @@ async function startServer() {
 
     const cleanEmail = (userProfile.email || '').toLowerCase().trim();
     const cleanCode = (userProfile.accessCode || '').trim();
+
+    if (cleanCode && cleanCode !== '250816') {
+      redeemedCodesCache[cleanCode] = {
+        code: cleanCode,
+        redeemedAt: userProfile.startDate || new Date().toISOString(),
+        userName: userProfile.name || 'Compradora VIP',
+        userPhone: userProfile.phone || '',
+        userEmail: cleanEmail || ''
+      };
+      persistCodes();
+    }
 
     // Calculate completed days & adherence
     let completedDays = 0;
@@ -221,6 +284,33 @@ async function startServer() {
     );
     persistUsers();
     res.json({ success: true, deleted: initialLen !== usersCache.length, count: usersCache.length });
+  });
+
+  // GET all redeemed VIP codes
+  app.get('/api/codes', (req, res) => {
+    res.json({
+      success: true,
+      count: Object.keys(redeemedCodesCache).length,
+      codes: redeemedCodesCache
+    });
+  });
+
+  // POST redeem VIP code
+  app.post('/api/codes/redeem', (req, res) => {
+    const { code, userName, userPhone, userEmail } = req.body;
+    if (!code) {
+      return res.status(400).json({ error: 'Code is required' });
+    }
+    const cleanCode = code.toString().replace(/\D/g, '').trim();
+    redeemedCodesCache[cleanCode] = {
+      code: cleanCode,
+      redeemedAt: new Date().toISOString(),
+      userName: userName || 'Compradora VIP',
+      userPhone: userPhone || '',
+      userEmail: userEmail || ''
+    };
+    persistCodes();
+    res.json({ success: true, code: redeemedCodesCache[cleanCode] });
   });
 
   // Vite middleware for development

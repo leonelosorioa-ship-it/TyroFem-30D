@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "id": "usr_623914",
+    "name": "Sandra Patricia Morales",
+    "email": "sandra.morales@hotmail.com",
+    "phone": "+57 310 987 6543",
+    "accessCode": "623914",
+    "ageGroup": "45-54 años",
+    "primaryAngle": "desbalance_menopausia",
+    "symptoms": [
+      "Bochornos o calores nocturnos",
+      "Niebla mental"
+    ],
+    "startDate": "2026-08-22T22:47:00.000Z",
+    "currentDay": 1,
+    "completedDays": 0,
+    "adherencePercent": 0,
+    "status": "activa",
+    "registeredAt": "2026-08-22T22:47:00.000Z",
+    "lastActivityAt": "2026-08-22T22:47:33.174Z",
+    "notes": "Registro verificado desde Onboarding TyroFem 30D."
+  },
+  {
+    "id": "usr_849201",
+    "name": "María Camila Gómez",
+    "email": "mariagomez@gmail.com",
+    "phone": "+57 312 456 7890",
+    "accessCode": "849201",
+    "ageGroup": "35-44 años",
+    "primaryAngle": "tiroides_metabolismo",
+    "symptoms": [
+      "Fatiga matutina",
+      "Inflamación digestiva"
+    ],
+    "startDate": "2026-08-22T22:47:00.000Z",
+    "currentDay": 1,
+    "completedDays": 1,
+    "adherencePercent": 3,
+    "status": "activa",
+    "registeredAt": "2026-08-22T22:47:00.000Z",
+    "lastActivityAt": "2026-08-22T22:47:52.699Z",
+    "notes": "Registro verificado desde Onboarding TyroFem 30D."
+  }
+]
