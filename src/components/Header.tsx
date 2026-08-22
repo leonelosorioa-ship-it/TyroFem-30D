@@ -21,6 +21,7 @@ interface HeaderProps {
   onOpenOrder: () => void;
   onOpenChat: () => void;
   onOpenBrandModal?: () => void;
+  onOpenUserProfile?: () => void;
   onInstallPWA?: () => void;
   canInstallPWA?: boolean;
 }
@@ -33,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenOrder,
   onOpenChat,
   onOpenBrandModal,
+  onOpenUserProfile,
   onInstallPWA,
   canInstallPWA
 }) => {
@@ -60,6 +62,16 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {userProfile && onOpenUserProfile && (
+              <button
+                onClick={onOpenUserProfile}
+                className="flex items-center gap-1 text-[10px] bg-cyan-950/90 border border-cyan-400/50 text-cyan-200 px-2 py-0.5 rounded-full hover:bg-cyan-900 transition-colors cursor-pointer"
+                title="Ver mi código VIP e Informe Clínico"
+              >
+                <span className="font-bold">VIP {userProfile.accessCode ? `#${userProfile.accessCode}` : 'AUTORIZADO'}</span>
+              </button>
+            )}
+
             <button
               onClick={onOpenNutritionalInfo}
               className="flex items-center gap-1 text-[11px] text-emerald-300 hover:text-white transition-colors cursor-pointer"

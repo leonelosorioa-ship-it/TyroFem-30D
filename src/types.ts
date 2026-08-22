@@ -6,6 +6,9 @@ export type HealthAngle =
 
 export interface UserProfile {
   name: string;
+  phone?: string;
+  email?: string;
+  accessCode?: string;
   ageGroup?: string;
   primaryAngle: HealthAngle;
   symptoms: string[];

@@ -32,6 +32,8 @@ import { ColshopiBrandModal } from './components/ColshopiBrandModal';
 import { ColshopiCorporateBanner } from './components/ColshopiCorporateBanner';
 import { ColshopiLogo } from './components/ColshopiLogo';
 import { MarieProfileCard } from './components/MarieProfileCard';
+import { UserProfileModal } from './components/UserProfileModal';
+import { AdminCodePoolModal } from './components/AdminCodePoolModal';
 import { CALENDAR_DAYS } from './data/calendarData';
 import { RECIPES_DATA } from './data/recipesData';
 
@@ -71,6 +73,8 @@ export default function App() {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isNutritionalModalOpen, setIsNutritionalModalOpen] = useState(false);
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
+  const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
+  const [isAdminCodeModalOpen, setIsAdminCodeModalOpen] = useState(false);
   const [isReorderTrigger, setIsReorderTrigger] = useState(false);
 
   // Save changes to localStorage
@@ -187,6 +191,7 @@ export default function App() {
         onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
         onOpenChat={() => setActiveTab('chat')}
         onOpenBrandModal={() => setIsBrandModalOpen(true)}
+        onOpenUserProfile={() => setIsUserProfileModalOpen(true)}
       />
 
       {/* Main Tab Navigation Header (Desktop / Tablet) */}
@@ -228,7 +233,15 @@ export default function App() {
 
           {/* Quick Profile Tag */}
           <div className="hidden md:flex items-center gap-2 text-xs font-medium text-slate-500 pl-4 border-l border-slate-200 shrink-0">
-            <span>Alumna: <strong className="text-slate-800">{userProfile.name}</strong></span>
+            <button
+              onClick={() => setIsUserProfileModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-900 transition-colors cursor-pointer"
+              title="Ver mi credencial VIP y expediente clínico"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Alumna: <strong className="text-slate-900">{userProfile.name}</strong></span>
+              <span className="text-[10px] text-cyan-700 font-bold bg-cyan-100 px-1.5 py-0.2 rounded">VIP</span>
+            </button>
           </div>
         </div>
       </div>
@@ -454,6 +467,20 @@ export default function App() {
         }}
       />
 
+      {/* User VIP Profile Modal */}
+      <UserProfileModal
+        isOpen={isUserProfileModalOpen}
+        onClose={() => setIsUserProfileModalOpen(false)}
+        userProfile={userProfile}
+        completedDays={completedDaysCount}
+      />
+
+      {/* ColShopi Admin 50 Codes Database Modal */}
+      <AdminCodePoolModal
+        isOpen={isAdminCodeModalOpen}
+        onClose={() => setIsAdminCodeModalOpen(false)}
+      />
+
       {/* PWA Installation Helper */}
       <PWAInstallBanner />
 
@@ -473,7 +500,15 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center flex-wrap gap-2.5">
+              <button
+                onClick={() => setIsAdminCodeModalOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-slate-900 border border-emerald-500/40 text-emerald-300 text-xs font-semibold hover:bg-emerald-950 transition-colors cursor-pointer flex items-center gap-1.5"
+                title="Ver y copiar los 50 códigos autorizados para entregar a compradoras"
+              >
+                <span>🔑 50 Códigos VIP</span>
+              </button>
+
               <button
                 onClick={() => setIsBrandModalOpen(true)}
                 className="px-3.5 py-1.5 rounded-xl bg-cyan-950/80 border border-cyan-400/40 text-cyan-300 text-xs font-semibold hover:bg-cyan-900 transition-colors cursor-pointer"

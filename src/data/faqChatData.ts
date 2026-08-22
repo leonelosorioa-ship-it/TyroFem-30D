@@ -155,6 +155,24 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
     ]
   },
   {
+    triggers: ['codigo', 'digitos', 'acceso', 'activacion', 'bloqueada', 'desbloquear'],
+    response: '🔐 **Código de Acceso VIP de 6 Dígitos:**\n\nEsta App es un beneficio 100% gratuito exclusivo para compradoras de **Tyruss Full (500g)** de ColShopi Tienda. Para acceder, debes ingresar tu código de 6 dígitos numéricos.\n\nSi aún no te lo hemos asignado o recibiste tu producto recientemente, solicítalo al WhatsApp único de ColShopi: **+57 310 400 7428** con el mensaje:\n*"Hola Marié, ya recibí mi producto Tyruss Full y quiero el acceso gratis a la App TyroFem 30D, mi nombre es: [Tu Nombre]"*',
+    actionLink: {
+      text: 'Solicitar mi Código VIP al WhatsApp (+57 310 400 7428) 📲',
+      type: 'whatsapp',
+      url: 'https://wa.me/573104007428?text=Hola%20Mari%C3%A9,%20ya%20recib%C3%AD%20mi%20producto%20Tyruss%20Full%20y%20quiero%20el%20acceso%20gratis%20a%20la%20App%20TyroFem%2030D,%20mi%20nombre%20es:%20'
+    }
+  },
+  {
+    triggers: ['informe', 'informe clinico', 'reporte', 'correo', 'resultado', '30 dias', 'evaluacion'],
+    response: '📋 **Informe Clínico de Evolución Tiroidea, Balance Hormonal & Biometría Metabólica TyroFem 30D:**\n\nAl completar tus 30 días de acompañamiento con Tyruss Full, generaremos para ti este informe confidencial con:\n\n✔ Gráfica comparativa de niveles de energía (Día 1 vs Día 30).\n✔ Evolución de digestión y desinflamación abdominal.\n✔ Reducción de síntomas y estabilización hormonal.\n✔ Recomendaciones y plan de mantenimiento nutricional de Marié.\n\nSe enviará automáticamente al correo electrónico principal que registraste al activar tu código.',
+    quickReplies: [
+      '¿Cómo ver mi código registrado?',
+      '¿Qué alimentos evitar para la tiroides?',
+      'Ver Promociones de Tyruss Full'
+    ]
+  },
+  {
     triggers: ['whatsapp', 'asesoria', 'contacto', 'telefono', 'hablar con marie', 'atencion'],
     response: '📲 **¡Claro que sí mi bella!**\n\nPuedes chatear directamente conmigo o con mi equipo en la línea oficial de ColShopi Tienda en Colombia: **310 400 7428** 💚.\n\nAtendemos de lunes a sábado con todo el cariño y resolvemos tus inquietudes para tomar tu pedido con envío gratis y pago contra entrega.',
     actionLink: {

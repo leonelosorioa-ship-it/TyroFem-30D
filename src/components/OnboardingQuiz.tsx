@@ -4,16 +4,25 @@ import {
   ArrowRight, 
   CheckCircle2, 
   Heart, 
-  Activity, 
-  Flame, 
   ShieldCheck, 
-  HelpCircle, 
-  Zap, 
-  Leaf, 
-  Smile 
+  KeyRound,
+  MessageCircle,
+  Mail,
+  Phone,
+  User,
+  AlertCircle,
+  HelpCircle,
+  FileCheck2,
+  Lock
 } from 'lucide-react';
 import { HealthAngle, UserProfile } from '../types';
 import { ColshopiLogo } from './ColshopiLogo';
+import { 
+  isAuthorizedCode, 
+  isCodeAlreadyUsed, 
+  markCodeAsRedeemed 
+} from '../data/authorizedCodes';
+import { AdminCodePoolModal } from './AdminCodePoolModal';
 
 interface OnboardingQuizProps {
   onComplete: (profile: UserProfile) => void;
@@ -21,8 +30,18 @@ interface OnboardingQuizProps {
 
 export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) => {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  
+  // Registration and VIP Gate States
   const [name, setName] = useState('');
-  const [ageGroup, setAgeGroup] = useState('35-45 años');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [ageGroup, setAgeGroup] = useState('35-44 años');
+  const [accessCode, setAccessCode] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+
+  // Clinical Diagnostic States
   const [primaryAngle, setPrimaryAngle] = useState<HealthAngle>('tiroides_metabolismo');
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -101,43 +120,113 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
     }
   };
 
+  // WhatsApp Pre-filled message generator
+  const getWhatsAppRequestUrl = () => {
+    const userNameParam = name.trim() ? name.trim() : '';
+    const text = `Hola Marié, ya recibí mi producto Tyruss Full y quiero el acceso gratis a la App TyroFem 30D, mi nombre es: ${userNameParam}`;
+    return `https://wa.me/573104007428?text=${encodeURIComponent(text)}`;
+  };
+
+  // Code validation handler with strict 50 authorized codes verification
+  const handleValidateStep1 = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCodeError(null);
+
+    const cleanName = name.trim();
+    const cleanPhone = phone.trim();
+    const cleanEmail = email.trim();
+    const cleanCode = accessCode.replace(/\D/g, ''); // only digits
+
+    if (!cleanName) {
+      setCodeError('Por favor ingresa tu nombre completo.');
+      return;
+    }
+    if (!cleanPhone || cleanPhone.length < 7) {
+      setCodeError('Por favor ingresa el número de WhatsApp con el que realizaste tu pedido.');
+      return;
+    }
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      setCodeError('Por favor ingresa un correo electrónico válido para recibir tu Informe Clínico.');
+      return;
+    }
+    if (cleanCode.length !== 6) {
+      setCodeError('El código de acceso debe contener exactamente 6 dígitos numéricos. Si aún no lo tienes, solicítalo al WhatsApp de ColShopi: +57 310 400 7428.');
+      return;
+    }
+
+    // 1. Check if the code is in the 50 authorized master database
+    if (!isAuthorizedCode(cleanCode)) {
+      setCodeError(
+        '⛔ Código NO autorizado o no existe en la base de datos de ColShopi. Solo las compradoras verificadas de Tyruss Full reciben un código de acceso. Solicita tu código oficial por WhatsApp a ColShopi: +57 310 400 7428.'
+      );
+      return;
+    }
+
+    // 2. Check if the code was already redeemed / used by another user
+    if (isCodeAlreadyUsed(cleanCode)) {
+      setCodeError(
+        '⚠️ Este código de 6 dígitos ya fue canjeado y activado previamente por otra compradora. Cada código es de USO ÚNICO e intransferible. Si necesitas activar tu acceso para tu nuevo pedido, escríbenos a WhatsApp para asignarte un código libre.'
+      );
+      return;
+    }
+
+    setIsCodeVerified(true);
+    setAccessCode(cleanCode);
+    setStep(2);
+  };
+
   const handleFinish = () => {
     setIsGenerating(true);
+    
+    // Register and burn the single-use 6-digit code in database
+    markCodeAsRedeemed(accessCode.trim(), {
+      userName: name.trim() || 'Compradora VIP',
+      userPhone: phone.trim(),
+      userEmail: email.trim()
+    });
+
     setTimeout(() => {
       const newProfile: UserProfile = {
-        name: name.trim() || 'Amiga',
+        name: name.trim() || 'Compradora VIP',
+        phone: phone.trim(),
+        email: email.trim(),
+        accessCode: accessCode.trim(),
         ageGroup,
         primaryAngle,
         symptoms: selectedSymptoms.length > 0 ? selectedSymptoms : ['Fatiga matutina', 'Inflamación digestiva'],
         hasCompletedOnboarding: true,
         startDate: new Date().toISOString(),
         currentDay: 1,
-        unlockedBadges: ['badge_start']
+        unlockedBadges: ['badge_start', 'badge_vip']
       };
       onComplete(newProfile);
-    }, 1500);
+    }, 1600);
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-xl bg-white rounded-3xl shadow-xl shadow-emerald-950/5 border border-emerald-100 overflow-hidden">
-        {/* Header Ribbon with ColShopi Neon Identity */}
-        <div className="bg-gradient-to-r from-[#070c12] via-slate-900 to-[#070c12] px-6 py-5 text-white relative border-b border-cyan-500/20">
-          <div className="flex items-center justify-between">
+    <div className="min-h-[85vh] flex items-center justify-center p-3 sm:p-6">
+      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl shadow-slate-900/10 border border-slate-200 overflow-hidden">
+        
+        {/* Header Ribbon with ColShopi VIP Identity */}
+        <div className="bg-gradient-to-r from-[#070c12] via-slate-900 to-[#070c12] px-5 sm:px-7 py-5 text-white relative border-b border-cyan-500/25">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <ColshopiLogo size="sm" showGlow={true} />
               <div>
-                <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-wider block">
-                  ColShopi Tienda By Leps Digital
-                </span>
-                <h2 className="text-base sm:text-lg font-bold text-white font-serif-luxury">
-                  Diagnóstico Nutricional Femenino
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-cyan-300 uppercase tracking-wider bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-400/40">
+                    Acceso Exclusivo Compradoras
+                  </span>
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-white font-serif-luxury mt-0.5">
+                  TyroFem 30D • Activación de Protocolo
                 </h2>
               </div>
             </div>
-            <div className="text-right">
+
+            <div className="text-right shrink-0">
               <span className="text-xs text-cyan-300 block font-medium">Paso {step} de 4</span>
-              <div className="flex gap-1 mt-1 justify-end">
+              <div className="flex gap-1.5 mt-1 justify-end">
                 {[1, 2, 3, 4].map(s => (
                   <div 
                     key={s} 
@@ -152,107 +241,255 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
         </div>
 
         {/* Form Body */}
-        <div className="p-6 sm:p-8">
-          {/* STEP 1: Name & Age */}
+        <div className="p-5 sm:p-8">
+
+          {/* ============================================================ */}
+          {/* STEP 1: VIP ACCESS CODE & BUYER REGISTRATION FORM */}
+          {/* ============================================================ */}
           {step === 1 && (
-            <div className="space-y-6">
-              <div className="text-center space-y-3">
-                {/* Visual Representation of Nutritionist Marie */}
-                <div className="inline-flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-2xl p-0.5 bg-gradient-to-br from-cyan-400 to-emerald-400 shadow-[0_0_20px_rgba(0,229,255,0.35)] relative">
-                    <div className="w-full h-full rounded-[14px] bg-[#0c161d] overflow-hidden flex flex-col items-center justify-end">
-                      <div className="text-3xl mt-1">👩🏻‍⚕️</div>
-                      <div className="bg-black text-[8px] text-white font-black px-2 py-0.2 rounded-xs border border-slate-700 mb-1 tracking-wider">
-                        MARIÉ
+            <form onSubmit={handleValidateStep1} className="space-y-6">
+              
+              {/* Doctor Marie Portrait & VIP Access Notice */}
+              <div className="bg-gradient-to-br from-slate-900 to-[#0c161d] text-white rounded-2xl p-4 sm:p-5 border border-cyan-500/30 relative overflow-hidden space-y-3">
+                <div className="absolute -top-12 -right-12 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
+                
+                <div className="flex items-start sm:items-center gap-3.5">
+                  <div className="relative shrink-0">
+                    <div className="w-14 h-14 rounded-2xl p-0.5 bg-gradient-to-br from-cyan-400 to-emerald-400 shadow-[0_0_15px_rgba(0,229,255,0.3)]">
+                      <div className="w-full h-full rounded-[14px] bg-[#090e14] overflow-hidden flex flex-col items-center justify-end">
+                        <div className="text-2xl mt-0.5">👩🏻‍⚕️</div>
+                        <div className="bg-black text-[7px] text-white font-black px-1.5 py-0.2 rounded-xs border border-slate-700 mb-0.5 tracking-wider">
+                          MARIÉ
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <span className="mt-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    Nutricionista ColShopi Oficial
-                  </span>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-bold text-white">
+                        ¡Bienvenida! Soy la Nutricionista Marié 💚
+                      </h3>
+                    </div>
+                    <p className="text-xs text-cyan-200/90 leading-relaxed mt-0.5">
+                      Esta aplicación es un <strong>obsequio VIP exclusivo para compradoras de Tyruss Full</strong>. Para activar tu guía de 30 días, ingresa tu <strong>código único de 6 dígitos numéricos</strong> asignado por ColShopi.
+                    </p>
+                  </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-slate-800 font-serif-luxury">
-                  ¡Hola! Soy la Nutricionista Marié 💚
-                </h3>
-                <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                  Cuidamos de ti en <strong>ColShopi Tienda</strong>. Quiero acompañarte de forma personalizada durante estos 30 días con <strong>Tyruss Full</strong>. ¿Cómo te llamas y qué edad tienes?
-                </p>
+                {/* Direct WhatsApp Helper Trigger */}
+                <div className="pt-2 border-t border-slate-800/90 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                  <div className="text-[11px] text-slate-300 flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>¿Aún no tienes tu código de 6 dígitos?</span>
+                  </div>
+
+                  <a
+                    href={getWhatsAppRequestUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition-all active:scale-98 text-center cursor-pointer"
+                  >
+                    <MessageCircle className="w-4 h-4 fill-white text-emerald-600" />
+                    <span>Solicitar mi Código a WhatsApp (+57 310 400 7428)</span>
+                  </a>
+                </div>
               </div>
 
+              {/* Error Message if any */}
+              {codeError && (
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 animate-fadeIn">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <p className="font-medium leading-relaxed">{codeError}</p>
+                </div>
+              )}
+
+              {/* Registration Fields */}
               <div className="space-y-4">
+                
+                {/* 1. Nombre Completo */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Tu Nombre Completo o Cómo te gusta que te llamen
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Tu Nombre Completo</span>
+                    <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
+                    required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ej: Carolina, Patricia, Marcela..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-800 text-base"
-                    autoFocus
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (codeError) setCodeError(null);
+                    }}
+                    placeholder="Ej: Claudia Patricia Martínez"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-900 text-sm font-medium"
                   />
                 </div>
 
+                {/* 2. WhatsApp con el que realizó el pedido & Rango de Edad */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>WhatsApp de tu Pedido</span>
+                      <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (codeError) setCodeError(null);
+                      }}
+                      placeholder="Ej: 310 400 7428"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-900 text-sm font-medium"
+                    />
+                    <span className="text-[10px] text-slate-400 mt-1 block">
+                      Número con el que solicitaste tu Tyruss Full.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                      Rango de Edad
+                    </label>
+                    <select
+                      value={ageGroup}
+                      onChange={(e) => setAgeGroup(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-900 text-sm font-medium bg-white"
+                    >
+                      <option value="18-24 años">18 - 24 años</option>
+                      <option value="25-34 años">25 - 34 años</option>
+                      <option value="35-44 años">35 - 44 años</option>
+                      <option value="45-54 años">45 - 54 años</option>
+                      <option value="55+ años">55 años o más</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* 3. Correo Electrónico Principal + Explicación del Informe Clínico */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Rango de Edad
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Tu Correo Electrónico Principal</span>
+                    <span className="text-rose-500">*</span>
                   </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {['25-34 años', '35-44 años', '45-54 años', '55+ años'].map((range) => (
-                      <button
-                        key={range}
-                        type="button"
-                        onClick={() => setAgeGroup(range)}
-                        className={`py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
-                          ageGroup === range
-                            ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
-                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-emerald-300'
-                        }`}
-                      >
-                        {range}
-                      </button>
-                    ))}
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (codeError) setCodeError(null);
+                    }}
+                    placeholder="ejemplo@correo.com"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-900 text-sm font-medium"
+                  />
+                  
+                  {/* Explicit Explanation of the 30-Day Clinical Report */}
+                  <div className="mt-2.5 p-3 rounded-xl bg-cyan-50/80 border border-cyan-200/80 text-cyan-950 text-xs space-y-1">
+                    <div className="flex items-center gap-1.5 font-bold text-cyan-900">
+                      <FileCheck2 className="w-4 h-4 text-cyan-700" />
+                      <span>¿Por qué te solicitamos tu correo?</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-cyan-950">
+                      Al finalizar tus 30 días con Tyruss Full, la Nutricionista Marié generará y te enviará a este correo tu{' '}
+                      <strong className="text-cyan-900 font-extrabold underline decoration-cyan-400">
+                        "Informe Clínico de Evolución Tiroidea, Balance Hormonal & Biometría Metabólica TyroFem 30D"
+                      </strong>, con la comparativa de tus niveles de energía, digestión, síntomas y tu plan de mantenimiento.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4. Código de 6 Dígitos Numéricos */}
+                <div className="p-4 rounded-2xl bg-slate-50 border-2 border-emerald-100 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                      <KeyRound className="w-4 h-4 text-amber-500" />
+                      <span>Código de Activación Único (6 Dígitos Numéricos)</span>
+                      <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[11px] font-bold text-slate-500">
+                      {accessCode.replace(/\D/g, '').length} / 6
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      maxLength={6}
+                      pattern="[0-9]*"
+                      inputMode="numeric"
+                      required
+                      value={accessCode}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        setAccessCode(val);
+                        if (codeError) setCodeError(null);
+                      }}
+                      placeholder="• • • • • •"
+                      className="w-full text-center tracking-[0.6em] font-mono text-2xl font-black px-4 py-3 rounded-xl border-2 border-emerald-500/60 bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900 placeholder:tracking-normal placeholder:text-slate-300"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-slate-600">
+                    <span className="flex items-center gap-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Asignado manualmente por ColShopi a cada compradora.</span>
+                    </span>
+
+                    <a
+                      href={getWhatsAppRequestUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-800 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Pedir mi código por WhatsApp</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </a>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 text-xs text-emerald-900 flex items-start gap-2.5">
-                <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
-                <p className="leading-relaxed">
-                  <strong className="font-semibold">Regalo 100% Gratuito:</strong> Esta guía y aplicación interactiva han sido creadas exclusivamente por ColShopi Tienda para acompañar tu proceso con Tyruss Full.
-                </p>
-              </div>
-
+              {/* Submit / Continue Button */}
               <button
-                type="button"
-                onClick={() => setStep(2)}
-                disabled={!name.trim()}
-                className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md ${
-                  name.trim() 
-                    ? 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-emerald-800/20 active:scale-98' 
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
+                type="submit"
+                className="w-full py-4 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-800 text-white flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20 active:scale-98 transition-all cursor-pointer"
               >
-                <span>Continuar al Diagnóstico</span>
+                <span>Validar Código & Continuar al Diagnóstico</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-            </div>
+
+              {/* ColShopi Management Access Link */}
+              <div className="pt-2 text-center border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAdminModalOpen(true)}
+                  className="text-[11px] text-slate-600 hover:text-emerald-800 font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-600" />
+                  <span>Equipo ColShopi: Consultar Base de Datos de los 50 Códigos VIP</span>
+                </button>
+              </div>
+            </form>
           )}
 
-          {/* STEP 2: Primary Health Angle */}
+          {/* ============================================================ */}
+          {/* STEP 2: PRIMARY HEALTH ANGLE */}
+          {/* ============================================================ */}
           {step === 2 && (
-            <div className="space-y-5">
+            <div className="space-y-5 animate-fadeIn">
               <div className="space-y-1">
                 <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-                  Hola {name} 🌿
+                  Código VIP Validado • Hola {name} 🌿
                 </span>
-                <h3 className="text-lg font-bold text-slate-800">
+                <h3 className="text-lg font-bold text-slate-800 font-serif-luxury">
                   ¿Cuál es tu principal motivo de consulta hoy?
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Selecciona la situación que más se asemeja a lo que sientes en tu día a día:
+                  Selecciona la situación que más se asemeja a lo que sientes en tu día a día con tu salud:
                 </p>
               </div>
 
@@ -298,25 +535,27 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   onClick={() => setStep(3)}
                   className="flex-1 py-3.5 px-6 rounded-xl font-bold text-sm bg-emerald-700 hover:bg-emerald-800 text-white flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-800/20 active:scale-98 cursor-pointer"
                 >
-                  <span>Siguiente: Tus Síntomas</span>
+                  <span>Siguiente: Tus Síntomas Activos</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 3: Symptoms Checklist */}
+          {/* ============================================================ */}
+          {/* STEP 3: SYMPTOMS CHECKLIST */}
+          {/* ============================================================ */}
           {step === 3 && (
-            <div className="space-y-5">
+            <div className="space-y-5 animate-fadeIn">
               <div className="space-y-1">
                 <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-                  Personalización del Plan
+                  Personalización del Protocolo
                 </span>
-                <h3 className="text-lg font-bold text-slate-800">
+                <h3 className="text-lg font-bold text-slate-800 font-serif-luxury">
                   ¿Cuáles de estos síntomas has experimentado últimamente?
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Marca todos los que apliquen para calibrar tus recomendaciones diarias:
+                  Marca todos los que apliquen. Estos datos se registrarán en tu <strong>Informe Clínico TyroFem 30D</strong>:
                 </p>
               </div>
 
@@ -365,33 +604,40 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
             </div>
           )}
 
-          {/* STEP 4: Diagnostic Summary & Plan Unlock */}
+          {/* ============================================================ */}
+          {/* STEP 4: DIAGNOSTIC SUMMARY & PROTOCOL ACTIVATION */}
+          {/* ============================================================ */}
           {step === 4 && (
-            <div className="space-y-6 text-center">
+            <div className="space-y-6 text-center animate-fadeIn">
               {isGenerating ? (
                 <div className="py-12 space-y-4">
                   <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
                   <h4 className="text-base font-bold text-slate-800">
-                    Calibrando tu protocolo nutricional con Marié...
+                    Activando Protocolo VIP para {name}...
                   </h4>
-                  <p className="text-xs text-slate-500">
-                    Adaptando los nutrientes de Tyruss Full a tus necesidades hormonales y metabólicas.
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    Calibrando dosis de Tyruss Full, guía de hidratación y preparando la apertura de tu expediente clínico.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-5 text-left">
                   <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-3xl p-5 space-y-3">
-                    <div className="flex items-center gap-2 text-emerald-800">
-                      <Sparkles className="w-5 h-5 text-amber-500" />
-                      <h4 className="font-bold text-base">
-                        ¡Plan Listo para {name}!
-                      </h4>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-emerald-800">
+                        <Sparkles className="w-5 h-5 text-amber-500" />
+                        <h4 className="font-bold text-base font-serif-luxury">
+                          ¡Plan TyroFem 30D Listo para {name}!
+                        </h4>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-900 bg-emerald-200/80 px-2 py-0.5 rounded-full">
+                        Código VIP: {accessCode}
+                      </span>
                     </div>
 
                     <p className="text-xs text-slate-700 leading-relaxed">
-                      Según tu perfil, tu cuerpo requiere un enfoque prioritario en{' '}
+                      Según tu evaluación, tu organismo requiere un enfoque prioritario en{' '}
                       <strong className="text-emerald-900 font-bold">
-                        {primaryAngle === 'tiroides_metabolismo' && 'Activación Tiroidea & Aporte de Yodo/Selenio'}
+                        {primaryAngle === 'tiroides_metabolismo' && 'Activación Tiroidea & Aporte de Yodo/Selenio Funcional'}
                         {primaryAngle === 'desbalance_menopausia' && 'Equilibrio Estrogénico & Control de Temperatura'}
                         {primaryAngle === 'ciclos_spm' && 'Regulación del Eje Ovárico & Desinflamación Pélvica'}
                         {primaryAngle === 'digestion_detox' && 'Desintoxicación Intestinal & Tránsito Fluido'}
@@ -399,23 +645,35 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                     </p>
 
                     <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                      <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-100">
-                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Dosis Diaria</span>
+                      <div className="bg-white/90 p-2.5 rounded-xl border border-emerald-100">
+                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Dosis Diaria Tyruss</span>
                         <span className="font-bold text-emerald-800">1 y ¼ Cucharada (20g)</span>
                       </div>
-                      <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-100">
-                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Momento Ideal</span>
-                        <span className="font-bold text-emerald-800">Mañana en Ayunas</span>
+                      <div className="bg-white/90 p-2.5 rounded-xl border border-emerald-100">
+                        <span className="text-[10px] text-slate-500 block uppercase font-bold">Momento de Toma</span>
+                        <span className="font-bold text-emerald-800">Mañanas en Ayunas</span>
                       </div>
                     </div>
                   </div>
 
+                  {/* Registered Email & Clinical Report Confirmation Card */}
+                  <div className="p-4 rounded-2xl bg-cyan-50/90 border border-cyan-200 space-y-2 text-xs text-cyan-950">
+                    <div className="flex items-center gap-2 font-bold text-cyan-900">
+                      <Mail className="w-4 h-4 text-cyan-700 shrink-0" />
+                      <span>Destino del Informe Clínico (Día 30):</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      Al completar tus 30 días, recibirás tu <strong>"Informe Clínico de Evolución Tiroidea & Balance Metabólico TyroFem 30D"</strong> en: <strong className="text-cyan-950 underline">{email}</strong>.
+                    </p>
+                  </div>
+
+                  {/* Free Gift Card */}
                   <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 text-xs text-amber-950 space-y-1">
                     <div className="flex items-center gap-1.5 font-bold text-amber-900">
                       <span>🎁 Obsequio Incluido en tu Proceso:</span>
                     </div>
                     <p className="text-[11px] leading-relaxed">
-                      Recuerda que con tu pedido en ColShopi Tienda cuentas con tu <strong>Loción Termoactiva Herbal GRATIS</strong> para alivio corporal y piernas cansadas.
+                      Recuerda que con tu pedido en ColShopi Tienda cuentas con tu <strong>Loción Termoactiva Herbal GRATIS</strong> para alivio corporal, piernas pesadas y contracturas.
                     </p>
                   </div>
 
@@ -431,8 +689,15 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
               )}
             </div>
           )}
+
         </div>
       </div>
+
+      {/* Admin 50 Codes Database Modal */}
+      <AdminCodePoolModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+      />
     </div>
   );
 };
