@@ -2,19 +2,26 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-// High-Fidelity Vector & Bitmap matching the new "Marié Caricatura App.jpeg"
+// High-Fidelity Vector & Bitmap matching the new "Marie Caricatura App Fondo Plano.jpeg"
 const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <!-- Background Gradient (Muted Blue/Teal Room) -->
-    <linearGradient id="bgWall" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#416979"/>
-      <stop offset="50%" stop-color="#335665"/>
-      <stop offset="100%" stop-color="#233e4b"/>
+    <!-- Background Gradient (Smooth Warm Flat Cream / Off-White Room) -->
+    <radialGradient id="bgFlat" cx="50%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#fdfbf7"/>
+      <stop offset="40%" stop-color="#f4eee5"/>
+      <stop offset="75%" stop-color="#e9dfd2"/>
+      <stop offset="100%" stop-color="#dfd2c1"/>
+    </radialGradient>
+
+    <linearGradient id="softVignetteFade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdfbf7" stop-opacity="0"/>
+      <stop offset="75%" stop-color="#f4eee5" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#f4eee5" stop-opacity="0.95"/>
     </linearGradient>
 
     <!-- Neon Glow Filter -->
     <filter id="neonCyanGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur1"/>
       <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur2"/>
       <feMerge>
         <feMergeNode in="blur1"/>
@@ -24,7 +31,7 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
     </filter>
 
     <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.22"/>
     </filter>
 
     <!-- Wood Shelf Gradients -->
@@ -34,7 +41,7 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
       <stop offset="100%" stop-color="#8d5b2d"/>
     </linearGradient>
 
-    <!-- Skin Gradients (Warm Animated Tone) -->
+    <!-- Skin Gradients (Warm Radiant Animated Tone) -->
     <linearGradient id="skinTone" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#fee3d3"/>
       <stop offset="60%" stop-color="#fdd1bc"/>
@@ -42,11 +49,11 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
     </linearGradient>
 
     <radialGradient id="cheekBlush" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#f87171" stop-opacity="0.45"/>
+      <stop offset="0%" stop-color="#f87171" stop-opacity="0.5"/>
       <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
     </radialGradient>
 
-    <!-- Hair Rich Brown Gradients -->
+    <!-- Hair Rich Warm Brown Gradients -->
     <linearGradient id="hairMain" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#3d2218"/>
       <stop offset="35%" stop-color="#542e20"/>
@@ -62,13 +69,8 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
     <!-- Coat Gradients -->
     <linearGradient id="coatWhite" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="75%" stop-color="#f1f5f9"/>
-      <stop offset="100%" stop-color="#dbe3eb"/>
-    </linearGradient>
-
-    <linearGradient id="coatShadow" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#d1d9e2"/>
-      <stop offset="100%" stop-color="#b4c2ce"/>
+      <stop offset="75%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
     </linearGradient>
 
     <!-- Eye Gradient -->
@@ -79,20 +81,20 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
     </radialGradient>
   </defs>
 
-  <!-- 1. Background Interior -->
-  <rect width="1024" height="1024" fill="url(#bgWall)"/>
+  <!-- 1. Background Flat Warm Canvas -->
+  <rect width="1024" height="1024" fill="url(#bgFlat)"/>
 
-  <!-- Left Back Counter with Cyan Strip -->
-  <rect x="0" y="550" width="300" height="22" fill="#2d4957"/>
-  <rect x="140" y="550" width="160" height="8" fill="#00e5ff" filter="url(#neonCyanGlow)"/>
-  <rect x="140" y="550" width="160" height="4" fill="#ffffff"/>
+  <!-- Left Back Counter with Soft Cyan Strip -->
+  <g opacity="0.85">
+    <rect x="0" y="550" width="300" height="22" fill="#587483"/>
+    <rect x="140" y="550" width="160" height="8" fill="#00e5ff" filter="url(#neonCyanGlow)"/>
+    <rect x="140" y="550" width="160" height="4" fill="#ffffff"/>
+  </g>
 
   <!-- Potted Plant on Back Counter -->
-  <g transform="translate(195, 435)">
-    <!-- Pot -->
+  <g transform="translate(195, 435)" opacity="0.9">
     <polygon points="12,85 52,85 58,50 6,50" fill="#cbd5e1" stroke="#334155" stroke-width="2.5"/>
     <ellipse cx="32" cy="50" rx="27" ry="6" fill="#e2e8f0" stroke="#334155" stroke-width="2.5"/>
-    <!-- Leaves -->
     <path d="M 32 48 C 20 25 5 28 -2 38 C 12 48 24 50 32 48 Z" fill="#4ade80" stroke="#166534" stroke-width="2"/>
     <path d="M 32 48 C 30 15 45 10 52 24 C 44 38 38 45 32 48 Z" fill="#22c55e" stroke="#166534" stroke-width="2"/>
     <path d="M 32 48 C 18 35 25 5 32 -5 C 40 5 44 35 32 48 Z" fill="#16a34a" stroke="#15803d" stroke-width="2"/>
@@ -100,16 +102,14 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
   </g>
 
   <!-- Left Shelves with Supplements & "Tyruss Full" -->
-  <g id="leftShelves">
+  <g id="leftShelves" opacity="0.92">
     <!-- Shelf 1 (Top left) -->
     <rect x="0" y="450" width="170" height="18" rx="3" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2"/>
     <rect x="0" y="452" width="170" height="4" fill="#fde68a" opacity="0.6"/>
     <!-- Top small bottles -->
     <g transform="translate(0, 365)">
-      <!-- White bottle 1 -->
       <rect x="0" y="35" width="30" height="50" rx="5" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
       <rect x="0" y="52" width="30" height="22" fill="#0284c7"/>
-      <!-- White bottle 2 -->
       <rect x="34" y="38" width="18" height="47" rx="3" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/>
       <rect x="54" y="38" width="18" height="47" rx="3" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/>
       <rect x="74" y="38" width="18" height="47" rx="3" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/>
@@ -130,7 +130,6 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
     <!-- Shelf 3 (Lower left) with BIG TYRUSS FULL TUBS -->
     <rect x="0" y="750" width="190" height="22" rx="3" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2.5"/>
     <rect x="0" y="752" width="190" height="5" fill="#fde68a" opacity="0.6"/>
-    <!-- Metal legs structure -->
     <rect x="155" y="772" width="16" height="252" fill="#1e293b"/>
     <rect x="135" y="795" width="36" height="12" fill="#334155"/>
 
@@ -170,37 +169,37 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
   <!-- 2. Neon ColShopi Logo in Background -->
   <g transform="translate(200, 230)">
     <!-- Neon Outer Cyan Ring -->
-    <circle cx="0" cy="0" r="175" fill="#091b24" stroke="#00f0ff" stroke-width="12" filter="url(#neonCyanGlow)"/>
-    <circle cx="0" cy="0" r="175" fill="none" stroke="#ffffff" stroke-width="3.5" opacity="0.9"/>
+    <circle cx="0" cy="0" r="175" fill="#f0eae0" fill-opacity="0.8" stroke="#00d8f6" stroke-width="11" filter="url(#neonCyanGlow)"/>
+    <circle cx="0" cy="0" r="175" fill="none" stroke="#ffffff" stroke-width="3.5" opacity="0.95"/>
     
     <!-- Neon Script: Colshopi -->
-    <text x="0" y="-14" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="95" font-weight="700" fill="#00f0ff" filter="url(#neonCyanGlow)">
+    <text x="0" y="-14" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="95" font-weight="700" fill="#00d8f6" filter="url(#neonCyanGlow)">
       Colshopi
     </text>
-    <text x="0" y="-14" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="95" font-weight="700" fill="#ffffff">
+    <text x="0" y="-14" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="95" font-weight="700" fill="#0c4a6e">
       Colshopi
     </text>
 
     <!-- Tienda -->
-    <line x1="-120" y1="26" x2="-68" y2="26" stroke="#00f0ff" stroke-width="4.5" stroke-linecap="round" filter="url(#neonCyanGlow)"/>
-    <line x1="-120" y1="26" x2="-68" y2="26" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-    <text x="0" y="34" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="22" font-weight="800" letter-spacing="5px" fill="#ffffff">
+    <line x1="-120" y1="26" x2="-68" y2="26" stroke="#00d8f6" stroke-width="4.5" stroke-linecap="round" filter="url(#neonCyanGlow)"/>
+    <line x1="-120" y1="26" x2="-68" y2="26" stroke="#0284c7" stroke-width="2" stroke-linecap="round"/>
+    <text x="0" y="34" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="22" font-weight="800" letter-spacing="5px" fill="#0369a1">
       TIENDA
     </text>
-    <line x1="68" y1="26" x2="120" y2="26" stroke="#00f0ff" stroke-width="4.5" stroke-linecap="round" filter="url(#neonCyanGlow)"/>
-    <line x1="68" y1="26" x2="120" y2="26" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <line x1="68" y1="26" x2="120" y2="26" stroke="#00d8f6" stroke-width="4.5" stroke-linecap="round" filter="url(#neonCyanGlow)"/>
+    <line x1="68" y1="26" x2="120" y2="26" stroke="#0284c7" stroke-width="2" stroke-linecap="round"/>
 
     <!-- By Leps Digital -->
-    <text x="0" y="80" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="36" font-weight="700" fill="#ffffff" filter="url(#neonCyanGlow)">
+    <text x="0" y="80" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="36" font-weight="700" fill="#00d8f6" filter="url(#neonCyanGlow)">
       By Leps Digital
     </text>
-    <text x="0" y="80" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="36" font-weight="700" fill="#ffffff">
+    <text x="0" y="80" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="36" font-weight="700" fill="#0f172a">
       By Leps Digital
     </text>
   </g>
 
   <!-- Right Shelves Background -->
-  <g id="rightShelves" transform="translate(710, 0)">
+  <g id="rightShelves" transform="translate(710, 0)" opacity="0.92">
     <!-- Vertical Support Beam -->
     <rect x="40" y="0" width="16" height="1024" fill="#1e293b"/>
 
@@ -269,7 +268,7 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
     <rect x="152" y="780" width="38" height="122" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
   </g>
 
-  <!-- 3. Marié - Illustration Figure (Semi-Realistic Caricature Style) -->
+  <!-- 3. Marié - Illustration Figure (Semi-Realistic Caricature Style with Flat Vignette) -->
   <g id="marieFigureCaricatura" filter="url(#subtleShadow)">
     
     <!-- Hair Back Layers -->
@@ -306,41 +305,27 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 
       <!-- Left Eye (Big Expressive Cartoon/Anime Style) -->
       <g transform="translate(508, 318)">
-        <!-- Sclera -->
         <path d="M -30 0 Q 0 -22 30 0 Q 0 20 -30 0 Z" fill="#ffffff" stroke="#1a0a04" stroke-width="3.5"/>
-        <!-- Iris -->
         <ellipse cx="2" cy="-1" rx="17" ry="17" fill="url(#eyeIris)"/>
-        <!-- Pupil -->
         <circle cx="2" cy="-1" r="10" fill="#000000"/>
-        <!-- Highlights -->
         <circle cx="-3" cy="-6" r="5" fill="#ffffff"/>
         <circle cx="7" cy="4" r="2.5" fill="#ffffff" opacity="0.85"/>
-        <!-- Upper Eyelid & Bold Lashes -->
         <path d="M -34 0 Q 0 -25 34 0" stroke="#120502" stroke-width="6" stroke-linecap="round" fill="none"/>
         <path d="M 22 -14 L 32 -22" stroke="#120502" stroke-width="4.5" stroke-linecap="round"/>
-        <!-- Lower eyelid -->
         <path d="M -24 3 Q 0 18 24 3" stroke="#c27d60" stroke-width="2.5" fill="none"/>
-        <!-- Eyelid crease above -->
         <path d="M -22 -20 Q 0 -28 22 -20" stroke="#b46e50" stroke-width="2.5" fill="none"/>
       </g>
 
       <!-- Right Eye (Big Expressive Cartoon/Anime Style) -->
       <g transform="translate(642, 318)">
-        <!-- Sclera -->
         <path d="M -30 0 Q 0 -22 30 0 Q 0 20 -30 0 Z" fill="#ffffff" stroke="#1a0a04" stroke-width="3.5"/>
-        <!-- Iris -->
         <ellipse cx="-2" cy="-1" rx="17" ry="17" fill="url(#eyeIris)"/>
-        <!-- Pupil -->
         <circle cx="-2" cy="-1" r="10" fill="#000000"/>
-        <!-- Highlights -->
         <circle cx="-7" cy="-6" r="5" fill="#ffffff"/>
         <circle cx="3" cy="4" r="2.5" fill="#ffffff" opacity="0.85"/>
-        <!-- Upper Eyelid & Bold Lashes -->
         <path d="M -34 0 Q 0 -25 34 0" stroke="#120502" stroke-width="6" stroke-linecap="round" fill="none"/>
         <path d="M -22 -14 L -32 -22" stroke="#120502" stroke-width="4.5" stroke-linecap="round"/>
-        <!-- Lower eyelid -->
         <path d="M -24 3 Q 0 18 24 3" stroke="#c27d60" stroke-width="2.5" fill="none"/>
-        <!-- Eyelid crease above -->
         <path d="M -22 -20 Q 0 -28 22 -20" stroke="#b46e50" stroke-width="2.5" fill="none"/>
       </g>
 
@@ -351,13 +336,9 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 
       <!-- Mouth (Warm Enthusiastic Smile with Bright White Teeth) -->
       <g transform="translate(575, 418)">
-        <!-- Outer Lip Path -->
         <path d="M -54 0 Q 0 42 54 0 Q 0 -8 -54 0 Z" fill="#e11d48" stroke="#0f172a" stroke-width="4"/>
-        <!-- Teeth (White Arch) -->
         <path d="M -48 0 Q 0 28 48 0 Q 0 -4 -48 0 Z" fill="#ffffff"/>
-        <!-- Lower Lip Plump Underline -->
         <path d="M -30 22 Q 0 34 30 22" stroke="#f43f5e" stroke-width="5" stroke-linecap="round" fill="none"/>
-        <!-- Smile Corners Dimples -->
         <path d="M -57 -3 C -55 4 -52 10 -48 14" stroke="#b45309" stroke-width="3.5" stroke-linecap="round" fill="none"/>
         <path d="M 57 -3 C 55 4 52 10 48 14" stroke="#b45309" stroke-width="3.5" stroke-linecap="round" fill="none"/>
       </g>
@@ -365,53 +346,34 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 
     <!-- 5. Hair Front (Smooth Bob Cut with Glossy Sheen) -->
     <g id="hairFrontGroup">
-      <!-- Main Front Volume -->
       <path d="M 435 300 C 420 180 485 105 575 105 C 665 105 730 180 715 300 C 735 375 735 480 700 540 C 675 485 680 400 670 330 C 650 230 600 200 540 210 C 480 220 455 285 450 360 C 445 425 450 495 430 540 C 405 480 410 370 435 300 Z" fill="url(#hairMain)" stroke="#1a0a04" stroke-width="4.5"/>
-      
-      <!-- Side Strands -->
       <path d="M 550 110 C 475 120 425 170 418 250 C 410 330 415 440 395 515 C 410 505 430 450 435 380 C 442 300 458 220 550 175 Z" fill="url(#hairHighlight)" stroke="#1a0a04" stroke-width="3.5"/>
-
       <path d="M 580 110 C 655 120 710 175 715 255 C 722 335 725 445 745 515 C 730 505 710 450 702 380 C 695 295 675 220 580 175 Z" fill="url(#hairHighlight)" stroke="#1a0a04" stroke-width="3.5"/>
-
-      <!-- Glossy Hair Highlight Ribbons -->
       <path d="M 470 170 Q 565 135 660 170 Q 565 155 470 170 Z" fill="#9a5b42" opacity="0.8"/>
       <path d="M 485 175 Q 565 145 645 175" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
     </g>
 
     <!-- 6. Tailored White Doctor / Lab Blazer Coat & Arms Crossed -->
     <g id="blazerGroup">
-      <!-- Left Lapel -->
       <path d="M 475 510 L 415 760 L 550 880 L 575 640 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
       <path d="M 415 760 L 475 510 L 515 510 L 565 730 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-
-      <!-- Right Lapel -->
       <path d="M 675 510 L 735 760 L 600 880 L 575 640 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
       <path d="M 735 760 L 675 510 L 635 510 L 585 730 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
-
-      <!-- Left Shoulder and Arm -->
       <path d="M 280 720 C 290 580 395 530 475 510 L 505 635 L 365 860 C 310 840 275 780 280 720 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
-
-      <!-- Right Shoulder and Arm -->
       <path d="M 870 720 C 860 580 755 530 675 510 L 645 635 L 785 860 C 840 840 875 780 870 720 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
-
-      <!-- Crossed Forearms Structure -->
       <path d="M 350 820 C 410 810 575 800 740 890 C 700 970 540 990 375 960 C 335 920 330 865 350 820 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
       <path d="M 800 820 C 740 810 575 800 410 890 C 450 970 610 990 775 960 C 815 920 820 865 800 820 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
 
       <!-- Marié's Illustrated Hands Resting on Crossed Arms -->
-      <!-- Left Hand resting on right sleeve -->
       <g transform="translate(385, 875)">
         <path d="M 0 0 C -25 5 -35 25 -25 55 C -10 75 25 80 50 65 C 65 48 45 20 0 0 Z" fill="url(#skinTone)" stroke="#0f172a" stroke-width="3.5"/>
-        <!-- Fingers outlines -->
         <path d="M -12 28 Q 15 32 38 42" stroke="#a45337" stroke-width="3" fill="none"/>
         <path d="M -6 44 Q 18 48 40 56" stroke="#a45337" stroke-width="3" fill="none"/>
         <path d="M 0 60 Q 22 62 42 68" stroke="#a45337" stroke-width="3" fill="none"/>
       </g>
 
-      <!-- Right Hand resting on left sleeve -->
       <g transform="translate(765, 875)">
         <path d="M 0 0 C 25 5 35 25 25 55 C 10 75 -25 80 -50 65 C -65 48 -45 20 0 0 Z" fill="url(#skinTone)" stroke="#0f172a" stroke-width="3.5"/>
-        <!-- Fingers outlines -->
         <path d="M 12 28 Q -15 32 -38 42" stroke="#a45337" stroke-width="3" fill="none"/>
         <path d="M 6 44 Q -18 48 -40 56" stroke="#a45337" stroke-width="3" fill="none"/>
         <path d="M 0 60 Q -22 62 -42 68" stroke="#a45337" stroke-width="3" fill="none"/>
@@ -419,10 +381,7 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 
       <!-- 7. Official White Badge with Dark Border: [ MARIÉ ] on Left Chest -->
       <g transform="translate(660, 685)" filter="url(#subtleShadow)">
-        <!-- White Rounded Badge Plate -->
         <rect x="-60" y="-20" width="120" height="40" rx="8" fill="#f8fafc" stroke="#0f172a" stroke-width="3.5"/>
-        
-        <!-- Crisp Dark Badge Label: MARIÉ -->
         <text 
           x="0" 
           y="7" 
@@ -443,73 +402,67 @@ const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
 
 async function main() {
   const publicDir = path.resolve('public');
+  const distDir = path.resolve('dist');
+
   if (!fs.existsSync(publicDir)) {
     fs.mkdirSync(publicDir, { recursive: true });
   }
 
-  // 1. Write the new Caricatura SVG
+  // 1. Write the new Caricatura SVG with Fondo Plano
   fs.writeFileSync(path.join(publicDir, 'marie-caricatura.svg'), marieCaricaturaSvg);
   fs.writeFileSync(path.join(publicDir, 'marie-avatar.svg'), marieCaricaturaSvg);
   fs.writeFileSync(path.join(publicDir, 'marie-photo.svg'), marieCaricaturaSvg);
-  console.log('Saved new caricature SVG files');
+  console.log('Saved new caricature SVG files with Fondo Plano');
 
   // 2. Generate WebP, PNG, and JPEG files at various resolutions matching the attachment
   const svgBuffer = Buffer.from(marieCaricaturaSvg);
 
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .webp({ quality: 98 })
-    .toFile(path.join(publicDir, 'Marié Caricatura App webs.webp'));
+  const targets = [
+    'Marie Caricatura App Fondo Plano.jpeg',
+    'Marié Caricatura App Fondo Plano.jpeg',
+    'marie-caricatura-fondo-plano.webp',
+    'marie-caricatura-fondo-plano.png',
+    'Marié Caricatura App webs.webp',
+    'Marie Caricatura App webs.webp',
+    'marie-caricatura.webp',
+    'marie-avatar.webp',
+    'Marié Caricatura App.jpeg',
+    'Marie Caricatura App.jpeg',
+    'marie-caricatura.png',
+    'marie-avatar.png',
+    'marie-hero.png',
+    'marie-photo.jpg'
+  ];
 
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .webp({ quality: 98 })
-    .toFile(path.join(publicDir, 'Marie Caricatura App webs.webp'));
+  for (const filename of targets) {
+    const ext = path.extname(filename).toLowerCase();
+    const filePath = path.join(publicDir, filename);
 
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .webp({ quality: 98 })
-    .toFile(path.join(publicDir, 'marie-caricatura.webp'));
+    if (ext === '.webp') {
+      await sharp(svgBuffer).resize(1024, 1024).webp({ quality: 98 }).toFile(filePath);
+    } else if (ext === '.png') {
+      await sharp(svgBuffer).resize(1024, 1024).png({ quality: 100 }).toFile(filePath);
+    } else if (ext === '.jpeg' || ext === '.jpg') {
+      await sharp(svgBuffer).resize(1024, 1024).jpeg({ quality: 98 }).toFile(filePath);
+    }
+  }
 
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .webp({ quality: 98 })
-    .toFile(path.join(publicDir, 'marie-avatar.webp'));
+  // Also sync to dist if dist exists
+  if (fs.existsSync(distDir)) {
+    for (const filename of targets) {
+      const src = path.join(publicDir, filename);
+      const dest = path.join(distDir, filename);
+      if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+      }
+    }
+  }
 
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .jpeg({ quality: 98 })
-    .toFile(path.join(publicDir, 'Marié Caricatura App.jpeg'));
-
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .jpeg({ quality: 98 })
-    .toFile(path.join(publicDir, 'Marie Caricatura App.jpeg'));
-
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .png({ quality: 100 })
-    .toFile(path.join(publicDir, 'marie-caricatura.png'));
-
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .png({ quality: 100 })
-    .toFile(path.join(publicDir, 'marie-avatar.png'));
-
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .png({ quality: 100 })
-    .toFile(path.join(publicDir, 'marie-hero.png'));
-
-  await sharp(svgBuffer)
-    .resize(1024, 1024)
-    .jpeg({ quality: 98 })
-    .toFile(path.join(publicDir, 'marie-photo.jpg'));
-
-  console.log('Successfully generated all Marié Caricatura image assets in WebP, PNG, JPG in /public');
+  console.log('Successfully generated and synced all Marie Fondo Plano image assets!');
 }
 
 main().catch(err => {
   console.error(err);
   process.exit(1);
 });
+

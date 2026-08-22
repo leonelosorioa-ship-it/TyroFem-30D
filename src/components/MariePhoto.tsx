@@ -10,6 +10,10 @@ interface MariePhotoProps {
 
 // Cascade list of photo sources to ensure the exact original caricature illustration is loaded seamlessly
 const PHOTO_SOURCES = [
+  '/Marie Caricatura App Fondo Plano.jpeg',
+  '/Marié Caricatura App Fondo Plano.jpeg',
+  '/marie-caricatura-fondo-plano.webp',
+  '/marie-caricatura-fondo-plano.png',
   '/Marié Caricatura App.jpeg',
   '/Marie Caricatura App.jpeg',
   '/Marié Caricatura App webs.webp',
