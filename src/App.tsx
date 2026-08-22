@@ -306,8 +306,8 @@ export default function App() {
       />
 
       {/* Main Tab Navigation Header (Desktop / Tablet) */}
-      <div className="bg-white border-b border-slate-200/80 sticky top-[69px] z-30 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between overflow-x-auto gap-2 py-1">
+      <div className="hidden sm:block bg-white border-b border-slate-200/80 sticky top-[61px] z-30 shadow-xs">
+        <div className="max-w-5xl mx-auto px-4 flex items-center justify-between overflow-x-auto gap-2 py-1.5">
           <div className="flex items-center gap-1 sm:gap-2">
             {[
               { id: 'calendario', label: 'Calendario 30D', icon: CalendarIcon },
@@ -358,7 +358,7 @@ export default function App() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl mx-auto w-full p-4 sm:p-6 mt-2">
+      <main className="flex-1 max-w-5xl mx-auto w-full p-3 sm:p-6 mt-1 sm:mt-2 pb-24 sm:pb-8">
         {/* Universal Back Navigation Bar (Available in every section to return to previous section) */}
         {activeTab !== 'calendario' && (
           <div className="mb-4 bg-white/90 backdrop-blur-md rounded-2xl p-2.5 sm:p-3 border border-slate-200/90 shadow-xs flex items-center justify-between gap-3 animate-fadeIn">
@@ -666,7 +666,7 @@ export default function App() {
         userProfile={userProfile}
       />
 
-      {/* Permanent WhatsApp Share Floating Button (Viralization & Direct Marie Link) */}
+      {/* Permanent WhatsApp Share Floating Button */}
       <WhatsAppShareButton
         userProfile={userProfile}
         currentDay={currentDay}
@@ -674,15 +674,15 @@ export default function App() {
         progressMap={progressMap}
       />
 
-        {/* PWA Installation Helper & Modal */}
-        <PWAInstallBanner onOpenModal={handleTriggerPWAInstall} />
-        <PWAInstallModal
-          isOpen={isPwaInstallModalOpen}
-          onClose={() => setIsPwaInstallModalOpen(false)}
-        />
+      {/* PWA Installation Helper & Modal */}
+      <PWAInstallBanner onOpenModal={handleTriggerPWAInstall} />
+      <PWAInstallModal
+        isOpen={isPwaInstallModalOpen}
+        onClose={() => setIsPwaInstallModalOpen(false)}
+      />
 
       {/* Rich Corporate Brand Footer */}
-      <footer className="text-slate-400 border-t border-slate-800 bg-[#070b10] py-8 px-4 text-xs mb-14 sm:mb-0">
+      <footer className="text-slate-400 border-t border-slate-800 bg-[#070b10] py-8 px-4 text-xs mb-16 sm:mb-0">
         <div className="max-w-5xl mx-auto space-y-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
             <div className="flex items-center gap-3 text-left">
@@ -765,6 +765,48 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Native Smartphone Bottom Navigation Bar (Mobile only) */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200/90 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] py-1 px-1 flex items-center justify-around">
+        {[
+          { id: 'calendario', label: 'Calendario', icon: CalendarIcon },
+          { id: 'tracker', label: 'Registro', icon: Activity },
+          { id: 'recetas', label: 'Recetario', icon: BookOpen },
+          { id: 'chat', label: 'Marié', icon: MessageCircle },
+          { id: 'pedidos', label: 'Pedir', icon: ShoppingBag, badge: '🎁' },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleNavigateTab(tab.id as any)}
+              className={`flex-1 py-1.5 px-1 flex flex-col items-center justify-center gap-1 transition-all rounded-xl cursor-pointer relative ${
+                isActive
+                  ? 'text-emerald-800 font-extrabold'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <div className={`relative p-1 rounded-xl transition-all ${
+                isActive ? 'bg-emerald-100 text-emerald-800 scale-110 shadow-xs' : ''
+              }`}>
+                <Icon className="w-4 h-4" />
+                {tab.badge && (
+                  <span className="absolute -top-1 -right-1.5 text-[9px] leading-none">
+                    {tab.badge}
+                  </span>
+                )}
+              </div>
+              <span className={`text-[10px] tracking-tight leading-none ${isActive ? 'font-black text-emerald-800' : 'font-medium'}`}>
+                {tab.label}
+              </span>
+              {isActive && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 -mt-0.5" />
+              )}
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }

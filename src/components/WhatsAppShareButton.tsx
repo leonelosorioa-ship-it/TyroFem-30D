@@ -99,7 +99,7 @@ ${marieDirectLink}`
       {/* Permanent Floating Button (Mobile & Desktop) */}
       <div 
         id="colshopi-permanent-share-btn-container"
-        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col items-end gap-2 group pointer-events-auto"
+        className="fixed bottom-16 sm:bottom-6 right-3 sm:right-6 z-30 flex flex-col items-end gap-2 group pointer-events-auto"
       >
         {/* Helper tooltip tag on hover */}
         <div className="hidden sm:flex items-center gap-1.5 bg-slate-950/95 text-white text-[11px] font-bold px-3 py-1.5 rounded-xl border border-emerald-500/50 shadow-xl backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-1 group-hover:translate-y-0 pointer-events-none">
@@ -112,18 +112,18 @@ ${marieDirectLink}`
           onClick={() => setIsOpen(true)}
           type="button"
           aria-label="Compartir evolución en WhatsApp"
-          className="flex items-center gap-2.5 px-4 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-800 text-white font-black text-xs sm:text-sm shadow-[0_8px_25px_rgba(4,120,87,0.4)] border-2 border-emerald-300/40 hover:border-emerald-200 active:scale-95 transition-all duration-200 cursor-pointer"
+          className="flex items-center gap-2.5 p-2.5 sm:px-4 sm:py-3 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm shadow-[0_4px_20px_rgba(4,120,87,0.4)] border-2 border-emerald-300/50 hover:border-emerald-200 active:scale-95 transition-all duration-200 cursor-pointer"
         >
           {/* Animated WhatsApp icon indicator */}
           <div className="relative">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <MessageCircle className="w-5 h-5 fill-white text-emerald-500" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-white text-emerald-500" />
             </div>
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-emerald-900 rounded-full animate-ping" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 border-2 border-emerald-900 rounded-full" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 border-2 border-emerald-900 rounded-full animate-ping" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 border-2 border-emerald-900 rounded-full" />
           </div>
 
-          <div className="flex flex-col text-left leading-tight pr-1">
+          <div className="hidden sm:flex flex-col text-left leading-tight pr-1">
             <span className="text-[10px] text-emerald-100 font-semibold tracking-wider uppercase flex items-center gap-1">
               <span>Viralizar</span>
               <Sparkles className="w-2.5 h-2.5 text-amber-300" />
@@ -133,7 +133,7 @@ ${marieDirectLink}`
             </span>
           </div>
 
-          <Share2 className="w-4 h-4 text-emerald-100 shrink-0 ml-0.5" />
+          <Share2 className="hidden sm:block w-4 h-4 text-emerald-100 shrink-0 ml-0.5" />
         </button>
       </div>
 

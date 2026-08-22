@@ -70,35 +70,35 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   return (
     <div className="space-y-6 pb-20">
       {/* Hero Welcome & Phase Overview */}
-      <div className="bg-gradient-to-br from-emerald-800 via-teal-900 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-emerald-800 via-teal-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl relative overflow-hidden">
         {/* Subtle decorative background circles */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-400/30">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-1.5 sm:space-y-2">
+            <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 text-[11px] sm:text-xs font-semibold px-2.5 py-0.5 sm:py-1 rounded-full border border-emerald-400/30">
+              <Sparkles className="w-3 h-3 text-amber-400" />
               <span>Programa Oficial TyroFem 30D</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight font-serif-luxury">
+            <h2 className="text-xl sm:text-3xl font-bold tracking-tight font-serif-luxury">
               Tu Viaje de 30 Días, {userProfile.name} 🌿
             </h2>
-            <p className="text-sm text-emerald-100/90 max-w-xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl leading-relaxed">
               Cada día se desbloquea cada <strong>24 horas</strong> para garantizar la asimilación biológica de tu porción de <strong>Tyruss Full</strong> y asegurar el éxito de tu transformación.
             </p>
           </div>
 
           {/* Progress Card */}
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 sm:p-5 flex items-center gap-4 shrink-0 min-w-[240px]">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-500 flex flex-col items-center justify-center text-slate-900 shadow-md font-bold shrink-0">
-              <span className="text-xs uppercase leading-none font-semibold">Día</span>
-              <span className="text-xl leading-tight">{unlockedDay}</span>
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4 shrink-0 min-w-full sm:min-w-[240px]">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-500 flex flex-col items-center justify-center text-slate-900 shadow-md font-bold shrink-0">
+              <span className="text-[10px] sm:text-xs uppercase leading-none font-semibold">Día</span>
+              <span className="text-lg sm:text-xl leading-tight">{unlockedDay}</span>
             </div>
             <div className="flex-1">
               <div className="flex justify-between items-baseline mb-1">
-                <span className="text-xs font-semibold text-emerald-200">Progreso 30D</span>
-                <span className="text-sm font-bold text-white">{completedCount}/30 Días</span>
+                <span className="text-[11px] sm:text-xs font-semibold text-emerald-200">Progreso 30D</span>
+                <span className="text-xs sm:text-sm font-bold text-white">{completedCount}/30 Días</span>
               </div>
               <div className="w-full bg-emerald-950/60 rounded-full h-2 overflow-hidden border border-emerald-400/20">
                 <div 
@@ -116,21 +116,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       {/* 24-HOUR TIME LOCK LIVE COUNTDOWN BANNER (WHEN NEXT DAY IS PENDING) */}
       {!isAllProgramUnlocked && (
-        <div className="bg-gradient-to-r from-[#09121d] via-slate-900 to-[#070e17] rounded-2xl p-4 sm:p-5 border border-cyan-500/40 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5 w-full md:w-auto">
-            <div className="w-11 h-11 rounded-2xl bg-cyan-950 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0 shadow-inner">
-              <Clock className="w-5 h-5 animate-pulse text-cyan-400" />
+        <div className="bg-gradient-to-r from-[#09121d] via-slate-900 to-[#070e17] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-cyan-500/40 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-cyan-950 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0 shadow-inner">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse text-cyan-400" />
             </div>
             <div className="space-y-0.5 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-400/40">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-400/40">
                   ⏳ Desbloqueo Regresivo 24H
                 </span>
-                <span className="text-[11px] text-emerald-300 font-medium">
+                <span className="text-[10px] sm:text-[11px] text-emerald-300 font-medium">
                   Día {unlockedDay} en curso
                 </span>
               </div>
-              <h4 className="text-xs sm:text-sm font-bold text-white font-serif-luxury">
+              <h4 className="text-[11px] sm:text-sm font-bold text-white font-serif-luxury">
                 Próximo Test & Guía del Día {nextDayNumber} se habilita en:
               </h4>
             </div>

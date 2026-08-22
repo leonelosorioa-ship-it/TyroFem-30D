@@ -45,30 +45,30 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-emerald-100 shadow-xs">
-      {/* Top micro-bar: Exclusive Gift & Brand Badge */}
+      {/* Top micro-bar: Brand & Quick Badges */}
       <div className="bg-gradient-to-r from-[#070b10] via-slate-900 to-[#070b10] text-white text-xs py-1.5 px-3 border-b border-cyan-500/20">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 truncate">
+          <div className="flex items-center gap-1.5 truncate">
             <button
               onClick={onOpenBrandModal}
               className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer text-left truncate"
               title="Conocer más sobre ColShopi Tienda By Leps Digital"
             >
               <ColshopiLogo size="xs" showGlow={false} />
-              <span className="truncate text-cyan-300 font-bold text-[11px]">
-                ColShopi Tienda By Leps Digital
+              <span className="truncate text-cyan-300 font-bold text-[10px] sm:text-[11px]">
+                ColShopi Tienda
               </span>
               <span className="hidden sm:inline text-slate-400 text-[10px]">
-                • Cuidamos de ti 💙
+                By Leps Digital • Cuidamos de ti 💙
               </span>
             </button>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {userProfile?.isAdmin && onOpenAdminPanel && (
               <button
                 onClick={onOpenAdminPanel}
-                className="flex items-center gap-1 text-[11px] bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-0.5 rounded-full shadow-md transition-all cursor-pointer ring-2 ring-amber-300/60 animate-pulse"
+                className="flex items-center gap-1 text-[10px] sm:text-[11px] bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2 py-0.5 rounded-full shadow-md transition-all cursor-pointer ring-1 sm:ring-2 ring-amber-300/60 animate-pulse"
                 title="Abrir Panel de Control Administrativo ColShopi"
               >
                 <span>👑 Panel Admin</span>
@@ -87,23 +87,12 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={onOpenNutritionalInfo}
-              className="flex items-center gap-1 text-[11px] text-emerald-300 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-[10px] sm:text-[11px] text-emerald-300 hover:text-white transition-colors cursor-pointer bg-slate-800/60 px-1.5 py-0.5 rounded border border-emerald-500/30"
               title="Ver Registro INVIMA y Ficha Técnica"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">INVIMA: RSA-0021928-2022</span>
-              <span className="sm:hidden">INVIMA</span>
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <span>INVIMA</span>
             </button>
-
-            {onOpenBrandModal && (
-              <button
-                onClick={onOpenBrandModal}
-                className="hidden lg:flex items-center gap-1 text-[10px] bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/30 text-cyan-300 px-2 py-0.5 rounded transition-colors cursor-pointer"
-              >
-                <Store className="w-3 h-3 text-cyan-400" />
-                <span>Nuestra Tienda</span>
-              </button>
-            )}
 
             {onInstallPWA && (
               <button
@@ -112,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
                 title="Instalar TyroFem 30D en tu pantalla de inicio"
               >
                 <Smartphone className="w-3 h-3 text-cyan-300 animate-pulse" />
-                <span>Instalar App</span>
+                <span className="hidden xs:inline">Instalar App</span>
               </button>
             )}
           </div>
@@ -120,34 +109,33 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Main Header Container */}
-      <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between gap-2">
         {/* Brand & Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onOpenBrandModal}
-            className="group cursor-pointer flex items-center gap-2 text-left"
+            className="group cursor-pointer flex items-center gap-2 text-left shrink-0"
             title="Ver información de ColShopi Tienda"
           >
-            <ColshopiLogo size="md" showGlow={true} className="group-hover:scale-105 transition-transform" />
+            <ColshopiLogo size="sm" showGlow={true} className="group-hover:scale-105 transition-transform" />
             <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-tight">
-                  Tyro<span className="text-emerald-700 font-extrabold">Fem</span> <span className="text-amber-600 text-xs font-semibold px-1.5 py-0.2 bg-amber-50 rounded border border-amber-200">30D</span>
+              <div className="flex items-center gap-1">
+                <h1 className="text-sm sm:text-base md:text-lg font-bold tracking-tight text-slate-900 leading-tight">
+                  Tyro<span className="text-emerald-700 font-extrabold">Fem</span> <span className="text-amber-600 text-[10px] sm:text-xs font-semibold px-1 py-0.2 bg-amber-50 rounded border border-amber-200">30D</span>
                 </h1>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium truncate max-w-[190px] sm:max-w-xs flex items-center gap-1">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate max-w-[130px] xs:max-w-[180px] sm:max-w-xs flex items-center gap-1">
                 <span>Por</span> 
                 <span className="text-emerald-800 font-bold">Nutricionista Marié</span>
-                <span className="text-[10px] text-cyan-600 bg-cyan-50 px-1 rounded border border-cyan-200">ColShopi</span>
               </p>
             </div>
           </button>
         </div>
 
         {/* Quick Stats & CTA Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Day & Progress Pill */}
-          <div className="hidden sm:flex items-center gap-2.5 bg-emerald-50/80 border border-emerald-200/80 rounded-xl px-3 py-1.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Day & Progress Pill (Tablet / Desktop) */}
+          <div className="hidden md:flex items-center gap-2.5 bg-emerald-50/80 border border-emerald-200/80 rounded-xl px-3 py-1.5">
             <div className="flex items-center gap-1 text-emerald-800 text-xs font-bold">
               <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
               <span>Día {currentDay}</span>
@@ -158,49 +146,30 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Admin Panel Quick Switcher if user is admin */}
-          {userProfile?.isAdmin && onOpenAdminPanel && (
-            <button
-              onClick={onOpenAdminPanel}
-              className="flex items-center gap-1.5 text-xs font-bold text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 px-3 py-2 rounded-xl shadow-md border border-amber-300 transition-all cursor-pointer transform active:scale-98"
-            >
-              <span>👑</span>
-              <span className="hidden sm:inline">Panel Admin</span>
-            </button>
-          )}
-
           {/* Quick Nutritional Table Button */}
           <button
             onClick={onOpenNutritionalInfo}
-            className="p-2 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors border border-slate-200/80 cursor-pointer"
+            className="p-1.5 sm:p-2 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors border border-slate-200/80 cursor-pointer"
             title="Tabla Nutricional Tyruss Full"
           >
             <FileText className="w-4 h-4" />
           </button>
 
-          {/* Chat with Marie Quick CTA */}
-          <button
-            onClick={onOpenChat}
-            className="hidden xs:flex items-center gap-1.5 text-xs font-semibold text-emerald-900 bg-emerald-100/80 hover:bg-emerald-200/80 px-3 py-2 rounded-xl transition-colors border border-emerald-300/60 cursor-pointer"
-          >
-            <span className="text-xs">👩🏻‍⚕️</span>
-            <span>Marié</span>
-          </button>
-
           {/* Re-order & Packages CTA */}
           <button
             onClick={onOpenOrder}
-            className="flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-3 sm:px-4 py-2 rounded-xl shadow-xs shadow-emerald-700/20 transition-all cursor-pointer transform active:scale-98"
+            className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl shadow-xs shadow-emerald-700/20 transition-all cursor-pointer transform active:scale-98"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Pedir Tyruss Full</span>
+            <span className="hidden xs:inline">Pedir Tyruss Full</span>
+            <span className="xs:hidden">Pedir</span>
           </button>
 
-          {/* Dedicated Download / Install App Button (matching DUERME header experience) */}
+          {/* Dedicated Download / Install App Button */}
           {onInstallPWA && (
             <button
               onClick={onInstallPWA}
-              className="p-2 text-emerald-800 bg-gradient-to-br from-emerald-100 to-teal-100 hover:from-emerald-200 hover:to-teal-200 rounded-xl transition-all border border-emerald-300/80 cursor-pointer shadow-sm active:scale-95 flex items-center justify-center shrink-0"
+              className="p-1.5 sm:p-2 text-emerald-800 bg-gradient-to-br from-emerald-100 to-teal-100 hover:from-emerald-200 hover:to-teal-200 rounded-xl transition-all border border-emerald-300/80 cursor-pointer shadow-sm active:scale-95 flex items-center justify-center shrink-0"
               title="Descargar e instalar App TyroFem 30D"
               aria-label="Descargar e instalar App"
             >

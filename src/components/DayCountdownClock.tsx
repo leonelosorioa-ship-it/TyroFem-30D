@@ -138,49 +138,49 @@ export const DayCountdownClock: React.FC<DayCountdownClockProps> = ({
 
   // Standard 'card' variant
   return (
-    <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-[#0c1622] rounded-2xl p-4 sm:p-5 border border-amber-500/40 text-white shadow-md relative overflow-hidden">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
-            <Clock className="w-6 h-6 animate-pulse" />
+    <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-[#0c1622] rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-amber-500/40 text-white shadow-md relative overflow-hidden w-full">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-inner">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 animate-pulse" />
           </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded border border-amber-400/30">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-amber-500/30 text-amber-300 px-1.5 py-0.5 rounded border border-amber-400/30">
                 🔒 Día {dayNumber} Bloqueado
               </span>
-              <span className="text-[11px] text-slate-400">
-                Ciclo de 24 horas obligatorio
+              <span className="text-[10px] sm:text-[11px] text-slate-400">
+                Ciclo 24h
               </span>
             </div>
-            <h4 className="text-sm font-bold text-white mt-0.5">
-              Tiempo restante para habilitar el test:
+            <h4 className="text-xs sm:text-sm font-bold text-white mt-0.5 truncate">
+              Tiempo restante para el test:
             </h4>
           </div>
         </div>
 
         {/* Digital Clock Badge */}
-        <div className="flex items-center gap-1.5 bg-slate-950 px-4 py-2 rounded-xl border border-cyan-500/50 shadow-inner font-mono">
-          <div className="text-center">
-            <span className="text-lg font-bold text-cyan-300">{pad(timeRemaining.hours)}</span>
-            <span className="text-[9px] text-slate-400 block -mt-1">h</span>
+        <div className="flex items-center justify-center gap-1.5 bg-slate-950 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-cyan-500/50 shadow-inner font-mono w-full sm:w-auto">
+          <div className="text-center min-w-[28px]">
+            <span className="text-base sm:text-lg font-bold text-cyan-300">{pad(timeRemaining.hours)}</span>
+            <span className="text-[8px] sm:text-[9px] text-slate-400 block -mt-1">h</span>
           </div>
-          <span className="text-cyan-500 font-bold">:</span>
-          <div className="text-center">
-            <span className="text-lg font-bold text-emerald-300">{pad(timeRemaining.minutes)}</span>
-            <span className="text-[9px] text-slate-400 block -mt-1">m</span>
+          <span className="text-cyan-500 font-bold text-sm sm:text-base">:</span>
+          <div className="text-center min-w-[28px]">
+            <span className="text-base sm:text-lg font-bold text-emerald-300">{pad(timeRemaining.minutes)}</span>
+            <span className="text-[8px] sm:text-[9px] text-slate-400 block -mt-1">m</span>
           </div>
-          <span className="text-emerald-500 font-bold">:</span>
-          <div className="text-center">
-            <span className="text-lg font-bold text-amber-300">{pad(timeRemaining.seconds)}</span>
-            <span className="text-[9px] text-slate-400 block -mt-1">s</span>
+          <span className="text-emerald-500 font-bold text-sm sm:text-base">:</span>
+          <div className="text-center min-w-[28px]">
+            <span className="text-base sm:text-lg font-bold text-amber-300">{pad(timeRemaining.seconds)}</span>
+            <span className="text-[8px] sm:text-[9px] text-slate-400 block -mt-1">s</span>
           </div>
         </div>
       </div>
 
       {showExplanation && (
-        <div className="mt-3 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="mt-2.5 pt-2.5 border-t border-slate-800/80 text-[10px] sm:text-[11px] text-slate-400 flex items-start gap-1.5">
+          <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0 mt-0.5" />
           <span>
             Cada día se activa exactamente a las <strong>24 horas</strong> del día anterior para asegurar la asimilación gradual de los 30 días calendario.
           </span>
