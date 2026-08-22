@@ -168,8 +168,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-3 sm:px-4 py-2 rounded-xl shadow-xs shadow-emerald-700/20 transition-all cursor-pointer transform active:scale-98"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Pedir Tyruss Full</span>
-            <span className="sm:hidden">Tarros</span>
+            <span>Pedir Tyruss Full</span>
           </button>
         </div>
       </div>

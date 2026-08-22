@@ -123,7 +123,9 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
 
   // WhatsApp Pre-filled message generator
   const getWhatsAppRequestUrl = () => {
-    return 'https://wa.link/6zpm18';
+    const userNameParam = name.trim() ? `, mi nombre es *${name.trim()}*` : '';
+    const text = `Hola Marié recibí ya mi Tyruss Full y quiero mi codigo para el acceso a TyroFem 30D${userNameParam}`;
+    return `https://wa.me/573104007428?text=${encodeURIComponent(text)}`;
   };
 
   // Code validation handler with strict 50 authorized codes verification
@@ -283,7 +285,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                     className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition-all active:scale-98 text-center cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4 fill-white text-emerald-600" />
-                    <span>Solicitar mi Código a Marié (+57 310 400 7428)</span>
+                    <span>Solicitar mi Código de acceso a Marié</span>
                   </a>
                 </div>
               </div>
