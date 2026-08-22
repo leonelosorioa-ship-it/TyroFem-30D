@@ -12,10 +12,14 @@ import {
   Phone, 
   AlertCircle,
   HelpCircle,
-  Leaf
+  Leaf,
+  Clock,
+  RefreshCw,
+  Send
 } from 'lucide-react';
 import { OFFICIAL_PACKAGES, FREE_GIFT_INFO, BATIDO_VERDE_INFO, COLSHOPI_INFO } from '../data/nutritionData';
-import { OrderFormState, ProductPackage, UserProfile } from '../types';
+import { ProductPackage, UserProfile } from '../types';
+import { MariePhoto } from './MariePhoto';
 
 interface OrderModalProps {
   userProfile: UserProfile;
@@ -40,10 +44,11 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   const [department, setDepartment] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [isRural, setIsRural] = useState<boolean>(false);
-  const [showSummaryModal, setShowSummaryModal] = useState<boolean>(false);
 
   const selectedPack = OFFICIAL_PACKAGES.find(p => p.id === selectedPackId) || OFFICIAL_PACKAGES[1];
   const totalPrice = selectedPack.price + (addBatidoVerde ? BATIDO_VERDE_INFO.promoPrice : 0);
+  const currentDay = userProfile.currentDay || 1;
+  const userName = userProfile.name && userProfile.name !== 'Amiga' ? userProfile.name : '';
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -53,13 +58,23 @@ export const OrderModal: React.FC<OrderModalProps> = ({
     }).format(val);
   };
 
+  // Direct fast message to WhatsApp line +57 310 400 7428
+  const handleFastWhatsAppMessage = () => {
+    const namePart = userName ? `, mi nombre es *${userName}*` : '';
+    const text = `¡Hola equipo ColShopi Tienda / Nutricionista Marié! 💚 Deseo hacer un NUEVO PEDIDO de Tyruss Full${namePart}. Ya soy usuaria activa de la App TyroFem 30D (voy en el Día ${currentDay} de 30) y quiero mantenerme activa en el tratamiento de la app y reactivar mis 30 días adicionales. ¿Me pueden ayudar con el despacho contra entrega? ✨`;
+
+    const url = `https://wa.me/573104007428?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  // Detailed Form Order to WhatsApp line +57 310 400 7428
   const handleGenerateWhatsAppOrder = () => {
     const batidoText = addBatidoVerde ? `\n🌱 + Batido Verde Detox Previo ($15.000)` : '';
     const addressText = isRural 
       ? `Reclamar en Oficina Interrapidísimo de ${city}` 
       : `${address}`;
 
-    const text = `¡Hola Marié! 💚 Vengo desde la App TyroFem 30D y quiero confirmar mi pedido de Tyruss Full:
+    const text = `¡Hola equipo ColShopi Tienda / Nutricionista Marié! 💚 Deseo hacer un NUEVO PEDIDO de Tyruss Full. Ya soy usuaria activa de la App TyroFem 30D (Día ${currentDay}) y quiero mantenerme activa en el tratamiento de la app y reactivar mis 30 días:
 
 ☑️ Nombre Completo: ${fullName || userProfile.name}
 ☑️ Celular: ${phone || 'Por confirmar'}
@@ -69,57 +84,103 @@ export const OrderModal: React.FC<OrderModalProps> = ({
 ☑️ Producto: ${selectedPack.title} + Loción Termoactiva GRATIS 🎁${batidoText}
 ☑️ Total a Pagar: ${formatCurrency(totalPrice)} (Pago Contra Entrega con Envío Gratis)
 
-¿Todo está correcto para proceder con el despacho? ✨`;
+¿Me confirman para proceder con el despacho nacional y la reactivación de mis 30 días en la App? 🚚✨`;
 
     const url = `https://wa.me/573104007428?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
-      <div className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-emerald-100 overflow-hidden my-6">
+    <div 
+      id="order-modal-overlay"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        id="order-modal-content"
+        className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-emerald-100 overflow-hidden my-4 sm:my-6"
+        onClick={e => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-950 text-white p-6 relative">
+        <div className="bg-gradient-to-r from-[#081b17] via-emerald-950 to-slate-900 text-white p-5 sm:p-6 relative">
           <button
+            id="btn-close-order-modal"
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+            aria-label="Cerrar ventana"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
               ColShopi Tienda By Leps Digital
             </span>
-            <span className="text-xs text-emerald-200">
-              Despacho Nacional con Pago Contra Entrega 🚚
+            <span className="text-[11px] text-cyan-300 font-semibold flex items-center gap-1">
+              <Phone className="w-3 h-3" />
+              <span>Línea Oficial: +57 310 400 7428</span>
             </span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-bold font-serif-luxury mt-1">
-            {isReorder ? 'Recompra Exclusiva Tyruss Full (Día 22+)' : 'Pedir Tyruss Full & Tu Obsequio Exclusivo 🌿'}
-          </h2>
-          <p className="text-xs text-emerald-100/90 mt-1 max-w-xl">
-            Garantiza tu tratamiento con Registro INVIMA RSA-0021928-2022, Loción Termoactiva GRATIS y Envío Sin Costo.
-          </p>
+          <div className="flex items-start gap-3 mt-2">
+            <div className="hidden sm:block shrink-0">
+              <MariePhoto size="sm" showBadge={false} />
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold font-serif-luxury text-white">
+                {isReorder ? 'Recompra y Continuidad Tyruss Full' : 'Pedir Tyruss Full & Reactivar Protocolo 🌿'}
+              </h2>
+              <p className="text-xs text-emerald-200/90 mt-1 max-w-xl">
+                Despacho Nacional con <strong>Pago Contra Entrega</strong>, <strong>Envío Gratis</strong> y Registro INVIMA RSA-0021928-2022.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-          {/* DAY 22 SPECIAL BANNER IF APPLICABLE */}
-          {isReorder && (
-            <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs text-amber-950 flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <strong className="font-bold text-amber-900 block text-sm">
-                  ¡Beneficio Especial de Alumna para {userProfile.name}!
-                </strong>
-                <p className="mt-0.5 text-amber-800 leading-relaxed">
-                  Por estar en la recta final de tu primer tarro, tienes prioridad en despacho y mantienes tu Loción Termoactiva de regalo para seguir desinflamando tu cuerpo.
-                </p>
-              </div>
+        <div className="p-4 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+          
+          {/* IMPORTANT NOTICE: 30 CALENDAR DAYS EXPIRATION & REACTIVATION */}
+          <div className="bg-gradient-to-r from-cyan-950/90 via-slate-900 to-emerald-950 text-white rounded-2xl p-4 sm:p-5 border border-cyan-500/40 shadow-sm relative overflow-hidden space-y-2">
+            <div className="flex items-center gap-2 text-cyan-300">
+              <Clock className="w-4 h-4 text-cyan-400 shrink-0" />
+              <strong className="text-xs sm:text-sm font-extrabold uppercase tracking-wider">
+                Vigencia del Acceso a la App: 30 Días Calendario
+              </strong>
             </div>
-          )}
+            <p className="text-xs text-slate-200 leading-relaxed">
+              Tu acceso a la <strong>App TyroFem 30D</strong> y el acompañamiento personalizado de la <strong>Nutricionista Marié</strong> está habilitado por <strong>30 días calendario</strong> (correspondientes a la duración de tu tarro de Tyruss Full). 
+            </p>
+            <div className="bg-emerald-900/60 rounded-xl p-2.5 border border-emerald-400/30 flex items-start gap-2 text-xs text-emerald-100">
+              <RefreshCw className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+              <span>
+                <strong>¿Cómo reactivar la App?</strong> La aplicación se reactivará automáticamente por <strong>30 días más</strong> al realizar tu nuevo pedido de Tyruss Full con ColShopi Tienda, garantizando tu progreso y continuidad sin interrupciones.
+              </span>
+            </div>
+          </div>
+
+          {/* QUICK DIRECT WHATSAPP BUTTON (1-CLICK CONTACT) */}
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="text-center sm:text-left">
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-200 text-emerald-900 inline-block mb-1">
+                Atención Rápida WhatsApp
+              </span>
+              <h4 className="text-sm font-bold text-slate-900">
+                ¿Prefieres pedir directo por WhatsApp a ColShopi?
+              </h4>
+              <p className="text-xs text-slate-600">
+                Escríbenos a la línea <strong>+57 310 400 7428</strong> con tu mensaje predeterminado de usuaria activa.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleFastWhatsAppMessage}
+              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs shadow-md active:scale-98 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            >
+              <MessageCircle className="w-4 h-4 fill-white text-emerald-600" />
+              <span>Escribir al WhatsApp (+57 310 400 7428)</span>
+            </button>
+          </div>
 
           {/* Package Selection Cards */}
           <div className="space-y-3">
@@ -197,7 +258,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
           </div>
 
           {/* FREE GIFT SPOTLIGHT */}
-          <div className="bg-gradient-to-r from-emerald-900 via-teal-900 to-emerald-950 text-white rounded-2xl p-5 shadow-sm space-y-2">
+          <div className="bg-gradient-to-r from-emerald-900 via-teal-900 to-emerald-950 text-white rounded-2xl p-4 sm:p-5 shadow-sm space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-xl">🎁</span>
               <h4 className="font-bold text-sm text-emerald-200">
@@ -205,7 +266,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               </h4>
             </div>
             <p className="text-xs text-emerald-100/90 leading-relaxed">
-              Formulada con <strong>Árnica, Hamamelis, Castaño de Indias, Uña de Gato y Chuchuguaza</strong>. Aplícala en piernas cansadas, cuello y espalda para una sensación de alivio y frescura inmediata.
+              Formulada con <strong>Árnica, Hamamelis, Castaño de Indias, Uña de Gato y Chuchuguaza</strong>. Alivia piernas cansadas, cuello y espalda con efecto reconfortante inmediato.
             </p>
           </div>
 
@@ -214,7 +275,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold uppercase bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full">
-                  Recomendación Clave de Marié
+                  Recomendación de Marié
                 </span>
                 <span className="text-xs font-bold text-rose-600 line-through">
                   $25.000
@@ -227,7 +288,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
                 ¿Deseas agregar el Batido Verde Detox Pre-Tratamiento?
               </h4>
               <p className="text-xs text-slate-600 leading-relaxed max-w-lg">
-                Sobre concentrado de 20g con espirulina, jengibre, cúrcuma y apio. Realiza una limpieza digestiva la noche previa para que tu cuerpo absorba el Tyruss Full al 100%.
+                Sobre concentrado de 20g con espirulina, jengibre, cúrcuma y apio para desinflamación y máxima absorción metabólica.
               </p>
             </div>
 
@@ -371,17 +432,18 @@ export const OrderModal: React.FC<OrderModalProps> = ({
         {/* Footer CTA */}
         <div className="bg-slate-50 p-4 sm:p-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-slate-500">
-            <Truck className="w-4 h-4 text-emerald-600" />
-            <span>Entrega de 2 a 5 días hábiles en toda Colombia</span>
+            <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>Entrega de 2 a 5 días hábiles con Pago Contra Entrega</span>
           </div>
 
           <button
+            id="btn-confirm-order-whatsapp"
             type="button"
             onClick={handleGenerateWhatsAppOrder}
-            className="w-full sm:w-auto py-3.5 px-8 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-800/20 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="w-full sm:w-auto py-3.5 px-6 sm:px-8 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-800/20 active:scale-98 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            <MessageCircle className="w-4 h-4" />
-            <span>Confirmar Pedido por WhatsApp</span>
+            <MessageCircle className="w-4 h-4 fill-white" />
+            <span>Enviar Pedido a WhatsApp (+57 310 400 7428)</span>
           </button>
         </div>
       </div>

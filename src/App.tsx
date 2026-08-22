@@ -354,17 +354,44 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* 30 Calendar Days App Validity & Reactivation Banner */}
+                <div className="bg-gradient-to-r from-slate-900 via-cyan-950 to-[#071318] text-white rounded-3xl p-6 border border-cyan-500/40 shadow-sm space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">⏰</span>
+                    <h4 className="font-bold text-base text-cyan-300">
+                      Vigencia de la App: 30 Días Calendario por Tratamiento
+                    </h4>
+                  </div>
+                  <p className="text-xs text-slate-200 leading-relaxed">
+                    Tu acceso a la <strong>App TyroFem 30D</strong> y el acompañamiento personalizado de la <strong>Nutricionista Marié</strong> está habilitado durante tus <strong>30 días calendario de tratamiento</strong>.
+                  </p>
+                  <div className="bg-emerald-950/80 rounded-2xl p-3.5 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-emerald-100">
+                    <div>
+                      <strong className="text-white block font-bold">¿Cómo reactivar tu App por 30 días más?</strong>
+                      <span className="text-emerald-200/90 text-[11px]">
+                        Al solicitar un nuevo pedido de Tyruss Full, tu acceso se reactiva automáticamente por 30 días adicionales para continuar tu evolución.
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleOpenOrder(currentDay >= 22)}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-xs shrink-0 cursor-pointer"
+                    >
+                      Pedir Tyruss Full
+                    </button>
+                  </div>
+                </div>
+
                 {/* Form Trigger Card */}
                 <div className="bg-emerald-900 text-white rounded-3xl p-6 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
                     <h4 className="font-bold text-base">¿Lista para continuar tu proceso?</h4>
-                    <p className="text-xs text-emerald-200 mt-0.5">Completa tu pedido en 30 segundos con WhatsApp o formulario.</p>
+                    <p className="text-xs text-emerald-200 mt-0.5">Escribe directamente a la línea de ColShopi (+57 310 400 7428) o llena tu formulario.</p>
                   </div>
                   <button
                     onClick={() => handleOpenOrder(currentDay >= 22)}
                     className="w-full sm:w-auto px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-xl transition-all cursor-pointer shrink-0 shadow-sm"
                   >
-                    Abrir Formulario de Pedido
+                    Pedir Tyruss Full
                   </button>
                 </div>
               </div>
@@ -372,19 +399,6 @@ export default function App() {
           </div>
         )}
       </main>
-
-      {/* Floating Action Button: Quick WhatsApp / Order */}
-      <aside aria-label="Acciones rápidas de WhatsApp y Asesoría" className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex flex-col gap-2">
-        <a
-          href="https://wa.me/573104007428?text=Hola%20Marié,%20estoy%20en%20la%20App%20TyroFem%2030D%20y%20quiero%20hacerte%20una%20consulta"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-13 h-13 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center shadow-xl shadow-emerald-900/30 hover:scale-105 active:scale-95 transition-all cursor-pointer ring-4 ring-white"
-          title="Chatear con Marié por WhatsApp"
-        >
-          <MessageCircle className="w-6 h-6 fill-white" />
-        </a>
-      </aside>
 
       {/* Mobile Bottom Navigation Bar */}
       <nav aria-label="Navegación principal móvil" className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex items-center justify-around shadow-lg">

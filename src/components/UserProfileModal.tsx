@@ -160,6 +160,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
           </div>
 
+          {/* 30-Day Validity & Reactivation Badge */}
+          <div className="p-3.5 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-xs space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] uppercase font-bold text-cyan-300 flex items-center gap-1">
+                <span>⏰ Vigencia de la App</span>
+              </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-900/80 text-cyan-200 font-bold border border-cyan-400/40">
+                30 Días Calendario
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              Tu acceso está activo durante tu ciclo de tratamiento. Para reactivar tu App por <strong>30 días más</strong>, solicita tu nuevo pedido de Tyruss Full a la línea de ColShopi.
+            </p>
+          </div>
+
           {/* Health Objective Registered */}
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
             <span className="text-[10px] uppercase font-bold text-slate-500 block">

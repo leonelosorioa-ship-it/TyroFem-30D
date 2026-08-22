@@ -39,9 +39,9 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
   const vipAdvantages = [
     {
       icon: <Smartphone className="w-6 h-6 text-cyan-400" />,
-      title: 'Única Tienda con App Exclusiva de Tratamiento',
-      desc: 'ColShopi Tienda By Leps Digital es la primera y única tienda naturista en Colombia que entrega a sus clientas una App interactiva con bio-monitoreo diario, gráficos de energía y seguimiento de 30 días.',
-      badge: 'Exclusividad Total'
+      title: 'App Exclusiva 30 Días con Reactivación en Recompra',
+      desc: 'Tu acceso a la App TyroFem 30D y bio-monitoreo está habilitado por 30 días calendario correspondientes a tu tarro de Tyruss Full. Al realizar tu recompra en ColShopi Tienda, tu acceso se reactiva automáticamente por 30 días adicionales para continuar tu evolución.',
+      badge: 'Vigencia 30D'
     },
     {
       icon: <Award className="w-6 h-6 text-emerald-400" />,
