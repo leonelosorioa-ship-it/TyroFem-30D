@@ -8,17 +8,18 @@ interface MariePhotoProps {
   className?: string;
 }
 
-// Cascade list of photo sources to ensure the new caricature illustration is loaded seamlessly
+// Cascade list of photo sources to ensure the exact original caricature illustration is loaded seamlessly
 const PHOTO_SOURCES = [
+  '/Marié Caricatura App.jpeg',
+  '/Marie Caricatura App.jpeg',
   '/Marié Caricatura App webs.webp',
   '/Marie Caricatura App webs.webp',
   '/marie-caricatura.webp',
   '/marie-avatar.webp',
-  '/Marié Caricatura App.jpeg',
-  '/Marie Caricatura App.jpeg',
   '/marie-caricatura.png',
   '/marie-avatar.png',
   '/marie-hero.png',
+  '/marie-photo.jpg',
   '/marie-caricatura.svg',
   '/marie-avatar.svg',
 ];

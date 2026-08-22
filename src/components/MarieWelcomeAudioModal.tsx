@@ -18,11 +18,14 @@ import {
   PhoneCall,
   Heart,
   Plus,
-  Minus
+  Minus,
+  Sun,
+  Smartphone
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { ColshopiLogo } from './ColshopiLogo';
 import { MariePhoto } from './MariePhoto';
+import { useScreenWakeLock } from '../hooks/useScreenWakeLock';
 
 interface MarieWelcomeAudioModalProps {
   isOpen: boolean;
@@ -49,6 +52,9 @@ export const MarieWelcomeAudioModal: React.FC<MarieWelcomeAudioModalProps> = ({
   const [isAutoplayBlocked, setIsAutoplayBlocked] = useState<boolean>(false);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [isLoadingAudio, setIsLoadingAudio] = useState<boolean>(true);
+
+  // Automatically keep mobile & desktop screen awake while this audio is playing
+  useScreenWakeLock(isPlaying, 'marie-welcome-audio-modal');
 
   // Auto-play attempt on mount / open
   useEffect(() => {
@@ -468,6 +474,18 @@ export const MarieWelcomeAudioModal: React.FC<MarieWelcomeAudioModalProps> = ({
                   <Plus className="w-3 h-3" />
                 </button>
               </div>
+            </div>
+
+            {/* Screen Awake Status (Always active while audio plays) */}
+            <div className="flex items-center justify-between pt-1 border-t border-slate-800/80 text-[10px] text-slate-400">
+              <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                <Smartphone className="w-3.5 h-3.5 animate-pulse text-emerald-400 shrink-0" />
+                <span>Pantalla activa: no se apagará mientras escuches el audio</span>
+              </span>
+              <span className="flex items-center gap-1 text-cyan-300">
+                <Sun className="w-3 h-3 text-amber-400" />
+                <span>Audio continuo</span>
+              </span>
             </div>
           </div>
 

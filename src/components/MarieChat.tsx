@@ -20,6 +20,7 @@ import { ChatMessage, UserProfile } from '../types';
 import { INITIAL_MARIE_MESSAGES, getMarieResponse } from '../data/faqChatData';
 import { ColshopiLogo } from './ColshopiLogo';
 import { MariePhoto } from './MariePhoto';
+import { useScreenWakeLock } from '../hooks/useScreenWakeLock';
 
 interface MarieChatProps {
   userProfile: UserProfile;
@@ -51,6 +52,9 @@ export const MarieChat: React.FC<MarieChatProps> = ({
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [audioProgress, setAudioProgress] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Keep screen awake while playing audio notes
+  useScreenWakeLock(isPlayingAudio, 'marie-chat-voice-note');
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX, Pause, Play, Music, Sparkles } from 'lucide-react';
+import { useScreenWakeLock } from '../hooks/useScreenWakeLock';
 
 const ENTRY_AUDIO_URL = 'https://f005.backblazeb2.com/file/ColShopi/Tyruss+Full/ColShopi+App.mp3';
 
@@ -16,6 +17,9 @@ export const AppEntryAudioPlayer: React.FC<AppEntryAudioPlayerProps> = ({
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [hasEnded, setHasEnded] = useState<boolean>(false);
   const [showPill, setShowPill] = useState<boolean>(false);
+
+  // Keep screen awake while app entry audio is playing
+  useScreenWakeLock(isPlaying, 'app-entry-audio');
 
   // Initial autoplay attempt on mount (every time the app loads, reloads, or refreshes)
   useEffect(() => {
