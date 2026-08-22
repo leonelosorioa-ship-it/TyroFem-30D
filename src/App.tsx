@@ -28,6 +28,10 @@ import { MarieChat } from './components/MarieChat';
 import { OrderModal } from './components/OrderModal';
 import { NutritionalInfoModal } from './components/NutritionalInfoModal';
 import { PWAInstallBanner } from './components/PWAInstallBanner';
+import { ColshopiBrandModal } from './components/ColshopiBrandModal';
+import { ColshopiCorporateBanner } from './components/ColshopiCorporateBanner';
+import { ColshopiLogo } from './components/ColshopiLogo';
+import { MarieProfileCard } from './components/MarieProfileCard';
 import { CALENDAR_DAYS } from './data/calendarData';
 import { RECIPES_DATA } from './data/recipesData';
 
@@ -66,6 +70,7 @@ export default function App() {
   const [targetRecipeId, setTargetRecipeId] = useState<string | undefined>(undefined);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isNutritionalModalOpen, setIsNutritionalModalOpen] = useState(false);
+  const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
   const [isReorderTrigger, setIsReorderTrigger] = useState(false);
 
   // Save changes to localStorage
@@ -181,6 +186,7 @@ export default function App() {
         onOpenNutritionalInfo={() => setIsNutritionalModalOpen(true)}
         onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
         onOpenChat={() => setActiveTab('chat')}
+        onOpenBrandModal={() => setIsBrandModalOpen(true)}
       />
 
       {/* Main Tab Navigation Header (Desktop / Tablet) */}
@@ -268,42 +274,86 @@ export default function App() {
 
         {activeTab === 'pedidos' && (
           <div className="space-y-6 pb-20">
-            {/* Quick Trigger to open full order modal or showcase offers directly */}
-            <div className="bg-gradient-to-br from-emerald-800 via-teal-800 to-emerald-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase px-3 py-1 rounded-full bg-amber-400 text-slate-950">
-                  ColShopi Tienda By Leps Digital
-                </span>
-                <span className="text-xs text-emerald-200">
-                  Garantía & Despacho Inmediato 🚚
-                </span>
+            {/* Full Official Corporate Banner */}
+            <ColshopiCorporateBanner 
+              onOpenBrandModal={() => setIsBrandModalOpen(true)}
+              onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-1">
+                <MarieProfileCard 
+                  onOpenChat={() => setActiveTab('chat')}
+                  onOpenBrandModal={() => setIsBrandModalOpen(true)}
+                />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold font-serif-luxury">
-                Promociones Oficiales Tyruss Full (500g)
-              </h2>
-              <p className="text-sm text-emerald-100 max-w-2xl leading-relaxed">
-                Todos los pedidos incluyen <strong>Loción Termoactiva GRATIS 🎁</strong>, Envío Sin Costo a toda Colombia y <strong>Pago Contra Entrega</strong> (pagas en efectivo al recibir en tu puerta).
-              </p>
-              <div className="pt-2">
-                <button
-                  onClick={() => handleOpenOrder(currentDay >= 22)}
-                  className="py-3 px-6 bg-white hover:bg-emerald-50 text-emerald-950 font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer inline-flex items-center gap-2"
-                >
-                  <ShoppingBag className="w-4 h-4 text-emerald-700" />
-                  <span>Abrir Formulario de Pedido Rápido</span>
-                </button>
+
+              <div className="md:col-span-2 space-y-4">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                        Despacho Oficial ColShopi
+                      </span>
+                      <h3 className="text-lg font-bold text-slate-800 mt-1 font-serif-luxury">
+                        Garantías de tu Compra
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => handleOpenOrder(currentDay >= 22)}
+                      className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    >
+                      Pedir Ahora
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600">
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2">
+                      <span className="text-base">🚚</span>
+                      <div>
+                        <strong className="block text-slate-800">Envío Gratis Colombia</strong>
+                        Despacho prioritario de 2 a 4 días hábiles.
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2">
+                      <span className="text-base">💵</span>
+                      <div>
+                        <strong className="block text-slate-800">Pago Contra Entrega</strong>
+                        Pagas en efectivo al recibir en tu puerta.
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2">
+                      <span className="text-base">🎁</span>
+                      <div>
+                        <strong className="block text-slate-800">Obsequio Incluido</strong>
+                        Loción Termoactiva gratis en todos los paquetes.
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2">
+                      <span className="text-base">🛡️</span>
+                      <div>
+                        <strong className="block text-slate-800">100% Original & Sellado</strong>
+                        Registro INVIMA RSA-0021928-2022 de Unmerco.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Form Trigger Card */}
+                <div className="bg-emerald-900 text-white rounded-3xl p-6 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div>
+                    <h4 className="font-bold text-base">¿Lista para continuar tu proceso?</h4>
+                    <p className="text-xs text-emerald-200 mt-0.5">Completa tu pedido en 30 segundos con WhatsApp o formulario.</p>
+                  </div>
+                  <button
+                    onClick={() => handleOpenOrder(currentDay >= 22)}
+                    className="w-full sm:w-auto px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs rounded-xl transition-all cursor-pointer shrink-0 shadow-sm"
+                  >
+                    Abrir Formulario de Pedido
+                  </button>
+                </div>
               </div>
             </div>
-
-            {/* Embed the Order Form inside view as well */}
-            <DailyTracker
-              userProfile={userProfile}
-              progressMap={progressMap}
-              currentDay={currentDay}
-              onSaveProgress={handleSaveDayProgress}
-              onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
-              onOpenChat={() => setActiveTab('chat')}
-            />
           </div>
         )}
       </main>
@@ -390,21 +440,87 @@ export default function App() {
         }}
       />
 
+      {/* ColShopi Brand Modal */}
+      <ColshopiBrandModal
+        isOpen={isBrandModalOpen}
+        onClose={() => setIsBrandModalOpen(false)}
+        onOpenOrder={() => {
+          setIsBrandModalOpen(false);
+          handleOpenOrder(false);
+        }}
+        onOpenChat={() => {
+          setIsBrandModalOpen(false);
+          setActiveTab('chat');
+        }}
+      />
+
       {/* PWA Installation Helper */}
       <PWAInstallBanner />
 
-      {/* Footer */}
-      <footer className="text-center py-6 text-xs text-slate-500 border-t border-slate-200/80 bg-white space-y-1 mb-14 sm:mb-0">
-        <div className="flex items-center justify-center gap-2 text-emerald-800 font-bold">
-          <span>TyroFem 30D</span>
-          <span>•</span>
-          <span>ColShopi Tienda By Leps Digital 💚</span>
-          <span>•</span>
-          <span>Nutricionista Marié</span>
+      {/* Rich Corporate Brand Footer */}
+      <footer className="text-slate-400 border-t border-slate-800 bg-[#070b10] py-8 px-4 text-xs mb-14 sm:mb-0">
+        <div className="max-w-5xl mx-auto space-y-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+            <div className="flex items-center gap-3 text-left">
+              <ColshopiLogo size="md" showGlow={true} />
+              <div>
+                <h4 className="text-sm font-bold text-white tracking-wide">
+                  COLSHOPI TIENDA BY LEPS DIGITAL
+                </h4>
+                <p className="text-[11px] text-cyan-300">
+                  Cuidamos de ti • Nutrición & Bienestar Femenino 2026
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsBrandModalOpen(true)}
+                className="px-3.5 py-1.5 rounded-xl bg-cyan-950/80 border border-cyan-400/40 text-cyan-300 text-xs font-semibold hover:bg-cyan-900 transition-colors cursor-pointer"
+              >
+                Conocer la Marca ColShopi
+              </button>
+
+              <button
+                onClick={() => setIsNutritionalModalOpen(true)}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 text-xs font-semibold hover:text-white transition-colors cursor-pointer"
+              >
+                INVIMA: RSA-0021928-2022
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[11px] text-slate-400 text-center sm:text-left">
+            <div>
+              <span className="text-slate-200 font-bold block mb-1">Categorías</span>
+              <p>Belleza & Cuidado</p>
+              <p>Salud & Bienestar</p>
+              <p>Nutrición Femenina</p>
+            </div>
+            <div>
+              <span className="text-slate-200 font-bold block mb-1">Garantías</span>
+              <p>Pago Contra Entrega</p>
+              <p>Envío Gratis Nacional</p>
+              <p>Productos 100% Originales</p>
+            </div>
+            <div>
+              <span className="text-slate-200 font-bold block mb-1">Atención & WhatsApp</span>
+              <p className="text-cyan-300 font-semibold">+57 310 400 7428</p>
+              <p>Lunes a Sábado: 8am - 8pm</p>
+              <p>Colombia</p>
+            </div>
+            <div>
+              <span className="text-slate-200 font-bold block mb-1">Nutricionista</span>
+              <p className="text-emerald-300 font-semibold">Marié de ColShopi</p>
+              <p>Guía TyroFem 30D</p>
+              <p>Tyruss Full (500g)</p>
+            </div>
+          </div>
+
+          <div className="text-center pt-4 border-t border-slate-900 text-[10px] text-slate-500">
+            © 2026 ColShopi Tienda By Leps Digital. Todos los derechos reservados. Tyruss Full es un alimento funcional en polvo fabricado por Laboratorio Unmerco con Registro Sanitario INVIMA RSA-0021928-2022.
+          </div>
         </div>
-        <p className="text-[11px] text-slate-400 max-w-lg mx-auto">
-          Tyruss Full es un alimento en polvo funcional con Registro INVIMA RSA-0021928-2022. No reemplaza tratamientos médicos especializados.
-        </p>
       </footer>
     </div>
   );

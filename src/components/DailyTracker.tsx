@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayProgress, UserProfile } from '../types';
+import { EnergyTrendChart } from './EnergyTrendChart';
 
 interface DailyTrackerProps {
   userProfile: UserProfile;
@@ -352,6 +353,12 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 30-Day Energy Trend Visualization (Recharts) */}
+      <EnergyTrendChart 
+        progressMap={progressMap} 
+        currentDay={currentDay} 
+      />
 
       {/* 30-Day Milestone Rewards / Badges */}
       <div className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-xs space-y-4">

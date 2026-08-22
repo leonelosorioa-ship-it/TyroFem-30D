@@ -13,10 +13,12 @@ import {
   Check, 
   ExternalLink,
   MessageCircle,
-  Clock
+  Clock,
+  Award
 } from 'lucide-react';
 import { ChatMessage, UserProfile } from '../types';
 import { INITIAL_MARIE_MESSAGES, getMarieResponse } from '../data/faqChatData';
+import { ColshopiLogo } from './ColshopiLogo';
 
 interface MarieChatProps {
   userProfile: UserProfile;
@@ -117,57 +119,77 @@ export const MarieChat: React.FC<MarieChatProps> = ({
   };
 
   const quickPrompts = [
-    '🦋 ¿Cómo ayuda a la Tiroides y Metabolismo?',
+    '🦋 ¿Cómo actúa Tyruss Full en la Tiroides y Metabolismo?',
     '🌸 ¿Cómo controlar sofocos y calores?',
-    '🥤 ¿Cómo se prepara y toma?',
-    '🛡️ ¿Tiene Registro INVIMA?',
+    '🥤 ¿Cómo se prepara y a qué hora tomarlo?',
+    '🛡️ ¿Tiene Registro INVIMA certificado?',
     '🎁 ¿Cuál es mi obsequio (Loción Termoactiva)?',
-    '📦 Ver Promociones y Precios'
+    '📦 Ver Promociones ColShopi y Precios'
   ];
 
   return (
     <div className="space-y-4 pb-20 max-w-4xl mx-auto">
-      {/* Header Profile Card */}
-      <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white rounded-3xl p-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="relative">
-            <div className="w-13 h-13 rounded-full bg-emerald-600 border-2 border-emerald-300 flex items-center justify-center text-2xl shadow-md">
-              👩‍⚕️
-            </div>
-            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 border-2 border-emerald-900 rounded-full" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold">Nutricionista Marié</h2>
-              <span className="text-[10px] font-bold bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 px-2 py-0.5 rounded-full">
-                ColShopi Oficial
-              </span>
-            </div>
-            <p className="text-xs text-emerald-200 font-medium">
-              Asesora en Salud Femenina & Nutrición Funcional
-            </p>
-          </div>
-        </div>
+      {/* Header Profile Card with ColShopi Identity & Marie Portrait */}
+      <div className="relative overflow-hidden rounded-3xl bg-[#090e14] text-white p-5 sm:p-6 border border-cyan-500/30 shadow-xl space-y-4">
+        {/* Glow */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* WhatsApp & Reset Buttons */}
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-          <a
-            href="https://wa.me/573104007428?text=Hola%20Marié,%20estoy%20en%20la%20App%20TyroFem%2030D%20y%20quiero%20hacerte%20una%20consulta"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
-          >
-            <MessageCircle className="w-3.5 h-3.5" />
-            <span>WhatsApp (+57 310 400 7428)</span>
-          </a>
+        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            {/* Visual Portrait Replica */}
+            <div className="relative shrink-0">
+              <div className="w-15 h-15 rounded-2xl p-0.5 bg-gradient-to-br from-cyan-400 to-emerald-400 shadow-[0_0_15px_rgba(0,229,255,0.4)]">
+                <div className="w-full h-full rounded-[14px] bg-[#0c161d] overflow-hidden flex flex-col items-center justify-end relative">
+                  <div className="text-2xl mt-1">👩🏻‍⚕️</div>
+                  <div className="bg-black text-[7px] text-white font-black px-1.5 py-0.2 rounded-xs border border-slate-700 mb-0.5 tracking-wider">
+                    MARIÉ
+                  </div>
+                </div>
+              </div>
+              <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-400 border-2 border-slate-900 rounded-full" />
+            </div>
 
-          <button
-            onClick={handleResetChat}
-            className="p-2 text-emerald-200 hover:text-white hover:bg-white/10 rounded-xl transition-colors cursor-pointer"
-            title="Reiniciar conversación"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-white font-serif-luxury">
+                  Nutricionista Marié
+                </h2>
+                <span className="text-[10px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-400/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
+                  ColShopi Tienda
+                </span>
+              </div>
+              <p className="text-xs text-cyan-200/90 font-medium">
+                Especialista en Salud Femenina & Guía Nutricional TyroFem 30D
+              </p>
+              <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                <span>By Leps Digital</span>
+                <span>•</span>
+                <span className="text-emerald-300">En línea para resolver tus dudas</span>
+              </div>
+            </div>
+          </div>
+
+          {/* WhatsApp & Reset Buttons */}
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <a
+              href="https://wa.me/573104007428?text=Hola%20Marié,%20estoy%20en%20la%20App%20TyroFem%2030D%20y%20quiero%20hacerte%20una%20consulta"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>WhatsApp Directo (+57 310 400 7428)</span>
+            </a>
+
+            <button
+              onClick={handleResetChat}
+              className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+              title="Reiniciar conversación"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 

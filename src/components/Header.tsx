@@ -4,12 +4,14 @@ import {
   ShieldCheck, 
   HelpCircle, 
   Flame, 
-  Heart,
-  ShoppingBag,
-  FileText,
-  Smartphone
+  Heart, 
+  ShoppingBag, 
+  FileText, 
+  Smartphone,
+  Store
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { ColshopiLogo } from './ColshopiLogo';
 
 interface HeaderProps {
   userProfile: UserProfile | null;
@@ -18,6 +20,7 @@ interface HeaderProps {
   onOpenNutritionalInfo: () => void;
   onOpenOrder: () => void;
   onOpenChat: () => void;
+  onOpenBrandModal?: () => void;
   onInstallPWA?: () => void;
   canInstallPWA?: boolean;
 }
@@ -29,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNutritionalInfo,
   onOpenOrder,
   onOpenChat,
+  onOpenBrandModal,
   onInstallPWA,
   canInstallPWA
 }) => {
@@ -36,28 +40,45 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-emerald-100 shadow-xs">
-      {/* Top micro-bar: Exclusive Gift Badge */}
-      <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white text-xs py-1.5 px-3">
+      {/* Top micro-bar: Exclusive Gift & Brand Badge */}
+      <div className="bg-gradient-to-r from-[#070b10] via-slate-900 to-[#070b10] text-white text-xs py-1.5 px-3 border-b border-cyan-500/20">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 truncate">
-            <span className="inline-flex items-center justify-center bg-emerald-500/30 text-emerald-200 text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-emerald-400/30">
-              REGALO EXCLUSIVO
-            </span>
-            <span className="truncate text-emerald-100 font-medium">
-              ColShopi Tienda By Leps Digital 💚 • Nutricionista Marié
-            </span>
+          <div className="flex items-center gap-2 truncate">
+            <button
+              onClick={onOpenBrandModal}
+              className="inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity cursor-pointer text-left truncate"
+              title="Conocer más sobre ColShopi Tienda By Leps Digital"
+            >
+              <ColshopiLogo size="xs" showGlow={false} />
+              <span className="truncate text-cyan-300 font-bold text-[11px]">
+                ColShopi Tienda By Leps Digital
+              </span>
+              <span className="hidden sm:inline text-slate-400 text-[10px]">
+                • Cuidamos de ti 💙
+              </span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onOpenNutritionalInfo}
-              className="flex items-center gap-1 text-[11px] text-emerald-200 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-[11px] text-emerald-300 hover:text-white transition-colors cursor-pointer"
               title="Ver Registro INVIMA y Ficha Técnica"
             >
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               <span className="hidden sm:inline">INVIMA: RSA-0021928-2022</span>
               <span className="sm:hidden">INVIMA</span>
             </button>
+
+            {onOpenBrandModal && (
+              <button
+                onClick={onOpenBrandModal}
+                className="hidden lg:flex items-center gap-1 text-[10px] bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/30 text-cyan-300 px-2 py-0.5 rounded transition-colors cursor-pointer"
+              >
+                <Store className="w-3 h-3 text-cyan-400" />
+                <span>Nuestra Tienda</span>
+              </button>
+            )}
 
             {canInstallPWA && (
               <button
@@ -73,22 +94,28 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Main Header Container */}
-      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
         {/* Brand & Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 flex items-center justify-center text-white shadow-md shadow-emerald-700/20 ring-2 ring-emerald-100 shrink-0">
-            <Sparkles className="w-5 h-5 text-emerald-200" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold tracking-tight text-slate-900 leading-tight">
-                Tyro<span className="text-emerald-700 font-extrabold">Fem</span> <span className="text-amber-600 text-xs font-semibold px-1.5 py-0.5 bg-amber-50 rounded border border-amber-200">30D</span>
-              </h1>
+          <button
+            onClick={onOpenBrandModal}
+            className="group cursor-pointer flex items-center gap-2 text-left"
+            title="Ver información de ColShopi Tienda"
+          >
+            <ColshopiLogo size="md" showGlow={true} className="group-hover:scale-105 transition-transform" />
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-tight">
+                  Tyro<span className="text-emerald-700 font-extrabold">Fem</span> <span className="text-amber-600 text-xs font-semibold px-1.5 py-0.2 bg-amber-50 rounded border border-amber-200">30D</span>
+                </h1>
+              </div>
+              <p className="text-[11px] text-slate-500 font-medium truncate max-w-[190px] sm:max-w-xs flex items-center gap-1">
+                <span>Por</span> 
+                <span className="text-emerald-800 font-bold">Nutricionista Marié</span>
+                <span className="text-[10px] text-cyan-600 bg-cyan-50 px-1 rounded border border-cyan-200">ColShopi</span>
+              </p>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium truncate max-w-[200px] sm:max-w-xs">
-              Guía Nutricional & Balance Hormonal • <span className="text-emerald-700 font-semibold">Marié</span>
-            </p>
-          </div>
+          </button>
         </div>
 
         {/* Quick Stats & CTA Actions */}
@@ -117,9 +144,9 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Chat with Marie Quick CTA */}
           <button
             onClick={onOpenChat}
-            className="hidden xs:flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-100/70 hover:bg-emerald-200/70 px-3 py-2 rounded-xl transition-colors border border-emerald-300/60 cursor-pointer"
+            className="hidden xs:flex items-center gap-1.5 text-xs font-semibold text-emerald-900 bg-emerald-100/80 hover:bg-emerald-200/80 px-3 py-2 rounded-xl transition-colors border border-emerald-300/60 cursor-pointer"
           >
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+            <span className="text-xs">👩🏻‍⚕️</span>
             <span>Marié</span>
           </button>
 

@@ -7,12 +7,13 @@ import {
   Activity, 
   Flame, 
   ShieldCheck, 
-  HelpCircle,
-  Zap,
-  Leaf,
-  Smile
+  HelpCircle, 
+  Zap, 
+  Leaf, 
+  Smile 
 } from 'lucide-react';
 import { HealthAngle, UserProfile } from '../types';
+import { ColshopiLogo } from './ColshopiLogo';
 
 interface OnboardingQuizProps {
   onComplete: (profile: UserProfile) => void;
@@ -120,26 +121,28 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-xl bg-white rounded-3xl shadow-xl shadow-emerald-950/5 border border-emerald-100 overflow-hidden">
-        {/* Header Ribbon */}
-        <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 px-6 py-5 text-white relative">
+        {/* Header Ribbon with ColShopi Neon Identity */}
+        <div className="bg-gradient-to-r from-[#070c12] via-slate-900 to-[#070c12] px-6 py-5 text-white relative border-b border-cyan-500/20">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🌿</span>
+            <div className="flex items-center gap-3">
+              <ColshopiLogo size="sm" showGlow={true} />
               <div>
-                <span className="text-xs font-semibold text-emerald-200 uppercase tracking-wider block">
-                  ColShopi Tienda Presenta
+                <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-wider block">
+                  ColShopi Tienda By Leps Digital
                 </span>
-                <h2 className="text-lg font-bold">Diagnóstico Nutricional Femenino</h2>
+                <h2 className="text-base sm:text-lg font-bold text-white font-serif-luxury">
+                  Diagnóstico Nutricional Femenino
+                </h2>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-xs text-emerald-200 block font-medium">Paso {step} de 4</span>
+              <span className="text-xs text-cyan-300 block font-medium">Paso {step} de 4</span>
               <div className="flex gap-1 mt-1 justify-end">
                 {[1, 2, 3, 4].map(s => (
                   <div 
                     key={s} 
                     className={`h-1.5 rounded-full transition-all duration-300 ${
-                      s === step ? 'w-6 bg-amber-400' : s < step ? 'w-3 bg-emerald-400' : 'w-2 bg-emerald-700/60'
+                      s === step ? 'w-6 bg-cyan-400' : s < step ? 'w-3 bg-emerald-400' : 'w-2 bg-slate-700'
                     }`}
                   />
                 ))}
@@ -153,15 +156,27 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
           {/* STEP 1: Name & Age */}
           {step === 1 && (
             <div className="space-y-6">
-              <div className="text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-3xl shadow-xs">
-                  👋
+              <div className="text-center space-y-3">
+                {/* Visual Representation of Nutritionist Marie */}
+                <div className="inline-flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-2xl p-0.5 bg-gradient-to-br from-cyan-400 to-emerald-400 shadow-[0_0_20px_rgba(0,229,255,0.35)] relative">
+                    <div className="w-full h-full rounded-[14px] bg-[#0c161d] overflow-hidden flex flex-col items-center justify-end">
+                      <div className="text-3xl mt-1">👩🏻‍⚕️</div>
+                      <div className="bg-black text-[8px] text-white font-black px-2 py-0.2 rounded-xs border border-slate-700 mb-1 tracking-wider">
+                        MARIÉ
+                      </div>
+                    </div>
+                  </div>
+                  <span className="mt-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    Nutricionista ColShopi Oficial
+                  </span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-800">
+
+                <h3 className="text-xl font-bold text-slate-800 font-serif-luxury">
                   ¡Hola! Soy la Nutricionista Marié 💚
                 </h3>
                 <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                  Quiero acompañarte de forma personalizada durante estos 30 días. ¿Cómo te llamas y qué edad tienes?
+                  Cuidamos de ti en <strong>ColShopi Tienda</strong>. Quiero acompañarte de forma personalizada durante estos 30 días con <strong>Tyruss Full</strong>. ¿Cómo te llamas y qué edad tienes?
                 </p>
               </div>
 
