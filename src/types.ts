@@ -4,6 +4,8 @@ export type HealthAngle =
   | 'ciclos_spm'
   | 'digestion_detox';
 
+export type UserStatus = 'activa' | 'suspendida' | 'inhabilitada';
+
 export interface UserProfile {
   name: string;
   phone?: string;
@@ -16,6 +18,9 @@ export interface UserProfile {
   startDate: string;
   currentDay: number;
   unlockedBadges: string[];
+  status?: UserStatus;
+  statusReason?: string;
+  isAdmin?: boolean;
 }
 
 export interface DayTask {

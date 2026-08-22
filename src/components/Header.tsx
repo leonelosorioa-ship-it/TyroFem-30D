@@ -22,6 +22,7 @@ interface HeaderProps {
   onOpenChat: () => void;
   onOpenBrandModal?: () => void;
   onOpenUserProfile?: () => void;
+  onOpenAdminPanel?: () => void;
   onInstallPWA?: () => void;
   canInstallPWA?: boolean;
 }
@@ -35,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenChat,
   onOpenBrandModal,
   onOpenUserProfile,
+  onOpenAdminPanel,
   onInstallPWA,
   canInstallPWA
 }) => {
@@ -62,7 +64,17 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {userProfile && onOpenUserProfile && (
+            {userProfile?.isAdmin && onOpenAdminPanel && (
+              <button
+                onClick={onOpenAdminPanel}
+                className="flex items-center gap-1 text-[11px] bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black px-2.5 py-0.5 rounded-full shadow-md transition-all cursor-pointer ring-2 ring-amber-300/60 animate-pulse"
+                title="Abrir Panel de Control Administrativo ColShopi"
+              >
+                <span>👑 Panel Admin</span>
+              </button>
+            )}
+
+            {userProfile && onOpenUserProfile && !userProfile.isAdmin && (
               <button
                 onClick={onOpenUserProfile}
                 className="flex items-center gap-1 text-[10px] bg-cyan-950/90 border border-cyan-400/50 text-cyan-200 px-2 py-0.5 rounded-full hover:bg-cyan-900 transition-colors cursor-pointer"
@@ -144,6 +156,17 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="font-bold text-emerald-700">{progressPercent}%</span> completado
             </div>
           </div>
+
+          {/* Admin Panel Quick Switcher if user is admin */}
+          {userProfile?.isAdmin && onOpenAdminPanel && (
+            <button
+              onClick={onOpenAdminPanel}
+              className="flex items-center gap-1.5 text-xs font-bold text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 px-3 py-2 rounded-xl shadow-md border border-amber-300 transition-all cursor-pointer transform active:scale-98"
+            >
+              <span>👑</span>
+              <span className="hidden sm:inline">Panel Admin</span>
+            </button>
+          )}
 
           {/* Quick Nutritional Table Button */}
           <button

@@ -37,6 +37,9 @@ import { MarieProfileCard } from './components/MarieProfileCard';
 import { UserProfileModal } from './components/UserProfileModal';
 import { ColshopiVipPerksModal } from './components/ColshopiVipPerksModal';
 import { WhatsAppShareButton } from './components/WhatsAppShareButton';
+import { AdminPanel } from './components/AdminPanel';
+import { UserSuspendedModal } from './components/UserSuspendedModal';
+import { findUserByCodeOrEmail } from './data/usersDatabase';
 import { CALENDAR_DAYS } from './data/calendarData';
 import { RECIPES_DATA } from './data/recipesData';
 
@@ -108,6 +111,24 @@ export default function App() {
   const [isVipPerksModalOpen, setIsVipPerksModalOpen] = useState(false);
   const [isPwaInstallModalOpen, setIsPwaInstallModalOpen] = useState(false);
   const [isReorderTrigger, setIsReorderTrigger] = useState(false);
+  const [isAdminViewOpen, setIsAdminViewOpen] = useState<boolean>(() => {
+    return userProfile?.isAdmin === true;
+  });
+
+  // Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem('tyrofem_user_profile');
+    setUserProfile(null);
+    setIsAdminViewOpen(false);
+    setIsUserProfileModalOpen(false);
+  };
+
+  // Sync admin state
+  useEffect(() => {
+    if (userProfile?.isAdmin) {
+      setIsAdminViewOpen(true);
+    }
+  }, [userProfile?.isAdmin]);
 
   // Save changes to localStorage
   useEffect(() => {
@@ -168,6 +189,35 @@ export default function App() {
 
   const completedDaysCount = (Object.values(progressMap) as DayProgress[]).filter(p => p.completedAt || (p.tyrussTaken && p.water2L)).length;
   const currentDay = userProfile?.currentDay || 1;
+
+  // Check if user is suspended or disabled in centralized database
+  const dbUser = userProfile ? (findUserByCodeOrEmail(userProfile.email || '') || findUserByCodeOrEmail(userProfile.accessCode || '')) : null;
+  const effectiveStatus = dbUser?.status || userProfile?.status || 'activa';
+  const isSuspendedOrBanned = !userProfile?.isAdmin && (effectiveStatus === 'suspendida' || effectiveStatus === 'inhabilitada');
+
+  // If user is suspended or disabled, render dedicated lock screen
+  if (userProfile && isSuspendedOrBanned) {
+    return (
+      <UserSuspendedModal
+        userProfile={{
+          ...userProfile,
+          status: effectiveStatus,
+          statusReason: dbUser?.statusReason || userProfile.statusReason
+        }}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  // If Admin is logged in and Admin Panel View is toggled, render Admin Panel
+  if (userProfile?.isAdmin && isAdminViewOpen) {
+    return (
+      <AdminPanel
+        onBackToApp={() => setIsAdminViewOpen(false)}
+        onLogoutAdmin={handleLogout}
+      />
+    );
+  }
 
   // Render Onboarding Quiz if not completed
   if (!userProfile || !userProfile.hasCompletedOnboarding) {
@@ -235,6 +285,7 @@ export default function App() {
         onOpenChat={() => handleNavigateTab('chat')}
         onOpenBrandModal={() => setIsBrandModalOpen(true)}
         onOpenUserProfile={() => setIsUserProfileModalOpen(true)}
+        onOpenAdminPanel={() => setIsAdminViewOpen(true)}
         onInstallPWA={() => setIsPwaInstallModalOpen(true)}
       />
 
@@ -579,6 +630,8 @@ export default function App() {
         completedDays={completedDaysCount}
         progressMap={progressMap}
         currentDay={currentDay}
+        onOpenAdminPanel={() => setIsAdminViewOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* ColShopi VIP Customer Exclusivity & Perks Modal */}
@@ -628,6 +681,16 @@ export default function App() {
             </div>
 
             <div className="flex items-center flex-wrap gap-2.5">
+              {userProfile?.isAdmin && (
+                <button
+                  onClick={() => setIsAdminViewOpen(true)}
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 border border-amber-300 text-slate-950 text-xs font-black hover:from-amber-400 hover:to-amber-500 transition-all cursor-pointer flex items-center gap-1.5 shadow-md active:scale-98"
+                  title="Abrir Panel de Control Administrativo ColShopi"
+                >
+                  <span>👑 Panel Admin ColShopi</span>
+                </button>
+              )}
+
               <button
                 onClick={() => setIsVipPerksModalOpen(true)}
                 className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-cyan-900/80 border border-emerald-400/50 text-emerald-200 text-xs font-bold hover:border-emerald-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-98"

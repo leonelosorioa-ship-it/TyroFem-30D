@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Activity, 
   Sparkles, 
@@ -16,13 +16,19 @@ import {
   Heart,
   FileText,
   Download,
-  Check
+  Check,
+  Lock,
+  Clock,
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayProgress, UserProfile } from '../types';
 import { EnergyTrendChart } from './EnergyTrendChart';
 import { TransformationReportModal } from './TransformationReportModal';
 import { generateTransformationReportPDF } from '../utils/pdfGenerator';
+import { getMaxUnlockedDay } from '../utils/timeLock';
+import { DayCountdownClock } from './DayCountdownClock';
 
 interface DailyTrackerProps {
   userProfile: UserProfile;
@@ -41,8 +47,32 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   onOpenOrder,
   onOpenChat
 }) => {
-  const currentDayData = progressMap[currentDay] || {
-    dayNumber: currentDay,
+  const [unlockedMaxDay, setUnlockedMaxDay] = useState<number>(() => 
+    getMaxUnlockedDay(userProfile?.startDate)
+  );
+
+  useEffect(() => {
+    const updateUnlocked = () => {
+      setUnlockedMaxDay(getMaxUnlockedDay(userProfile?.startDate));
+    };
+    updateUnlocked();
+    const interval = setInterval(updateUnlocked, 1000);
+    return () => clearInterval(interval);
+  }, [userProfile?.startDate]);
+
+  const [selectedDay, setSelectedDay] = useState<number>(() => currentDay || unlockedMaxDay);
+
+  // Sync selectedDay when unlockedMaxDay changes if it was on currentDay
+  useEffect(() => {
+    if (selectedDay > 30) {
+      setSelectedDay(30);
+    }
+  }, [unlockedMaxDay, selectedDay]);
+
+  const isSelectedDayUnlocked = selectedDay <= unlockedMaxDay;
+
+  const currentDayData = progressMap[selectedDay] || {
+    dayNumber: selectedDay,
     tyrussTaken: false,
     water2L: false,
     antiinflammatoryMeal: false,
@@ -64,6 +94,28 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isQuickDownloading, setIsQuickDownloading] = useState(false);
 
+  // Sync inputs when selectedDay changes
+  useEffect(() => {
+    const data = progressMap[selectedDay] || {
+      dayNumber: selectedDay,
+      tyrussTaken: false,
+      water2L: false,
+      antiinflammatoryMeal: false,
+      extraHabit: false,
+      energyLevel: 4,
+      digestion: 'liviana',
+      mood: 'tranquila',
+      sleepStars: 4,
+      notes: ''
+    };
+    setEnergyLevel(data.energyLevel || 4);
+    setDigestion(data.digestion || 'liviana');
+    setMood(data.mood || 'tranquila');
+    setSleepStars(data.sleepStars || 4);
+    setWaterGlasses(data.water2L ? 8 : (data.waterGlasses || 4));
+    setNotes(data.notes || '');
+  }, [selectedDay, progressMap]);
+
   const completedDays = (Object.values(progressMap) as DayProgress[]).filter(p => p.completedAt || (p.tyrussTaken && p.water2L)).length;
   const progressPercent = Math.round((completedDays / 30) * 100);
 
@@ -73,7 +125,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
       generateTransformationReportPDF({
         userProfile,
         progressMap,
-        currentDay
+        currentDay: selectedDay
       });
       setTimeout(() => setIsQuickDownloading(false), 2000);
     } catch (error) {
@@ -83,6 +135,8 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   };
 
   const handleUpdate = (updatedFields: Partial<DayProgress>) => {
+    if (!isSelectedDayUnlocked) return;
+
     const updated: DayProgress = {
       ...currentDayData,
       energyLevel,
@@ -100,14 +154,16 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
     if (updatedFields.sleepStars !== undefined) setSleepStars(updatedFields.sleepStars);
     if (updatedFields.notes !== undefined) setNotes(updatedFields.notes);
 
-    onSaveProgress(currentDay, updated);
+    onSaveProgress(selectedDay, updated);
   };
 
   const handleAddGlass = () => {
+    if (!isSelectedDayUnlocked) return;
     const next = Math.min(8, waterGlasses + 1);
     setWaterGlasses(next);
     handleUpdate({ water2L: next >= 8 });
   };
+
 
   const badges = [
     {
@@ -239,7 +295,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
             }`}
           >
             <Activity className="w-4 h-4" />
-            <span>1. Registro del Día {currentDay}</span>
+            <span>1. Test & Registro (Día {selectedDay})</span>
           </button>
 
           <button
@@ -276,14 +332,107 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
       {/* SUB-TAB 1: Registro Diario */}
       {activeSubTab === 'registro' && (
         <div className="space-y-6">
+          {/* Day Selector Strip */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Seleccionar Día del Protocolo:
+                </span>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  Día {unlockedMaxDay} Habilitado Actualmente
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-400">
+                1 día cada 24 horas
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 pt-1">
+              {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => {
+                const isDUnlocked = d <= unlockedMaxDay;
+                const isSelected = d === selectedDay;
+                const isDone = progressMap[d]?.completedAt || (progressMap[d]?.tyrussTaken && progressMap[d]?.water2L);
+
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setSelectedDay(d)}
+                    className={`h-9 min-w-9 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 ${
+                      isSelected
+                        ? 'bg-emerald-700 text-white ring-2 ring-emerald-500/30 shadow-xs scale-105'
+                        : isDone
+                        ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                        : isDUnlocked
+                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        : 'bg-slate-50 text-slate-400 border border-dashed border-slate-200 hover:bg-amber-50 hover:text-amber-900'
+                    }`}
+                    title={isDUnlocked ? `Día ${d}` : `Día ${d} Bloqueado (requiere cumplir 24h)`}
+                  >
+                    {!isDUnlocked ? (
+                      <Lock className="w-3 h-3 text-amber-500 shrink-0" />
+                    ) : isDone ? (
+                      <Check className="w-3 h-3 text-emerald-700 shrink-0" />
+                    ) : null}
+                    <span>{d}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* If the selected day is LOCKED, show the 24H countdown timer hero and disable inputs */}
+          {!isSelectedDayUnlocked ? (
+            <div className="space-y-4">
+              <DayCountdownClock
+                dayNumber={selectedDay}
+                startDate={userProfile.startDate}
+                variant="hero"
+                showExplanation={true}
+                onUnlocked={() => setUnlockedMaxDay(getMaxUnlockedDay(userProfile.startDate))}
+              />
+              <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs text-amber-900 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                <p>
+                  <strong>Test del Día {selectedDay} Bloqueado:</strong> Por prescripción nutricional del protocolo TyroFem 30D, los tests somáticos diarios solo pueden registrarse una vez que tu organismo haya completado el ciclo biológico de 24 horas del día anterior.
+                </p>
+              </div>
+            </div>
+          ) : (
+            unlockedMaxDay < 30 && selectedDay === unlockedMaxDay && (
+              <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-[#070e17] rounded-2xl p-3.5 sm:p-4 border border-cyan-500/40 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-cyan-950 rounded-xl border border-cyan-400/40 text-cyan-300 shrink-0">
+                    <Clock className="w-4 h-4 text-cyan-400 animate-pulse" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">
+                      Ciclo de 24 Horas en Marcha
+                    </span>
+                    <h5 className="text-xs font-bold text-white">
+                      Tu próximo test (Día {unlockedMaxDay + 1}) se habilitará en:
+                    </h5>
+                  </div>
+                </div>
+                <DayCountdownClock
+                  dayNumber={unlockedMaxDay + 1}
+                  startDate={userProfile.startDate}
+                  variant="compact"
+                  showExplanation={false}
+                />
+              </div>
+            )
+          )}
+
           {/* Daily Metrics Dashboard */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!isSelectedDayUnlocked ? 'opacity-50 pointer-events-none' : ''}`}>
             {/* Metric 1: Energy Level */}
             <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
                   <Sun className="w-4 h-4 text-amber-500" />
-                  <span>Nivel de Energía Hoy</span>
+                  <span>Nivel de Energía (Día {selectedDay})</span>
                 </div>
                 <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                   {energyLevel === 5 && '⚡ Radiante (100%)'}
@@ -299,6 +448,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <button
                     key={star}
                     type="button"
+                    disabled={!isSelectedDayUnlocked}
                     onClick={() => handleUpdate({ energyLevel: star })}
                     className={`flex-1 py-3 rounded-xl flex flex-col items-center gap-1 transition-all cursor-pointer ${
                       energyLevel >= star 
@@ -335,6 +485,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <button
                     key={opt.id}
                     type="button"
+                    disabled={!isSelectedDayUnlocked}
                     onClick={() => handleUpdate({ digestion: opt.id as DayProgress['digestion'] })}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       digestion === opt.id
@@ -366,6 +517,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <button
                     key={g}
                     type="button"
+                    disabled={!isSelectedDayUnlocked}
                     onClick={() => {
                       setWaterGlasses(g);
                       handleUpdate({ water2L: g >= 8 });
@@ -387,8 +539,9 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                 <span>{waterGlasses >= 8 ? '🎉 ¡Meta de 2L alcanzada!' : `Faltan ${8 - waterGlasses} vasos (250ml c/u)`}</span>
                 <button
                   type="button"
+                  disabled={!isSelectedDayUnlocked}
                   onClick={handleAddGlass}
-                  className="text-teal-700 font-bold hover:underline cursor-pointer"
+                  className="text-teal-700 font-bold hover:underline cursor-pointer disabled:opacity-50"
                 >
                   + Agregar 1 Vaso
                 </button>
@@ -418,6 +571,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <button
                     key={m.id}
                     type="button"
+                    disabled={!isSelectedDayUnlocked}
                     onClick={() => handleUpdate({ mood: m.id as DayProgress['mood'] })}
                     className={`flex-1 py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer ${
                       mood === m.id
@@ -442,8 +596,9 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                     <button
                       key={s}
                       type="button"
+                      disabled={!isSelectedDayUnlocked}
                       onClick={() => handleUpdate({ sleepStars: s })}
-                      className="cursor-pointer"
+                      className="cursor-pointer disabled:opacity-50"
                     >
                       <Star className={`w-4 h-4 ${sleepStars >= s ? 'fill-indigo-500 text-indigo-500' : 'text-slate-300'}`} />
                     </button>

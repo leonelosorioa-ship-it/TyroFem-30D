@@ -21,6 +21,7 @@ import {
 import { DayProgress, UserProfile } from '../types';
 import { ColshopiLogo } from './ColshopiLogo';
 import { generateTransformationReportPDF } from '../utils/pdfGenerator';
+import { LogOut } from 'lucide-react';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -29,6 +30,8 @@ interface UserProfileModalProps {
   completedDays: number;
   progressMap?: Record<number, DayProgress>;
   currentDay?: number;
+  onOpenAdminPanel?: () => void;
+  onLogout?: () => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -37,7 +40,9 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   userProfile,
   completedDays,
   progressMap = {},
-  currentDay = 1
+  currentDay = 1,
+  onOpenAdminPanel,
+  onLogout
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
@@ -233,6 +238,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               )}
             </button>
 
+            {/* Admin Exclusive Panel Trigger */}
+            {userProfile.isAdmin && onOpenAdminPanel && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenAdminPanel();
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-md"
+              >
+                <span>👑 Abrir Panel de Control Administrativo ColShopi</span>
+              </button>
+            )}
+
             <a
               href="https://wa.link/6zpm18"
               target="_blank"
@@ -242,6 +260,22 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <MessageCircle className="w-4 h-4 text-emerald-600" />
               <span>Contactar a Marié por WhatsApp (+57 310 400 7428)</span>
             </a>
+
+            {onLogout && (
+              <div className="pt-2 border-t border-slate-100 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onLogout();
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs text-rose-600 hover:text-rose-700 font-semibold hover:underline cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Cerrar Sesión / Salir de esta cuenta</span>
+                </button>
+              </div>
+            )}
           </div>
 
         </div>

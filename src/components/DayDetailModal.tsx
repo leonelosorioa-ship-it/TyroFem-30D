@@ -14,10 +14,14 @@ import {
   Coffee,
   ChevronRight,
   Smile,
-  ArrowLeft
+  ArrowLeft,
+  Lock,
+  AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayPlan, DayProgress, UserProfile } from '../types';
+import { getMaxUnlockedDay } from '../utils/timeLock';
+import { DayCountdownClock } from './DayCountdownClock';
 
 interface DayDetailModalProps {
   dayPlan: DayPlan | null;
@@ -39,6 +43,21 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   onOpenChat
 }) => {
   if (!dayPlan) return null;
+
+  const [unlockedMaxDay, setUnlockedMaxDay] = useState<number>(() => 
+    getMaxUnlockedDay(userProfile?.startDate)
+  );
+
+  useEffect(() => {
+    const updateLock = () => {
+      setUnlockedMaxDay(getMaxUnlockedDay(userProfile?.startDate));
+    };
+    updateLock();
+    const interval = setInterval(updateLock, 1000);
+    return () => clearInterval(interval);
+  }, [userProfile?.startDate]);
+
+  const isDayUnlocked = dayPlan.dayNumber <= unlockedMaxDay;
 
   const [tyrussTaken, setTyrussTaken] = useState(currentProgress?.tyrussTaken || false);
   const [water2L, setWater2L] = useState(currentProgress?.water2L || false);
@@ -63,6 +82,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   }, [currentProgress, dayPlan.dayNumber]);
 
   const handleCheckboxToggle = (type: 'tyruss' | 'water' | 'meal' | 'extra') => {
+    if (!isDayUnlocked) return;
+
     let updatedTyruss = tyrussTaken;
     let updatedWater = water2L;
     let updatedMeal = antiinflammatoryMeal;
@@ -113,6 +134,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   };
 
   const handleNotesChange = (val: string) => {
+    if (!isDayUnlocked) return;
     setNotes(val);
     const updatedData: DayProgress = {
       dayNumber: dayPlan.dayNumber,
@@ -136,7 +158,11 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto pt-3 sm:pt-6 pb-12 animate-fadeIn">
       <div className="relative w-full max-w-2xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-emerald-100/80 overflow-hidden my-auto flex flex-col max-h-[92vh]">
         {/* Header Ribbon - Fixed */}
-        <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-4 sm:p-6 shrink-0 relative border-b border-emerald-900/40">
+        <div className={`p-4 sm:p-6 shrink-0 relative border-b text-white ${
+          isDayUnlocked 
+            ? 'bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 border-emerald-900/40' 
+            : 'bg-gradient-to-r from-slate-900 via-slate-950 to-[#0c1622] border-amber-500/30'
+        }`}>
           <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 z-20">
             <button
               onClick={onClose}
@@ -154,9 +180,11 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
             </button>
           </div>
 
-          <div className="flex items-center gap-2 mb-1 pr-24">
-            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">
-              Día {dayPlan.dayNumber} de 30
+          <div className="flex items-center gap-2 mb-1 pr-24 flex-wrap">
+            <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+              isDayUnlocked ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-amber-300 border border-amber-400/40'
+            }`}>
+              {isDayUnlocked ? `Día ${dayPlan.dayNumber} de 30` : `🔒 Día ${dayPlan.dayNumber} • Bloqueado`}
             </span>
             <span className="text-[11px] sm:text-xs text-emerald-200 font-medium truncate">
               {dayPlan.phaseName}
@@ -173,6 +201,18 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
 
         {/* Modal Body - Scrollable */}
         <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1 overscroll-contain">
+          
+          {/* If Day is Locked: Show 24H Countdown Clock Hero */}
+          {!isDayUnlocked && (
+            <DayCountdownClock
+              dayNumber={dayPlan.dayNumber}
+              startDate={userProfile.startDate}
+              variant="hero"
+              showExplanation={true}
+              onUnlocked={() => setUnlockedMaxDay(getMaxUnlockedDay(userProfile.startDate))}
+            />
+          )}
+
           {/* Tip de la Nutricionista Marié */}
           <div className="bg-gradient-to-br from-emerald-50/90 via-teal-50/50 to-white border border-emerald-200/80 rounded-2xl p-4 sm:p-5 relative shadow-xs">
             <div className="flex items-start gap-3.5">
@@ -238,21 +278,38 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
           </div>
 
           {/* Interactive Daily Habit Checklist */}
-          <div className="space-y-3">
+          <div className="space-y-3 relative">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                 <span>Cumplimiento Diario de Hábitos</span>
               </h4>
-              <span className="text-xs font-bold text-emerald-700">
-                {[tyrussTaken, water2L, antiinflammatoryMeal].filter(Boolean).length}/3 Obligatorios
-              </span>
+              {isDayUnlocked ? (
+                <span className="text-xs font-bold text-emerald-700">
+                  {[tyrussTaken, water2L, antiinflammatoryMeal].filter(Boolean).length}/3 Obligatorios
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-amber-600" />
+                  Bloqueado temporalmente
+                </span>
+              )}
             </div>
 
-            <div className="space-y-2">
+            {!isDayUnlocked && (
+              <div className="bg-amber-500/10 border border-amber-400/40 rounded-xl p-3 text-xs text-amber-900 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span>
+                  El test somático y el registro de tomas se habilitarán exactamente cuando transcurran las 24 horas del protocolo.
+                </span>
+              </div>
+            )}
+
+            <div className={`space-y-2 ${!isDayUnlocked ? 'opacity-60 pointer-events-none' : ''}`}>
               {/* Check 1: Tyruss Full */}
               <button
                 type="button"
+                disabled={!isDayUnlocked}
                 onClick={() => handleCheckboxToggle('tyruss')}
                 className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition-all cursor-pointer ${
                   tyrussTaken 
@@ -275,6 +332,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               {/* Check 2: Water */}
               <button
                 type="button"
+                disabled={!isDayUnlocked}
                 onClick={() => handleCheckboxToggle('water')}
                 className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition-all cursor-pointer ${
                   water2L 
@@ -297,6 +355,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               {/* Check 3: Antiinflammatory Diet */}
               <button
                 type="button"
+                disabled={!isDayUnlocked}
                 onClick={() => handleCheckboxToggle('meal')}
                 className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition-all cursor-pointer ${
                   antiinflammatoryMeal 
@@ -319,6 +378,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               {/* Check 4: Specific Task */}
               <button
                 type="button"
+                disabled={!isDayUnlocked}
                 onClick={() => handleCheckboxToggle('extra')}
                 className={`w-full p-3 rounded-xl border text-left flex items-center justify-between gap-3 transition-all cursor-pointer ${
                   extraHabit 
@@ -348,11 +408,12 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
           </div>
 
           {/* Personal Reflection & Notes */}
-          <div className="space-y-1.5">
+          <div className={`space-y-1.5 ${!isDayUnlocked ? 'opacity-60 pointer-events-none' : ''}`}>
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               Notas y Sensaciones de {userProfile.name} para el Día {dayPlan.dayNumber}
             </label>
             <textarea
+              disabled={!isDayUnlocked}
               value={notes}
               onChange={(e) => handleNotesChange(e.target.value)}
               placeholder="¿Cómo te sentiste hoy? (Ej: Menos pesadez, más activa, descansé mejor...)"
@@ -375,15 +436,22 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
           <button
             onClick={onClose}
             className={`py-2.5 px-6 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
-              isFullyCompleted
+              !isDayUnlocked
+                ? 'bg-slate-800 hover:bg-slate-900 text-white'
+                : isFullyCompleted
                 ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
                 : 'bg-slate-800 hover:bg-slate-900 text-white'
             }`}
           >
-            {isFullyCompleted ? '✓ Día Registrado' : 'Guardar y Cerrar'}
+            {!isDayUnlocked 
+              ? '🔒 Entendido (Volver al Calendario)' 
+              : isFullyCompleted 
+              ? '✓ Día Registrado' 
+              : 'Guardar y Cerrar'}
           </button>
         </div>
       </div>
     </div>
   );
 };
+

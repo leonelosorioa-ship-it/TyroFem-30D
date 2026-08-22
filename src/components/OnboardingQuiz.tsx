@@ -26,6 +26,13 @@ import {
   isCodeAlreadyUsed, 
   markCodeAsRedeemed 
 } from '../data/authorizedCodes';
+import { 
+  isAdminCredentials, 
+  ADMIN_CREDENTIALS, 
+  findUserByCodeOrEmail, 
+  saveRegisteredUser, 
+  RegisteredUser 
+} from '../data/usersDatabase';
 
 interface OnboardingQuizProps {
   onComplete: (profile: UserProfile) => void;
@@ -129,16 +136,50 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
     return `https://wa.me/573104007428?text=${encodeURIComponent(text)}`;
   };
 
-  // Code validation handler with strict 50 authorized codes verification
+  // Code validation handler with Admin credentials support and status checks
   const handleValidateStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     setCodeError(null);
 
     const cleanName = name.trim();
     const cleanPhone = phone.trim();
-    const cleanEmail = email.trim();
+    const cleanEmail = email.trim().toLowerCase();
     const cleanCode = accessCode.replace(/\D/g, ''); // only digits
 
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      setCodeError('Por favor ingresa un correo electrónico válido.');
+      return;
+    }
+    if (cleanCode.length !== 6) {
+      setCodeError('El código de acceso debe contener exactamente 6 dígitos numéricos.');
+      return;
+    }
+
+    // A. Check for Admin Credentials (contacto@colshopi.com / 250816)
+    if (isAdminCredentials(cleanEmail, cleanCode)) {
+      setIsGenerating(true);
+      setTimeout(() => {
+        const adminProfile: UserProfile = {
+          name: cleanName || ADMIN_CREDENTIALS.name,
+          phone: cleanPhone || '+57 310 400 7428',
+          email: ADMIN_CREDENTIALS.email,
+          accessCode: ADMIN_CREDENTIALS.code,
+          ageGroup: '35-44 años',
+          primaryAngle: 'tiroides_metabolismo',
+          symptoms: ['Supervisión y Monitoreo de Plataforma'],
+          hasCompletedOnboarding: true,
+          startDate: new Date().toISOString(),
+          currentDay: 1,
+          unlockedBadges: ['badge_start', 'badge_vip', 'badge_admin'],
+          status: 'activa',
+          isAdmin: true
+        };
+        onComplete(adminProfile);
+      }, 1000);
+      return;
+    }
+
+    // B. Check if it's a regular user and validate required fields
     if (!cleanName) {
       setCodeError('Por favor ingresa tu nombre completo.');
       return;
@@ -147,13 +188,26 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       setCodeError('Por favor ingresa el número de WhatsApp con el que realizaste tu pedido.');
       return;
     }
-    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
-      setCodeError('Por favor ingresa un correo electrónico válido para recibir tu Informe Clínico.');
-      return;
-    }
-    if (cleanCode.length !== 6) {
-      setCodeError('El código de acceso debe contener exactamente 6 dígitos numéricos. Si aún no lo tienes, solicítalo al WhatsApp de ColShopi: +57 310 400 7428.');
-      return;
+
+    // C. Check if user already exists in centralized database and is suspended or disabled
+    const existingUser = findUserByCodeOrEmail(cleanEmail) || findUserByCodeOrEmail(cleanCode);
+    if (existingUser) {
+      if (existingUser.status === 'suspendida') {
+        setCodeError(
+          `⚠️ Tu cuenta ha sido SUSPENDIDA temporalmente por la administración de ColShopi. ${
+            existingUser.statusReason ? `Motivo: "${existingUser.statusReason}".` : ''
+          } Comunícate con soporte al WhatsApp +57 310 400 7428 para reactivar tu acceso.`
+        );
+        return;
+      }
+      if (existingUser.status === 'inhabilitada') {
+        setCodeError(
+          `⛔ Tu cuenta ha sido INHABILITADA de forma permanente por la administración de ColShopi. ${
+            existingUser.statusReason ? `Motivo: "${existingUser.statusReason}".` : ''
+          } Comunícate con soporte al WhatsApp +57 310 400 7428 si consideras que es un error.`
+        );
+        return;
+      }
     }
 
     // 1. Check if the code is in the 50 authorized master database
@@ -177,6 +231,14 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
     setStep(2);
   };
 
+  const handleAdminQuickFill = () => {
+    setName('Administrador ColShopi');
+    setPhone('+57 310 400 7428');
+    setEmail(ADMIN_CREDENTIALS.email);
+    setAccessCode(ADMIN_CREDENTIALS.code);
+    setCodeError(null);
+  };
+
   const handleFinish = () => {
     setIsGenerating(true);
     
@@ -187,20 +249,44 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       userEmail: email.trim()
     });
 
+    const newProfile: UserProfile = {
+      name: name.trim() || 'Compradora VIP',
+      phone: phone.trim(),
+      email: email.trim(),
+      accessCode: accessCode.trim(),
+      ageGroup,
+      primaryAngle,
+      symptoms: selectedSymptoms.length > 0 ? selectedSymptoms : ['Fatiga matutina', 'Inflamación digestiva'],
+      hasCompletedOnboarding: true,
+      startDate: new Date().toISOString(),
+      currentDay: 1,
+      unlockedBadges: ['badge_start', 'badge_vip'],
+      status: 'activa',
+      isAdmin: false
+    };
+
+    // Save to master centralized users database for admin tracking
+    const registeredUser: RegisteredUser = {
+      id: `usr_${accessCode.trim()}`,
+      name: newProfile.name,
+      email: newProfile.email || '',
+      phone: newProfile.phone || '',
+      accessCode: newProfile.accessCode || '',
+      ageGroup: newProfile.ageGroup || '35-44 años',
+      primaryAngle: newProfile.primaryAngle,
+      symptoms: newProfile.symptoms,
+      startDate: newProfile.startDate,
+      currentDay: 1,
+      completedDays: 0,
+      adherencePercent: 0,
+      status: 'activa',
+      registeredAt: new Date().toISOString(),
+      lastActivityAt: new Date().toISOString(),
+      notes: 'Registro verificado desde Onboarding TyroFem 30D.'
+    };
+    saveRegisteredUser(registeredUser);
+
     setTimeout(() => {
-      const newProfile: UserProfile = {
-        name: name.trim() || 'Compradora VIP',
-        phone: phone.trim(),
-        email: email.trim(),
-        accessCode: accessCode.trim(),
-        ageGroup,
-        primaryAngle,
-        symptoms: selectedSymptoms.length > 0 ? selectedSymptoms : ['Fatiga matutina', 'Inflamación digestiva'],
-        hasCompletedOnboarding: true,
-        startDate: new Date().toISOString(),
-        currentDay: 1,
-        unlockedBadges: ['badge_start', 'badge_vip']
-      };
       onComplete(newProfile);
     }, 1600);
   };
@@ -468,14 +554,26 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
-              {/* ColShopi VIP Customer Guarantee Badge */}
-              <div className="pt-3 text-center border-t border-slate-100 flex flex-col sm:flex-row items-center justify-center gap-2 text-[11px] text-slate-500">
-                <div className="flex items-center gap-1 font-semibold text-emerald-800">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Comunidad Exclusiva ColShopi Tienda By Leps Digital</span>
+              {/* ColShopi VIP Customer Guarantee Badge & Admin Access */}
+              <div className="pt-3 text-center border-t border-slate-100 flex flex-col items-center justify-center gap-2 text-[11px] text-slate-500">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2">
+                  <div className="flex items-center gap-1 font-semibold text-emerald-800">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Comunidad Exclusiva ColShopi Tienda By Leps Digital</span>
+                  </div>
+                  <span className="hidden sm:inline text-slate-300">•</span>
+                  <span className="text-slate-400">Garantía & Registro INVIMA RSA-0021928-2022</span>
                 </div>
-                <span className="hidden sm:inline text-slate-300">•</span>
-                <span className="text-slate-400">Garantía & Registro INVIMA RSA-0021928-2022</span>
+
+                <button
+                  type="button"
+                  onClick={handleAdminQuickFill}
+                  className="text-[10px] text-slate-400 hover:text-cyan-700 transition-colors inline-flex items-center gap-1 mt-1 cursor-pointer"
+                  title="Acceso para el equipo administrativo de ColShopi"
+                >
+                  <Lock className="w-2.5 h-2.5 text-slate-400" />
+                  <span>Acceso Administrativo ColShopi (contacto@colshopi.com)</span>
+                </button>
               </div>
             </form>
           )}
