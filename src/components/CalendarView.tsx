@@ -20,6 +20,7 @@ import { DayPlan, DayProgress, UserProfile } from '../types';
 import { CALENDAR_DAYS } from '../data/calendarData';
 import { getMaxUnlockedDay, getTimeRemainingForNextDay } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
+import { SuccessStoriesCarousel } from './SuccessStoriesCarousel';
 
 interface CalendarViewProps {
   userProfile: UserProfile;
@@ -348,6 +349,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           })}
         </div>
       </div>
+
+      {/* Social Proof: Historias de Éxito de Clientas ColShopi */}
+      <SuccessStoriesCarousel
+        userProfile={userProfile}
+        onOpenDayPlan={() => {
+          const currentPlan = CALENDAR_DAYS.find(d => d.dayNumber === currentDay) || CALENDAR_DAYS[0];
+          onSelectDay(currentPlan);
+        }}
+        onOpenChat={onOpenChat}
+        onOpenOrder={onOpenOrder}
+      />
     </div>
   );
 };
