@@ -416,6 +416,7 @@ export default function App() {
 
         {activeTab === 'recetas' && (
           <RecipeBook
+            userProfile={userProfile}
             initialRecipeId={targetRecipeId}
             onOpenOrder={() => handleOpenOrder(false)}
             onOpenChat={() => handleNavigateTab('chat')}
@@ -457,6 +458,7 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-1">
                 <MarieProfileCard 
+                  userProfile={userProfile}
                   onOpenChat={() => handleNavigateTab('chat')}
                   onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
                   onOpenVipPerks={() => setIsVipPerksModalOpen(true)}

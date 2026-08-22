@@ -103,7 +103,7 @@ export const MarieChat: React.FC<MarieChatProps> = ({
 
     // Simulate natural thinking delay
     setTimeout(() => {
-      const responseData = getMarieResponse(query);
+      const responseData = getMarieResponse(query, userProfile?.name);
       const marieMsg: ChatMessage = {
         id: `marie-${Date.now()}`,
         sender: 'marie',
@@ -164,7 +164,7 @@ export const MarieChat: React.FC<MarieChatProps> = ({
               <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
                 <span>By Leps Digital</span>
                 <span>•</span>
-                <span className="text-emerald-300">En línea para resolver tus dudas</span>
+                <span className="text-emerald-300">Asesorando a {userProfile?.name || 'nuestra clienta'}</span>
               </div>
             </div>
           </div>

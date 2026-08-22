@@ -78,10 +78,15 @@ export const Header: React.FC<HeaderProps> = ({
             {userProfile && onOpenUserProfile && !userProfile.isAdmin && (
               <button
                 onClick={onOpenUserProfile}
-                className="flex items-center gap-1 text-[10px] bg-cyan-950/90 border border-cyan-400/50 text-cyan-200 px-2 py-0.5 rounded-full hover:bg-cyan-900 transition-colors cursor-pointer"
-                title="Ver mi código VIP e Informe Clínico"
+                className="flex items-center gap-1.5 text-[10px] bg-gradient-to-r from-cyan-950 via-slate-900 to-cyan-950 border border-cyan-400/60 text-cyan-200 px-2.5 py-0.5 rounded-full hover:border-cyan-300 transition-all cursor-pointer shadow-xs"
+                title="Ver mi perfil VIP e Informe Clínico"
               >
-                <span className="font-bold">VIP {userProfile.accessCode ? `#${userProfile.accessCode}` : 'AUTORIZADO'}</span>
+                <span className="font-black text-amber-300 bg-amber-950/80 px-1 rounded border border-amber-400/40 text-[9px]">
+                  VIP {userProfile.accessCode ? `#${userProfile.accessCode}` : 'PRO'}
+                </span>
+                <span className="font-bold text-white max-w-[110px] xs:max-w-[160px] sm:max-w-[200px] truncate">
+                  {userProfile.name}
+                </span>
               </button>
             )}
 

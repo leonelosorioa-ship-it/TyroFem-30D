@@ -14,8 +14,10 @@ import {
 } from 'lucide-react';
 import { ColshopiLogo } from './ColshopiLogo';
 import { MariePhoto } from './MariePhoto';
+import { UserProfile } from '../types';
 
 interface MarieProfileCardProps {
+  userProfile?: UserProfile | null;
   onOpenChat: () => void;
   onOpenOrder?: () => void;
   onOpenVipPerks?: () => void;
@@ -24,12 +26,15 @@ interface MarieProfileCardProps {
 }
 
 export const MarieProfileCard: React.FC<MarieProfileCardProps> = ({
+  userProfile,
   onOpenChat,
   onOpenOrder,
   onOpenVipPerks,
   onOpenWelcomeAudio,
   variant = 'full',
 }) => {
+  const firstName = userProfile?.name ? userProfile.name.split(' ')[0] : 'hermosa';
+
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0c131a] via-[#080d12] to-[#040608] text-white border border-cyan-500/30 shadow-xl">
       {/* Glow Effects */}
@@ -71,7 +76,7 @@ export const MarieProfileCard: React.FC<MarieProfileCardProps> = ({
             </div>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
-              "En <strong>ColShopi Tienda By Leps Digital</strong> no solo te vendemos un suplemento; te acompañamos en todo tu proceso. Somos la <strong>única tienda naturista con una App propia</strong> para que registres tu evolución, desinflames tu organismo con <strong>Tyruss Full</strong> y sientas el cambio real día a día."
+              "Hola {userProfile?.name ? <strong className="text-white">{userProfile.name}</strong> : 'hermosa'}, en <strong>ColShopi Tienda By Leps Digital</strong> no solo te vendemos un suplemento; te acompañamos en todo tu proceso. Somos la <strong>única tienda naturista con una App propia</strong> para que registres tu evolución, desinflames tu organismo con <strong>Tyruss Full</strong> y sientas el cambio real día a día."
             </p>
 
             {/* Quick credentials & guarantees */}

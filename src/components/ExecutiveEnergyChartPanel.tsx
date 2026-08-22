@@ -157,10 +157,10 @@ export const ExecutiveEnergyChartPanel: React.FC<ExecutiveEnergyChartPanelProps>
           </div>
 
           <h3 className="text-lg sm:text-xl font-black text-slate-900 font-serif-luxury flex items-center gap-2">
-            Curva de Energía y Respuesta Metabólica 🌿
+            Curva de Energía y Respuesta Metabólica {userProfile?.name ? `• ${userProfile.name}` : ''} 🌿
           </h3>
           <p className="text-xs text-slate-600 max-w-2xl">
-            Visualiza cómo el aporte diario de Selenio, Yodo Quelado y activos de <strong>Tyruss Full</strong> han elevado tu curva de rendimiento físico y desinflamación.
+            Hola {userProfile?.name ? <strong>{userProfile.name}</strong> : 'hermosa'}, visualiza cómo el aporte diario de Selenio, Yodo Quelado y activos de <strong>Tyruss Full</strong> han elevado tu curva de rendimiento físico y desinflamación.
           </p>
         </div>
 

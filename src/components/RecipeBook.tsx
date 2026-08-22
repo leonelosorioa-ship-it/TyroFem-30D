@@ -12,10 +12,11 @@ import {
   Filter,
   ArrowLeft
 } from 'lucide-react';
-import { Recipe } from '../types';
+import { Recipe, UserProfile } from '../types';
 import { RECIPES_DATA } from '../data/recipesData';
 
 interface RecipeBookProps {
+  userProfile?: UserProfile | null;
   initialRecipeId?: string;
   onSelectRecipe?: (recipe: Recipe) => void;
   onOpenOrder: () => void;
@@ -23,6 +24,7 @@ interface RecipeBookProps {
 }
 
 export const RecipeBook: React.FC<RecipeBookProps> = ({
+  userProfile,
   initialRecipeId,
   onSelectRecipe,
   onOpenOrder,
@@ -64,10 +66,10 @@ export const RecipeBook: React.FC<RecipeBookProps> = ({
             <span>Recetario Funcional Tyruss Full</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold font-serif-luxury">
-            Combinaciones & Batidos de Marié 🍏🍍
+            Combinaciones & Batidos de Marié {userProfile?.name ? `para ${userProfile.name}` : ''} 🍏🍍
           </h2>
           <p className="text-sm text-emerald-100/90 max-w-2xl leading-relaxed">
-            Potencia los superalimentos de tu Tyruss Full (espirulina, chlorella, selenio y colágeno) con frutas funcionales, hierbas y grasas saludables para cada momento de tu día.
+            Hola {userProfile?.name ? <strong>{userProfile.name}</strong> : 'hermosa'}, potencia los superalimentos de tu <strong>Tyruss Full</strong> (espirulina, chlorella, selenio y colágeno) con frutas funcionales, hierbas y grasas saludables para cada momento de tu día.
           </p>
         </div>
       </div>

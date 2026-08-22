@@ -160,7 +160,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   Día 22 • Alerta de Continuidad
                 </span>
               </div>
-              <h4 className="font-bold text-base mt-0.5">¡Vas excelente en tu transformación!</h4>
+              <h4 className="font-bold text-base mt-0.5">¡Vas excelente en tu transformación, {userProfile.name}!</h4>
               <p className="text-xs text-amber-50 leading-relaxed mt-0.5 max-w-xl">
                 Tu primer tarro de Tyruss Full (25 tomas) está por culminar. Solicita tu recompra con beneficio exclusivo para clientas de Marié en <strong>ColShopi Tienda</strong> y no pauses tu fijación metabólica.
               </p>

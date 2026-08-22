@@ -183,7 +183,7 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
   }
 ];
 
-export function getMarieResponse(userText: string): {
+export function getMarieResponse(userText: string, userName?: string): {
   text: string;
   quickReplies?: string[];
   actionLink?: ChatMessage['actionLink'];
@@ -191,12 +191,24 @@ export function getMarieResponse(userText: string): {
   voiceDuration?: string;
 } {
   const normalized = userText.toLowerCase().trim();
+  const firstName = userName ? userName.split(' ')[0] : '';
+  const personalizedGreeting = firstName ? `¡Hola ${firstName}! 💜 ` : '';
 
   // Check against knowledge base triggers
   for (const topic of FAQ_KNOWLEDGE_BASE) {
     if (topic.triggers.some(trigger => normalized.includes(trigger))) {
+      let respText = topic.response;
+      if (firstName && !respText.includes(firstName)) {
+        // Subtle personalization
+        if (respText.startsWith('🦋')) {
+          respText = `🦋 ${firstName}, te entiendo perfectamente… y sé lo frustrante que es cuando tu cuerpo no responde igual 💜\n` + respText.substring(respText.indexOf('\n\n') + 2);
+        } else if (respText.startsWith('🌸')) {
+          respText = `🌸 ${firstName}, debe ser muy incómodo pasar por eso… muchas mujeres en cambios hormonales o menopausia sienten exactamente lo mismo 💜\n` + respText.substring(respText.indexOf('\n\n') + 2);
+        }
+      }
+
       return {
-        text: topic.response,
+        text: respText,
         quickReplies: topic.quickReplies,
         actionLink: topic.actionLink,
         isVoiceNote: topic.isVoiceNote,
@@ -207,7 +219,7 @@ export function getMarieResponse(userText: string): {
 
   // Empathetic default response in Marié's voice
   return {
-    text: `Te entiendo perfectamente 💜. Muchas mujeres pasan por situaciones similares cuando el cuerpo necesita un apoyo nutricional profundo 🌿.\n\nEn **ColShopi Tienda**, formulamos **Tyruss Full** precisamente con superalimentos (espirulina, chlorella, selenio, yodo orgánico y fibra) para ayudar a desinflamar, reactivar el metabolismo y devolverte tu vitalidad natural ✨.\n\n👉 *¿Te gustaría que revisemos el modo de uso, las promociones vigentes con la Loción Termoactiva de regalo, o prefieres consultar un síntoma en específico?*`,
+    text: `${personalizedGreeting}Te entiendo perfectamente 💜. Muchas mujeres pasan por situaciones similares cuando el cuerpo necesita un apoyo nutricional profundo 🌿.\n\nEn **ColShopi Tienda**, formulamos **Tyruss Full** precisamente con superalimentos (espirulina, chlorella, selenio, yodo orgánico y fibra) para ayudar a desinflamar, reactivar el metabolismo y devolverte tu vitalidad natural ✨.\n\n👉 *¿Te gustaría que revisemos el modo de uso, las promociones vigentes con la Loción Termoactiva de regalo, o prefieres consultar un síntoma en específico?*`,
     quickReplies: [
       '🥤 ¿Cómo se prepara y toma?',
       '📦 Ver Promociones y Precios',
@@ -217,7 +229,7 @@ export function getMarieResponse(userText: string): {
     actionLink: {
       text: 'Pedir Asesoría Directa por WhatsApp 💬',
       type: 'whatsapp',
-      url: `https://wa.me/573104007428?text=Hola%20Marié,%20tengo%20una%20pregunta%20sobre:%20${encodeURIComponent(userText)}`
+      url: `https://wa.me/573104007428?text=Hola%20Marié,%20soy%20${encodeURIComponent(firstName || 'usuaria')}%20y%20tengo%20una%20pregunta%20sobre:%20${encodeURIComponent(userText)}`
     }
   };
 }

@@ -108,7 +108,7 @@ export const ExecutiveSummaryPanel: React.FC<ExecutiveSummaryPanelProps> = ({
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-900">
-            Resumen Ejecutivo de Bienestar ColShopi
+            Resumen Ejecutivo • {userProfile.name}
           </span>
         </div>
         <span className="text-[10px] text-slate-500 font-medium">

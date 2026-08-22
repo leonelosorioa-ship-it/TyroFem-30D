@@ -17,14 +17,18 @@ import {
 } from 'lucide-react';
 import { ColshopiLogo } from './ColshopiLogo';
 import { MariePhoto } from './MariePhoto';
+import { UserProfile } from '../types';
 
 interface ColshopiVipPerksModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenOrderModal?: () => void;
   onOpenChatModal?: () => void;
+  onOpenOrder?: () => void;
+  onOpenChat?: () => void;
   userAccessCode?: string;
   userName?: string;
+  userProfile?: UserProfile | null;
 }
 
 export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
@@ -32,10 +36,18 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
   onClose,
   onOpenOrderModal,
   onOpenChatModal,
-  userAccessCode = '849201',
-  userName = 'Compradora VIP'
+  onOpenOrder,
+  onOpenChat,
+  userAccessCode,
+  userName,
+  userProfile
 }) => {
   if (!isOpen) return null;
+
+  const resolvedName = userProfile?.name || userName || 'Compradora VIP';
+  const resolvedCode = userProfile?.accessCode || userAccessCode || '849201';
+  const handleOrder = onOpenOrder || onOpenOrderModal;
+  const handleChat = onOpenChat || onOpenChatModal;
 
   const vipAdvantages = [
     {
@@ -106,7 +118,7 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
                   Comunidad VIP Oficial
                 </span>
                 <span className="text-[9px] sm:text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-400/40">
-                  Código: #{userAccessCode}
+                  Código: #{resolvedCode}
                 </span>
               </div>
 
@@ -115,7 +127,7 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
               </h2>
 
               <p className="text-[11px] sm:text-xs text-slate-300 leading-relaxed">
-                ¡Hola, <strong className="text-emerald-300">{userName}</strong>! Queremos que sientas la diferencia de comprar en la <strong>única Tienda Online Naturista con App Exclusiva</strong> para cuidar tu salud y acompañar tu tratamiento.
+                ¡Hola, <strong className="text-emerald-300">{resolvedName}</strong>! Queremos que sientas la diferencia de comprar en la <strong>única Tienda Online Naturista con App Exclusiva</strong> para cuidar tu salud y acompañar tu tratamiento.
               </p>
             </div>
           </div>
@@ -162,18 +174,18 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
           <button
             onClick={() => {
               onClose();
-              if (onOpenChatModal) onOpenChatModal();
+              if (handleChat) handleChat();
             }}
             className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold transition-all border border-cyan-500/40 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <MessageCircle className="w-4 h-4" />
-            <span>Hablar con Marié por WhatsApp</span>
+            <span>Hablar con Marié en la App</span>
           </button>
 
           <button
             onClick={() => {
               onClose();
-              if (onOpenOrderModal) onOpenOrderModal();
+              if (handleOrder) handleOrder();
             }}
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
           >
