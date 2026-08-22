@@ -31,6 +31,7 @@ import { generateTransformationReportPDF } from '../utils/pdfGenerator';
 import { getMaxUnlockedDay } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
+import { ExecutiveSummaryPanel } from './ExecutiveSummaryPanel';
 
 interface DailyTrackerProps {
   userProfile: UserProfile;
@@ -247,6 +248,17 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
 
   return (
     <div className="space-y-6 pb-20">
+      {/* Top Executive Summary Panel with Interactive KPI Cards */}
+      <ExecutiveSummaryPanel
+        userProfile={userProfile}
+        progressMap={progressMap}
+        currentDay={currentDay}
+        unlockedMaxDay={unlockedMaxDay}
+        onSelectSubTab={(tab) => setActiveSubTab(tab)}
+        onOpenReport={() => setIsReportModalOpen(true)}
+        onSelectDay={(day) => setSelectedDay(day)}
+      />
+
       {/* Header Overview Card */}
       <div className="bg-white rounded-3xl p-6 border border-emerald-100 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
