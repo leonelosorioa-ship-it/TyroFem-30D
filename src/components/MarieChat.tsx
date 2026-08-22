@@ -19,6 +19,7 @@ import {
 import { ChatMessage, UserProfile } from '../types';
 import { INITIAL_MARIE_MESSAGES, getMarieResponse } from '../data/faqChatData';
 import { ColshopiLogo } from './ColshopiLogo';
+import { MariePhoto } from './MariePhoto';
 
 interface MarieChatProps {
   userProfile: UserProfile;
@@ -138,15 +139,7 @@ export const MarieChat: React.FC<MarieChatProps> = ({
           <div className="flex items-center gap-3.5">
             {/* Visual Portrait Replica */}
             <div className="relative shrink-0">
-              <div className="w-15 h-15 rounded-2xl p-0.5 bg-gradient-to-br from-cyan-400 to-emerald-400 shadow-[0_0_15px_rgba(0,229,255,0.4)]">
-                <div className="w-full h-full rounded-[14px] bg-[#0c161d] overflow-hidden flex flex-col items-center justify-end relative">
-                  <div className="text-2xl mt-1">👩🏻‍⚕️</div>
-                  <div className="bg-black text-[7px] text-white font-black px-1.5 py-0.2 rounded-xs border border-slate-700 mb-0.5 tracking-wider">
-                    MARIÉ
-                  </div>
-                </div>
-              </div>
-              <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-400 border-2 border-slate-900 rounded-full" />
+              <MariePhoto size="md" showBadge={false} showNeonBg={true} />
             </div>
 
             <div>

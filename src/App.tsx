@@ -33,7 +33,7 @@ import { ColshopiCorporateBanner } from './components/ColshopiCorporateBanner';
 import { ColshopiLogo } from './components/ColshopiLogo';
 import { MarieProfileCard } from './components/MarieProfileCard';
 import { UserProfileModal } from './components/UserProfileModal';
-import { AdminCodePoolModal } from './components/AdminCodePoolModal';
+import { ColshopiVipPerksModal } from './components/ColshopiVipPerksModal';
 import { CALENDAR_DAYS } from './data/calendarData';
 import { RECIPES_DATA } from './data/recipesData';
 
@@ -74,7 +74,7 @@ export default function App() {
   const [isNutritionalModalOpen, setIsNutritionalModalOpen] = useState(false);
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
   const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
-  const [isAdminCodeModalOpen, setIsAdminCodeModalOpen] = useState(false);
+  const [isVipPerksModalOpen, setIsVipPerksModalOpen] = useState(false);
   const [isReorderTrigger, setIsReorderTrigger] = useState(false);
 
   // Save changes to localStorage
@@ -297,7 +297,8 @@ export default function App() {
               <div className="md:col-span-1">
                 <MarieProfileCard 
                   onOpenChat={() => setActiveTab('chat')}
-                  onOpenBrandModal={() => setIsBrandModalOpen(true)}
+                  onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
+                  onOpenVipPerks={() => setIsVipPerksModalOpen(true)}
                 />
               </div>
 
@@ -477,10 +478,19 @@ export default function App() {
         currentDay={currentDay}
       />
 
-      {/* ColShopi Admin 50 Codes Database Modal */}
-      <AdminCodePoolModal
-        isOpen={isAdminCodeModalOpen}
-        onClose={() => setIsAdminCodeModalOpen(false)}
+      {/* ColShopi VIP Customer Exclusivity & Perks Modal */}
+      <ColshopiVipPerksModal
+        isOpen={isVipPerksModalOpen}
+        onClose={() => setIsVipPerksModalOpen(false)}
+        onOpenOrder={() => {
+          setIsVipPerksModalOpen(false);
+          handleOpenOrder(false);
+        }}
+        onOpenChat={() => {
+          setIsVipPerksModalOpen(false);
+          setActiveTab('chat');
+        }}
+        userProfile={userProfile}
       />
 
       {/* PWA Installation Helper */}
@@ -504,11 +514,12 @@ export default function App() {
 
             <div className="flex items-center flex-wrap gap-2.5">
               <button
-                onClick={() => setIsAdminCodeModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-slate-900 border border-emerald-500/40 text-emerald-300 text-xs font-semibold hover:bg-emerald-950 transition-colors cursor-pointer flex items-center gap-1.5"
-                title="Ver y copiar los 50 códigos autorizados para entregar a compradoras"
+                onClick={() => setIsVipPerksModalOpen(true)}
+                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-900/80 via-teal-900/80 to-cyan-900/80 border border-emerald-400/50 text-emerald-200 text-xs font-bold hover:border-emerald-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-98"
+                title="Conoce las ventajas exclusivas de ser cliente VIP de ColShopi Tienda"
               >
-                <span>🔑 50 Códigos VIP</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>⭐ Mis Ventajas VIP ColShopi</span>
               </button>
 
               <button
