@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { HealthAngle } from '../types';
+import { HealthAngle, UserProfile } from '../types';
 import { MASTER_AUTHORIZED_CODES, getRedeemedCodesRegistry } from './authorizedCodes';
 
 export type UserStatus = 'activa' | 'suspendida' | 'inhabilitada';
@@ -39,12 +39,10 @@ export function isAdminCredentials(email?: string, code?: string): boolean {
 }
 
 const STORAGE_KEY_USERS_DB = 'tyrofem_registered_users_db';
-
-// Known mock user IDs from development to purge automatically
 const MOCK_USER_IDS = ['usr_849201', 'usr_623914', 'usr_518472', 'usr_934165', 'usr_412893', 'usr_735628'];
 
 /**
- * Obtener todas las usuarias registradas en la base de datos real
+ * Obtener todas las usuarias registradas en la base de datos (Memoria Local/Cache)
  */
 export function getRegisteredUsers(): RegisteredUser[] {
   try {
@@ -69,14 +67,36 @@ export function getRegisteredUsers(): RegisteredUser[] {
 }
 
 /**
- * Guardar o actualizar una usuaria en la base de datos central
+ * Obtener usuarias directamente desde el servidor centralizado de ColShopi
+ */
+export async function fetchRegisteredUsersFromServer(): Promise<RegisteredUser[]> {
+  try {
+    const response = await fetch('/api/users');
+    if (!response.ok) {
+      throw new Error(`Server returned status ${response.status}`);
+    }
+    const data = await response.json();
+    if (data && Array.isArray(data.users)) {
+      const serverUsers: RegisteredUser[] = data.users.filter((u: any) => !MOCK_USER_IDS.includes(u.id));
+      localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(serverUsers));
+      return serverUsers;
+    }
+    return getRegisteredUsers();
+  } catch (error) {
+    console.warn('Could not fetch users from server, fallback to local storage:', error);
+    return getRegisteredUsers();
+  }
+}
+
+/**
+ * Guardar o actualizar una usuaria en la base de datos central y local
  */
 export function saveRegisteredUser(user: RegisteredUser): void {
   try {
     const users = getRegisteredUsers();
     const existingIndex = users.findIndex(
       u => u.id === user.id || 
-           u.email.toLowerCase() === user.email.toLowerCase() || 
+           (user.email && u.email.toLowerCase() === user.email.toLowerCase()) || 
            (user.accessCode && u.accessCode === user.accessCode)
     );
 
@@ -95,15 +115,61 @@ export function saveRegisteredUser(user: RegisteredUser): void {
     }
 
     localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
+
+    // Dispatch background sync to centralized server
+    fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(user)
+    }).catch(err => {
+      console.warn('Background sync to server failed:', err);
+    });
+
+    // Notify components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tyrofem_users_updated', { detail: user }));
+    }
   } catch (error) {
     console.error('Error saving user to registry', error);
   }
 }
 
 /**
+ * Sincronizar el progreso diario y sesión activa de la usuaria con el servidor
+ */
+export function syncUserSessionToServer(userProfile: UserProfile | null, progressMap?: Record<number, any>): void {
+  if (!userProfile || userProfile.isAdmin) return;
+
+  const payload = {
+    userProfile: {
+      ...userProfile,
+      name: userProfile.name,
+      email: userProfile.email,
+      phone: userProfile.phone,
+      accessCode: userProfile.accessCode,
+      primaryAngle: userProfile.primaryAngle,
+      ageGroup: userProfile.ageGroup,
+      symptoms: userProfile.symptoms,
+      startDate: userProfile.startDate,
+      status: userProfile.status || 'activa',
+      statusReason: userProfile.statusReason
+    },
+    progressMap: progressMap || {}
+  };
+
+  fetch('/api/users/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(err => {
+    console.warn('Error syncing session to server:', err);
+  });
+}
+
+/**
  * Cambiar el estado de una usuaria: Habilitar ('activa'), Suspender ('suspendida'), Inhabilitar ('inhabilitada')
  */
-export function updateUserStatus(userIdOrEmail: string, status: UserStatus, reason?: string): boolean {
+export async function updateUserStatus(userIdOrEmail: string, status: UserStatus, reason?: string): Promise<boolean> {
   try {
     const users = getRegisteredUsers();
     const cleanQuery = userIdOrEmail.trim().toLowerCase();
@@ -111,34 +177,49 @@ export function updateUserStatus(userIdOrEmail: string, status: UserStatus, reas
       u => u.id === userIdOrEmail || u.email.toLowerCase() === cleanQuery || u.accessCode === cleanQuery
     );
 
-    if (userIndex === -1) return false;
-
-    users[userIndex].status = status;
-    if (reason !== undefined) {
-      users[userIndex].statusReason = reason;
-    } else if (status === 'activa') {
-      users[userIndex].statusReason = undefined;
+    if (userIndex >= 0) {
+      users[userIndex].status = status;
+      if (reason !== undefined) {
+        users[userIndex].statusReason = reason;
+      } else if (status === 'activa') {
+        users[userIndex].statusReason = undefined;
+      }
+      users[userIndex].lastActivityAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
     }
-    users[userIndex].lastActivityAt = new Date().toISOString();
 
-    localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(users));
-
-    // Also verify if this user is currently in local userProfile and sync
+    // Sync to local profile if it matches current active session
     try {
       const currentProfileRaw = localStorage.getItem('tyrofem_user_profile');
       if (currentProfileRaw) {
         const currentProfile = JSON.parse(currentProfileRaw);
         if (
-          currentProfile.email?.toLowerCase() === users[userIndex].email.toLowerCase() ||
-          currentProfile.accessCode === users[userIndex].accessCode
+          currentProfile.email?.toLowerCase() === cleanQuery ||
+          currentProfile.accessCode === cleanQuery ||
+          currentProfile.id === userIdOrEmail
         ) {
           currentProfile.status = status;
-          currentProfile.statusReason = users[userIndex].statusReason;
+          currentProfile.statusReason = reason;
           localStorage.setItem('tyrofem_user_profile', JSON.stringify(currentProfile));
         }
       }
     } catch (e) {
       // silent
+    }
+
+    // Send PATCH to central server
+    try {
+      await fetch(`/api/users/${encodeURIComponent(userIdOrEmail)}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, reason })
+      });
+    } catch (err) {
+      console.warn('Server status patch error:', err);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tyrofem_users_updated'));
     }
 
     return true;
@@ -166,11 +247,25 @@ export function findUserByCodeOrEmail(query: string): RegisteredUser | undefined
 /**
  * Eliminar una usuaria (solo admin)
  */
-export function deleteRegisteredUser(userId: string): boolean {
+export async function deleteRegisteredUser(userId: string): Promise<boolean> {
   try {
     const users = getRegisteredUsers();
     const filtered = users.filter(u => u.id !== userId);
     localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(filtered));
+
+    // Send DELETE to central server
+    try {
+      await fetch(`/api/users/${encodeURIComponent(userId)}`, {
+        method: 'DELETE'
+      });
+    } catch (err) {
+      console.warn('Server user delete error:', err);
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tyrofem_users_updated'));
+    }
+
     return true;
   } catch (error) {
     console.error('Error deleting user', error);
@@ -261,7 +356,7 @@ export function exportUsersToExcelFile(users?: RegisteredUser[]): { success: boo
     const availableCodes = totalMasterCodes - totalUsedCodes;
 
     const summaryDataForExcel = [
-      { 'Métrica / Indicador': 'Total de Usuarias Registradas en Base de Datos', 'Valor': totalUsers, 'Detalle': 'Base central TyroFem 30D' },
+      { 'Métrica / Indicador': 'Total de Usuarias Registradas en Base de Datos Central', 'Valor': totalUsers, 'Detalle': 'Base central TyroFem 30D ColShopi' },
       { 'Métrica / Indicador': 'Usuarias Activas (Habilitadas)', 'Valor': activeCount, 'Detalle': `${Math.round((activeCount / (totalUsers || 1)) * 100)}% del total` },
       { 'Métrica / Indicador': 'Usuarias Suspendidas Temporalmente', 'Valor': suspendedCount, 'Detalle': 'Por revisión o infracción leve' },
       { 'Métrica / Indicador': 'Usuarias Inhabilitadas Permanentemente', 'Valor': disabledCount, 'Detalle': 'Acceso revocado por administración' },

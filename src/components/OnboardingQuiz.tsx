@@ -210,6 +210,34 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
         );
         return;
       }
+
+      // If returning active user with matching credentials, restore session directly
+      if (existingUser.status === 'activa') {
+        const emailMatches = existingUser.email && existingUser.email.toLowerCase() === cleanEmail;
+        const codeMatches = existingUser.accessCode && existingUser.accessCode === cleanCode;
+        if (emailMatches || codeMatches) {
+          setIsGenerating(true);
+          setTimeout(() => {
+            const restoredProfile: UserProfile = {
+              name: existingUser.name || cleanName,
+              phone: existingUser.phone || cleanPhone,
+              email: existingUser.email || cleanEmail,
+              accessCode: existingUser.accessCode || cleanCode,
+              ageGroup: existingUser.ageGroup || '35-44 años',
+              primaryAngle: existingUser.primaryAngle || 'tiroides_metabolismo',
+              symptoms: existingUser.symptoms || ['Soporte nutricional Tyruss Full'],
+              hasCompletedOnboarding: true,
+              startDate: existingUser.startDate || new Date().toISOString(),
+              currentDay: existingUser.currentDay || 1,
+              unlockedBadges: ['badge_start', 'badge_vip'],
+              status: 'activa',
+              isAdmin: false
+            };
+            onComplete(restoredProfile);
+          }, 1000);
+          return;
+        }
+      }
     }
 
     // 1. Check if the code is in the 50 authorized master database

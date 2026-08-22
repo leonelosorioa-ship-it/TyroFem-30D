@@ -36,6 +36,7 @@ import {
   RegisteredUser, 
   UserStatus, 
   getRegisteredUsers, 
+  fetchRegisteredUsersFromServer,
   updateUserStatus, 
   saveRegisteredUser, 
   deleteRegisteredUser, 
@@ -54,6 +55,8 @@ interface AdminPanelProps {
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdmin }) => {
   const [users, setUsers] = useState<RegisteredUser[]>(() => getRegisteredUsers());
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncedAt, setLastSyncedAt] = useState<string>(new Date().toLocaleTimeString('es-CO'));
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | UserStatus>('all');
   const [angleFilter, setAngleFilter] = useState<'all' | HealthAngle>('all');
@@ -76,9 +79,40 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
   const [newUserAge, setNewUserAge] = useState('35-44 años');
   const [newUserNotes, setNewUserNotes] = useState('');
 
-  const reloadUsers = () => {
-    setUsers(getRegisteredUsers());
+  const reloadUsers = async (showLoadingSpinner = false) => {
+    if (showLoadingSpinner) setIsSyncing(true);
+    try {
+      const serverUsers = await fetchRegisteredUsersFromServer();
+      setUsers(serverUsers);
+      setLastSyncedAt(new Date().toLocaleTimeString('es-CO'));
+    } catch (e) {
+      setUsers(getRegisteredUsers());
+    } finally {
+      if (showLoadingSpinner) {
+        setTimeout(() => setIsSyncing(false), 500);
+      }
+    }
   };
+
+  // Initial fetch and auto-polling every 8 seconds for real-time registrations
+  useEffect(() => {
+    reloadUsers(true);
+
+    const interval = setInterval(() => {
+      reloadUsers(false);
+    }, 8000);
+
+    const handleCustomUpdate = () => {
+      reloadUsers(false);
+    };
+
+    window.addEventListener('tyrofem_users_updated', handleCustomUpdate);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('tyrofem_users_updated', handleCustomUpdate);
+    };
+  }, []);
 
   const codesSummary = useMemo(() => getCodesStatusSummary(), [users]);
 
@@ -216,12 +250,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            {/* Live Database Sync status */}
+            <div className="hidden sm:flex items-center gap-2 bg-slate-950/90 border border-emerald-500/40 text-emerald-300 text-[11px] px-3 py-1.5 rounded-xl shadow-xs">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="font-semibold">Base Central Conectada</span>
+              <span className="text-[10px] text-slate-400 font-mono">({lastSyncedAt})</span>
+            </div>
+
             <div className="hidden md:flex flex-col text-right">
               <span className="text-xs font-bold text-white truncate max-w-[200px]">
                 {ADMIN_CREDENTIALS.email}
               </span>
               <span className="text-[10px] text-emerald-400 flex items-center gap-1 justify-end">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                 Código Admin: 250816
               </span>
             </div>
@@ -404,11 +447,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
 
               <button
                 type="button"
-                onClick={reloadUsers}
-                className="p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl transition-colors cursor-pointer"
-                title="Recargar base de datos"
+                onClick={() => reloadUsers(true)}
+                disabled={isSyncing}
+                className="p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                title="Recargar y sincronizar con base de datos central"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-cyan-400' : ''}`} />
               </button>
             </div>
 

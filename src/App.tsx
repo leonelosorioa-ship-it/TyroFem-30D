@@ -42,7 +42,7 @@ import { UserSuspendedModal } from './components/UserSuspendedModal';
 import { MarieWelcomeAudioModal } from './components/MarieWelcomeAudioModal';
 import { AppEntryAudioPlayer } from './components/AppEntryAudioPlayer';
 import { promptPWAInstall } from './utils/pwaManager';
-import { findUserByCodeOrEmail } from './data/usersDatabase';
+import { findUserByCodeOrEmail, syncUserSessionToServer } from './data/usersDatabase';
 import { CALENDAR_DAYS } from './data/calendarData';
 import { RECIPES_DATA } from './data/recipesData';
 
@@ -149,15 +149,21 @@ export default function App() {
     }
   }, [userProfile?.isAdmin]);
 
-  // Save changes to localStorage
+  // Save changes to localStorage and sync with centralized server
   useEffect(() => {
     if (userProfile) {
       localStorage.setItem('tyrofem_user_profile', JSON.stringify(userProfile));
+      if (!userProfile.isAdmin) {
+        syncUserSessionToServer(userProfile, progressMap);
+      }
     }
   }, [userProfile]);
 
   useEffect(() => {
     localStorage.setItem('tyrofem_progress_map', JSON.stringify(progressMap));
+    if (userProfile && !userProfile.isAdmin) {
+      syncUserSessionToServer(userProfile, progressMap);
+    }
   }, [progressMap]);
 
   // Handle Onboarding Completion
