@@ -236,12 +236,8 @@ export const MarieChat: React.FC<MarieChatProps> = ({
             >
               <div className="flex items-end gap-2 max-w-[88%] sm:max-w-[78%]">
                 {isMarie && (
-                  <div className="w-7 h-7 rounded-full overflow-hidden border border-cyan-400/60 shadow-xs shrink-0 mb-1">
-                    <img
-                      src="/marie-avatar.png"
-                      alt="Marié"
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="shrink-0 mb-1">
+                    <MariePhoto size="xs" showBadge={false} />
                   </div>
                 )}
 

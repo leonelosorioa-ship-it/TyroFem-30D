@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
 interface MariePhotoProps {
@@ -8,11 +8,22 @@ interface MariePhotoProps {
   className?: string;
 }
 
+// Cascade list of photo sources to ensure the exact real photograph is always displayed
+const PHOTO_SOURCES = [
+  '/Marie JPG App.jpg',
+  '/marie-photo.jpg',
+  '/marie-avatar.png',
+  '/marie-hero.png',
+  '/marie-avatar.svg',
+];
+
 export const MariePhoto: React.FC<MariePhotoProps> = ({
   size = 'md',
   showBadge = true,
   className = '',
 }) => {
+  const [sourceIndex, setSourceIndex] = useState(0);
+
   // Size dimensions for container
   const dimensions = {
     xs: 'w-10 h-10',
@@ -32,6 +43,12 @@ export const MariePhoto: React.FC<MariePhotoProps> = ({
     hero: 'text-xs px-3.5 py-1 font-bold',
   }[size];
 
+  const handleImageError = () => {
+    if (sourceIndex < PHOTO_SOURCES.length - 1) {
+      setSourceIndex(prev => prev + 1);
+    }
+  };
+
   return (
     <div className={`relative inline-block select-none ${className}`}>
       {/* Outer Cyan Ambient Glow for larger sizes */}
@@ -39,22 +56,18 @@ export const MariePhoto: React.FC<MariePhotoProps> = ({
         <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500/30 via-teal-500/20 to-emerald-500/30 rounded-3xl blur-xl pointer-events-none animate-pulse" />
       )}
 
-      {/* Main Container Frame */}
+      {/* Main Container Frame with high contrast dark glass frame */}
       <div 
         className={`relative ${dimensions} rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-cyan-400/80 shadow-[0_4px_25px_rgba(0,229,255,0.35)] bg-[#070e14] flex items-center justify-center`}
       >
-        {/* High Resolution Photographic Asset */}
+        {/* Exact Real Photo */}
         <img
-          src="/marie-avatar.png"
+          src={PHOTO_SOURCES[sourceIndex]}
           alt="Nutricionista Marié - ColShopi Tienda"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-top sm:object-center"
           loading="eager"
           referrerPolicy="no-referrer"
-          onError={(e) => {
-            // Fallback to SVG if PNG fails
-            const target = e.currentTarget;
-            target.src = '/marie-avatar.svg';
-          }}
+          onError={handleImageError}
         />
 
         {/* Real Official Badge at bottom */}
