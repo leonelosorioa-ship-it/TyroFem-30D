@@ -16,6 +16,7 @@ import {
   Download,
   Check,
   FileText,
+  Smartphone,
   ArrowLeft
 } from 'lucide-react';
 import { DayProgress, UserProfile } from '../types';
@@ -31,6 +32,7 @@ interface UserProfileModalProps {
   progressMap?: Record<number, DayProgress>;
   currentDay?: number;
   onOpenAdminPanel?: () => void;
+  onInstallApp?: () => void;
   onLogout?: () => void;
 }
 
@@ -42,6 +44,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   progressMap = {},
   currentDay = 1,
   onOpenAdminPanel,
+  onInstallApp,
   onLogout
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -248,6 +251,21 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-md"
               >
                 <span>👑 Abrir Panel de Control Administrativo ColShopi</span>
+              </button>
+            )}
+
+            {/* PWA App Install Action */}
+            {onInstallApp && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onInstallApp();
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 hover:from-emerald-100 hover:to-teal-100 text-emerald-900 border border-emerald-300/80 font-bold flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-xs"
+              >
+                <Smartphone className="w-4 h-4 text-emerald-700" />
+                <span>Instalar App en la pantalla de mi celular</span>
               </button>
             )}
 

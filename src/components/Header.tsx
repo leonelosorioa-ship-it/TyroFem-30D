@@ -8,7 +8,8 @@ import {
   ShoppingBag, 
   FileText, 
   Smartphone,
-  Store
+  Store,
+  Download
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { ColshopiLogo } from './ColshopiLogo';
@@ -194,6 +195,18 @@ export const Header: React.FC<HeaderProps> = ({
             <ShoppingBag className="w-3.5 h-3.5" />
             <span>Pedir Tyruss Full</span>
           </button>
+
+          {/* Dedicated Download / Install App Button (matching DUERME header experience) */}
+          {onInstallPWA && (
+            <button
+              onClick={onInstallPWA}
+              className="p-2 text-emerald-800 bg-gradient-to-br from-emerald-100 to-teal-100 hover:from-emerald-200 hover:to-teal-200 rounded-xl transition-all border border-emerald-300/80 cursor-pointer shadow-sm active:scale-95 flex items-center justify-center shrink-0"
+              title="Descargar e instalar App TyroFem 30D"
+              aria-label="Descargar e instalar App"
+            >
+              <Download className="w-4 h-4 text-emerald-800" />
+            </button>
+          )}
         </div>
       </div>
 

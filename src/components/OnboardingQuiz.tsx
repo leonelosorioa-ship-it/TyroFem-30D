@@ -16,11 +16,13 @@ import {
   FileCheck2,
   Lock,
   Smartphone,
-  Gift
+  Gift,
+  Download
 } from 'lucide-react';
 import { HealthAngle, UserProfile } from '../types';
 import { ColshopiLogo } from './ColshopiLogo';
 import { MariePhoto } from './MariePhoto';
+import { promptPWAInstall } from '../utils/pwaManager';
 import { 
   isAuthorizedCode, 
   isCodeAlreadyUsed, 
@@ -323,17 +325,35 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
               </div>
             </div>
 
-            <div className="text-right shrink-0">
-              <span className="text-xs text-cyan-300 block font-medium">Paso {step} de 4</span>
-              <div className="flex gap-1.5 mt-1 justify-end">
-                {[1, 2, 3, 4].map(s => (
-                  <div 
-                    key={s} 
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      s === step ? 'w-6 bg-cyan-400' : s < step ? 'w-3 bg-emerald-400' : 'w-2 bg-slate-700'
-                    }`}
-                  />
-                ))}
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (window.__deferredPwaPrompt) {
+                    await promptPWAInstall();
+                  } else {
+                    alert('Para instalar TyroFem 30D: Abre el menú ⋮ de Chrome y presiona "Instalar aplicación", o en Safari toca "Compartir" y "Agregar al inicio".');
+                  }
+                }}
+                className="p-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/40 text-cyan-300 transition-all cursor-pointer shadow-sm active:scale-95 flex items-center gap-1 text-[10px] font-bold"
+                title="Descargar e Instalar App TyroFem 30D"
+              >
+                <Download className="w-3.5 h-3.5 text-cyan-300" />
+                <span className="hidden sm:inline">Instalar App</span>
+              </button>
+
+              <div className="text-right">
+                <span className="text-xs text-cyan-300 block font-medium">Paso {step} de 4</span>
+                <div className="flex gap-1.5 mt-1 justify-end">
+                  {[1, 2, 3, 4].map(s => (
+                    <div 
+                      key={s} 
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        s === step ? 'w-6 bg-cyan-400' : s < step ? 'w-3 bg-emerald-400' : 'w-2 bg-slate-700'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -1,24 +1,40 @@
 {
-  "name": "TyroFem 30D - Balance Hormonal & Tiroides",
+  "name": "TyroFem™ 30D Mujer - Balance Hormonal & Tiroides",
   "short_name": "TyroFem 30D",
-  "description": "App interactiva y guía de 30 días para balance hormonal, metabolismo y acompañamiento nutricional con Marié de ColShopi Tienda.",
+  "description": "Protocolo de 30 días para balance hormonal, tiroides, metabolismo y acompañamiento nutricional con Marié de ColShopi Tienda.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#081b17",
+  "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
+  "background_color": "#06281e",
   "theme_color": "#065F46",
   "orientation": "portrait",
+  "categories": ["health", "lifestyle", "medical"],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

@@ -4,11 +4,16 @@ import App from './App.tsx';
 import './index.css';
 
 // Register Service Worker for PWA
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // ignore in dev/sandbox
-    });
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => {
+        console.log('TyroFem PWA: Service Worker registered successfully', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('TyroFem PWA: Service Worker registration failed', err);
+      });
   });
 }
 

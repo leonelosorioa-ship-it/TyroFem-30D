@@ -39,6 +39,7 @@ import { ColshopiVipPerksModal } from './components/ColshopiVipPerksModal';
 import { WhatsAppShareButton } from './components/WhatsAppShareButton';
 import { AdminPanel } from './components/AdminPanel';
 import { UserSuspendedModal } from './components/UserSuspendedModal';
+import { promptPWAInstall } from './utils/pwaManager';
 import { findUserByCodeOrEmail } from './data/usersDatabase';
 import { CALENDAR_DAYS } from './data/calendarData';
 import { RECIPES_DATA } from './data/recipesData';
@@ -114,6 +115,21 @@ export default function App() {
   const [isAdminViewOpen, setIsAdminViewOpen] = useState<boolean>(() => {
     return userProfile?.isAdmin === true;
   });
+
+  // Direct PWA Install trigger (triggers native Chrome prompt or opens instructions modal)
+  const handleTriggerPWAInstall = async () => {
+    if (window.__deferredPwaPrompt) {
+      try {
+        const res = await promptPWAInstall();
+        if (res.outcome === 'accepted') {
+          return;
+        }
+      } catch (e) {
+        console.error('PWA install prompt error', e);
+      }
+    }
+    setIsPwaInstallModalOpen(true);
+  };
 
   // Handle Logout
   const handleLogout = () => {
@@ -286,7 +302,7 @@ export default function App() {
         onOpenBrandModal={() => setIsBrandModalOpen(true)}
         onOpenUserProfile={() => setIsUserProfileModalOpen(true)}
         onOpenAdminPanel={() => setIsAdminViewOpen(true)}
-        onInstallPWA={() => setIsPwaInstallModalOpen(true)}
+        onInstallPWA={handleTriggerPWAInstall}
       />
 
       {/* Main Tab Navigation Header (Desktop / Tablet) */}
@@ -631,6 +647,7 @@ export default function App() {
         progressMap={progressMap}
         currentDay={currentDay}
         onOpenAdminPanel={() => setIsAdminViewOpen(true)}
+        onInstallApp={handleTriggerPWAInstall}
         onLogout={handleLogout}
       />
 
@@ -658,7 +675,7 @@ export default function App() {
       />
 
         {/* PWA Installation Helper & Modal */}
-        <PWAInstallBanner onOpenInstallModal={() => setIsPwaInstallModalOpen(true)} />
+        <PWAInstallBanner onOpenModal={handleTriggerPWAInstall} />
         <PWAInstallModal
           isOpen={isPwaInstallModalOpen}
           onClose={() => setIsPwaInstallModalOpen(false)}
