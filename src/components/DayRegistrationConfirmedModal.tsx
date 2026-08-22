@@ -17,6 +17,7 @@ interface DayRegistrationConfirmedModalProps {
   isOpen: boolean;
   onClose: () => void;
   dayNumber: number;
+  completedDaysCount?: number;
   userProfile: UserProfile;
   onOpenReport: () => void;
   onOpenTrend: () => void;
@@ -27,12 +28,16 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
   isOpen,
   onClose,
   dayNumber,
+  completedDaysCount = 1,
   userProfile,
   onOpenReport,
   onOpenTrend,
   onOpenChat
 }) => {
   if (!isOpen) return null;
+
+  const progressPercent = Math.min(100, Math.round((completedDaysCount / 30) * 100));
+  const isMilestone = dayNumber === 7 || dayNumber === 14 || dayNumber === 21 || dayNumber === 30;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
@@ -53,7 +58,7 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
                 </span>
               </div>
               <h3 className="text-xl font-bold font-serif-luxury text-white mt-1">
-                ¡Día {dayNumber} Guardado con Éxito! 🌿
+                ¡Día {dayNumber} Guardado con Éxito! {isMilestone ? '🎉' : '🌿'}
               </h3>
             </div>
           </div>
@@ -61,25 +66,59 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
 
         {/* Content Body */}
         <div className="p-6 space-y-4 text-xs text-slate-700">
+          
+          {/* Progress Celebration Strip */}
+          <div className="bg-gradient-to-r from-emerald-900 to-teal-900 text-white rounded-2xl p-4 space-y-2.5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-200">
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>Progreso Total del Reto 30D</span>
+              </div>
+              <span className="text-xs font-black text-amber-300 bg-emerald-950/80 px-2 py-0.5 rounded-lg border border-amber-400/30">
+                {completedDaysCount} de 30 días ({progressPercent}%)
+              </span>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full bg-emerald-950/80 rounded-full h-2 overflow-hidden border border-emerald-700/50">
+              <div 
+                className="bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 h-full rounded-full transition-all duration-700"
+                style={{ width: `${Math.max(5, progressPercent)}%` }}
+              />
+            </div>
+
+            <p className="text-[11px] text-emerald-100 leading-snug">
+              {dayNumber >= 30 
+                ? '👑 ¡Felicidades! Has completado la totalidad del Reto TyroFem 30D.'
+                : dayNumber === 21
+                ? '🌸 ¡Hito de 21 Días alcanzado! Tu balance hormonal y hábitos están consolidados.'
+                : dayNumber === 14
+                ? '⚡ ¡Hito de 14 Días completado! Tu metabolismo y energía están activos.'
+                : dayNumber === 7
+                ? '🌿 ¡Hito de 7 Días completado! Tu proceso de desinflamación digestiva avanza con éxito.'
+                : `✨ ¡Sigue así! Estás a ${30 - completedDaysCount} ${30 - completedDaysCount === 1 ? 'día' : 'días'} de tu graduación oficial.`}
+            </p>
+          </div>
+
           {/* Main Notice */}
-          <div className="bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-4 space-y-2">
-            <div className="flex items-center gap-2 text-emerald-950 font-bold text-sm">
+          <div className="bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-3.5 space-y-1.5">
+            <div className="flex items-center gap-2 text-emerald-950 font-bold text-xs">
               <ShieldCheck className="w-4 h-4 text-emerald-700" />
               <span>Información registrada y protegida contra reprocesos</span>
             </div>
-            <p className="text-slate-600 leading-relaxed">
+            <p className="text-slate-600 leading-relaxed text-[11px]">
               Hola <strong>{userProfile.name}</strong>, tus tomas de <strong>Tyruss Full</strong>, hidratación, alimentación y métricas somáticas de hoy han quedado <strong>oficialmente consolidadas</strong>.
             </p>
           </div>
 
           {/* Locked Notice Explanation */}
-          <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3.5 space-y-1.5">
+          <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3 space-y-1">
             <div className="flex items-center gap-2 text-amber-950 font-bold text-xs">
-              <Lock className="w-4 h-4 text-amber-700 shrink-0" />
-              <span>Día bloqueado para edición: consulta disponible 24/7</span>
+              <Lock className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <span>Día asegurado para evitar duplicados: consulta disponible 24/7</span>
             </div>
             <p className="text-[11px] text-amber-900 leading-relaxed">
-              Para evitar confusiones y reprocesos en tu tratamiento metabólico, este día ha quedado asegurado. Podrás <strong>consultar sus datos en cualquier momento</strong> en tu calendario y en tus reportes.
+              Para garantizar la precisión de tu tratamiento metabólico, este día ha quedado registrado. Podrás consultar sus datos en cualquier momento en tu calendario y reporte.
             </p>
           </div>
 

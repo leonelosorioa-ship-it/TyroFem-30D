@@ -24,6 +24,7 @@ import {
   Eye
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { triggerDayCompletionConfetti } from '../utils/confettiCelebration';
 import { DayProgress, UserProfile } from '../types';
 import { EnergyTrendChart } from './EnergyTrendChart';
 import { TransformationReportModal } from './TransformationReportModal';
@@ -188,15 +189,17 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
 
     onSaveProgress(selectedDay, finalProgress);
 
-    try {
-      confetti({
-        particleCount: 75,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    } catch (e) {
-      // silent
-    }
+    // Calculate updated total completed days
+    const currentCompleted = (Object.values(progressMap) as DayProgress[]).filter(
+      p => p.dayNumber !== selectedDay && (p.completedAt || (p.tyrussTaken && p.water2L) || p.isLockedAfterSubmit)
+    ).length;
+    const updatedCompletedDays = currentCompleted + 1;
+
+    // Trigger tier-customized confetti animation linked to total progress
+    triggerDayCompletionConfetti({
+      dayNumber: selectedDay,
+      totalCompletedDays: updatedCompletedDays
+    });
 
     setShowConfirmationModal(true);
   };
@@ -930,6 +933,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         isOpen={showConfirmationModal}
         onClose={() => setShowConfirmationModal(false)}
         dayNumber={selectedDay}
+        completedDaysCount={completedDays}
         userProfile={userProfile}
         onOpenReport={() => {
           setShowConfirmationModal(false);
