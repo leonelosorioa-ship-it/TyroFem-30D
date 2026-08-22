@@ -2,20 +2,20 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-// High-Fidelity Photorealistic Render of Marié matching the exact attached real portrait
-const photorealisticMarieSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+// High-Fidelity Vector & Bitmap matching the new "Marié Caricatura App.jpeg"
+const marieCaricaturaSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <!-- Background Blur & Room Gradient -->
-    <radialGradient id="storeBackground" cx="40%" cy="30%" r="80%">
-      <stop offset="0%" stop-color="#0c1b26"/>
-      <stop offset="50%" stop-color="#081119"/>
-      <stop offset="100%" stop-color="#03070b"/>
-    </radialGradient>
+    <!-- Background Gradient (Muted Blue/Teal Room) -->
+    <linearGradient id="bgWall" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#416979"/>
+      <stop offset="50%" stop-color="#335665"/>
+      <stop offset="100%" stop-color="#233e4b"/>
+    </linearGradient>
 
-    <!-- Photorealistic Soft Glow Neon Filter -->
-    <filter id="neonSignGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur1"/>
-      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur2"/>
+    <!-- Neon Glow Filter -->
+    <filter id="neonCyanGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur2"/>
       <feMerge>
         <feMergeNode in="blur1"/>
         <feMergeNode in="blur2"/>
@@ -23,340 +23,421 @@ const photorealisticMarieSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox=
       </feMerge>
     </filter>
 
-    <!-- Soft Depth of Field Filter for Background -->
-    <filter id="bokehBlur" x="-10%" y="-10%" width="120%" height="120%">
-      <feGaussianBlur stdDeviation="3.5"/>
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.25"/>
     </filter>
 
-    <!-- Natural Skin Radiance Gradients (Photographic Warm Neutral) -->
-    <radialGradient id="skinBase" cx="50%" cy="45%" r="55%">
-      <stop offset="0%" stop-color="#fbe5dc"/>
-      <stop offset="45%" stop-color="#f4cebe"/>
-      <stop offset="80%" stop-color="#e3ae97"/>
-      <stop offset="100%" stop-color="#c98c74"/>
-    </radialGradient>
-
-    <radialGradient id="foreheadLight" cx="50%" cy="35%" r="40%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
-
-    <radialGradient id="cheekLeft" cx="42%" cy="52%" r="25%">
-      <stop offset="0%" stop-color="#e06277" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#e06277" stop-opacity="0"/>
-    </radialGradient>
-
-    <radialGradient id="cheekRight" cx="58%" cy="52%" r="25%">
-      <stop offset="0%" stop-color="#e06277" stop-opacity="0.22"/>
-      <stop offset="100%" stop-color="#e06277" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- Neck Ambient Occlusion -->
-    <linearGradient id="neckGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#a46852"/>
-      <stop offset="35%" stop-color="#ca8b73"/>
-      <stop offset="100%" stop-color="#e2aa94"/>
+    <!-- Wood Shelf Gradients -->
+    <linearGradient id="woodShelf" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d7a168"/>
+      <stop offset="40%" stop-color="#b87f48"/>
+      <stop offset="100%" stop-color="#8d5b2d"/>
     </linearGradient>
 
-    <!-- Hair Deep Brunette Realistic Gradients -->
-    <linearGradient id="hairDark" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1c100b"/>
-      <stop offset="40%" stop-color="#2d1912"/>
-      <stop offset="75%" stop-color="#3d2219"/>
-      <stop offset="100%" stop-color="#140b07"/>
+    <!-- Skin Gradients (Warm Animated Tone) -->
+    <linearGradient id="skinTone" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fee3d3"/>
+      <stop offset="60%" stop-color="#fdd1bc"/>
+      <stop offset="100%" stop-color="#f6b89c"/>
     </linearGradient>
 
-    <linearGradient id="hairSheen" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#4d2b20" stop-opacity="0"/>
-      <stop offset="50%" stop-color="#734433" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#4d2b20" stop-opacity="0"/>
+    <radialGradient id="cheekBlush" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f87171" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Hair Rich Brown Gradients -->
+    <linearGradient id="hairMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3d2218"/>
+      <stop offset="35%" stop-color="#542e20"/>
+      <stop offset="70%" stop-color="#381d14"/>
+      <stop offset="100%" stop-color="#241009"/>
     </linearGradient>
 
-    <!-- Tailored White Blazer Suit Gradients -->
-    <linearGradient id="suitWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="hairHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7a4633"/>
+      <stop offset="100%" stop-color="#4d281a"/>
+    </linearGradient>
+
+    <!-- Coat Gradients -->
+    <linearGradient id="coatWhite" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="55%" stop-color="#f8fafc"/>
-      <stop offset="85%" stop-color="#e2e8f0"/>
-      <stop offset="100%" stop-color="#cbd5e1"/>
+      <stop offset="75%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#dbe3eb"/>
     </linearGradient>
 
-    <linearGradient id="lapelLeftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="70%" stop-color="#f1f5f9"/>
-      <stop offset="100%" stop-color="#cbd5e1"/>
+    <linearGradient id="coatShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d1d9e2"/>
+      <stop offset="100%" stop-color="#b4c2ce"/>
     </linearGradient>
 
-    <linearGradient id="lapelRightGrad" x1="100%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="70%" stop-color="#f1f5f9"/>
-      <stop offset="100%" stop-color="#cbd5e1"/>
-    </linearGradient>
-
-    <!-- Eye Gradients -->
-    <radialGradient id="irisBrown" cx="40%" cy="40%" r="50%">
-      <stop offset="0%" stop-color="#6b3719"/>
-      <stop offset="60%" stop-color="#3d1d0c"/>
-      <stop offset="100%" stop-color="#1a0b04"/>
+    <!-- Eye Gradient -->
+    <radialGradient id="eyeIris" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#6e3919"/>
+      <stop offset="50%" stop-color="#451e0b"/>
+      <stop offset="100%" stop-color="#1e0a02"/>
     </radialGradient>
-
-    <!-- Lip Tone -->
-    <radialGradient id="lipGrad" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#cc5a6e"/>
-      <stop offset="70%" stop-color="#b54359"/>
-      <stop offset="100%" stop-color="#8c293e"/>
-    </radialGradient>
-
-    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.4"/>
-    </filter>
   </defs>
 
-  <!-- 1. Background Atmosphere & Pharmacy/Shop Setting with Bokeh -->
-  <rect width="800" height="800" fill="url(#storeBackground)"/>
+  <!-- 1. Background Interior -->
+  <rect width="1024" height="1024" fill="url(#bgWall)"/>
 
-  <!-- Shelves on the Right (Soft Out-of-Focus Background) -->
-  <g filter="url(#bokehBlur)" opacity="0.75">
-    <!-- Shelf 1 -->
-    <rect x="560" y="50" width="240" height="16" rx="2" fill="#2d1c14"/>
-    <rect x="560" y="66" width="240" height="4" fill="#00e5ff" opacity="0.6"/>
-    <!-- Plants & Jars -->
-    <ellipse cx="670" cy="45" rx="22" ry="12" fill="#166534"/>
-    <circle cx="660" cy="30" r="14" fill="#22c55e"/>
-    <circle cx="680" cy="28" r="13" fill="#15803d"/>
-    <rect x="600" y="20" width="24" height="30" rx="3" fill="#f8fafc"/>
-    <rect x="630" y="18" width="26" height="32" rx="3" fill="#065f46"/>
-    <rect x="710" y="15" width="30" height="35" rx="4" fill="#d97706"/>
-    <rect x="750" y="18" width="26" height="32" rx="3" fill="#f8fafc"/>
+  <!-- Left Back Counter with Cyan Strip -->
+  <rect x="0" y="550" width="300" height="22" fill="#2d4957"/>
+  <rect x="140" y="550" width="160" height="8" fill="#00e5ff" filter="url(#neonCyanGlow)"/>
+  <rect x="140" y="550" width="160" height="4" fill="#ffffff"/>
 
-    <!-- Shelf 2 -->
-    <rect x="560" y="190" width="240" height="16" rx="2" fill="#2d1c14"/>
-    <rect x="560" y="206" width="240" height="4" fill="#00e5ff" opacity="0.6"/>
-    <!-- Organic Pouches & Bottles -->
-    <rect x="580" y="125" width="40" height="65" rx="4" fill="#b45309"/>
-    <rect x="630" y="125" width="42" height="65" rx="4" fill="#0284c7"/>
-    <rect x="682" y="125" width="45" height="65" rx="4" fill="#0284c7"/>
-    <rect x="740" y="132" width="34" height="58" rx="4" fill="#10b981"/>
-
-    <!-- Shelf 3 -->
-    <rect x="560" y="330" width="240" height="16" rx="2" fill="#2d1c14"/>
-    <rect x="560" y="346" width="240" height="4" fill="#00e5ff" opacity="0.6"/>
-    <!-- Bottles -->
-    <rect x="585" y="265" width="32" height="65" rx="5" fill="#1e293b"/>
-    <rect x="625" y="265" width="35" height="65" rx="5" fill="#1e293b"/>
-    <rect x="670" y="258" width="40" height="72" rx="5" fill="#f8fafc"/>
-    <rect x="720" y="258" width="40" height="72" rx="5" fill="#f8fafc"/>
-
-    <!-- Shelf 4 -->
-    <rect x="560" y="470" width="240" height="16" rx="2" fill="#2d1c14"/>
-    <rect x="560" y="486" width="240" height="4" fill="#00e5ff" opacity="0.6"/>
-    <rect x="580" y="410" width="38" height="60" rx="4" fill="#047857"/>
-    <rect x="628" y="405" width="45" height="65" rx="5" fill="#ffffff"/>
-    <rect x="684" y="405" width="45" height="65" rx="5" fill="#ffffff"/>
+  <!-- Potted Plant on Back Counter -->
+  <g transform="translate(195, 435)">
+    <!-- Pot -->
+    <polygon points="12,85 52,85 58,50 6,50" fill="#cbd5e1" stroke="#334155" stroke-width="2.5"/>
+    <ellipse cx="32" cy="50" rx="27" ry="6" fill="#e2e8f0" stroke="#334155" stroke-width="2.5"/>
+    <!-- Leaves -->
+    <path d="M 32 48 C 20 25 5 28 -2 38 C 12 48 24 50 32 48 Z" fill="#4ade80" stroke="#166534" stroke-width="2"/>
+    <path d="M 32 48 C 30 15 45 10 52 24 C 44 38 38 45 32 48 Z" fill="#22c55e" stroke="#166534" stroke-width="2"/>
+    <path d="M 32 48 C 18 35 25 5 32 -5 C 40 5 44 35 32 48 Z" fill="#16a34a" stroke="#15803d" stroke-width="2"/>
+    <path d="M 32 48 C 45 32 65 30 72 42 C 58 50 42 49 32 48 Z" fill="#86efac" stroke="#166534" stroke-width="2"/>
   </g>
 
-  <!-- Left Lower Shelves -->
-  <g filter="url(#bokehBlur)" opacity="0.65">
-    <rect x="0" y="330" width="180" height="16" rx="2" fill="#2d1c14"/>
-    <rect x="0" y="346" width="180" height="4" fill="#00e5ff" opacity="0.6"/>
-    <rect x="15" y="270" width="36" height="60" rx="4" fill="#0f172a"/>
-    <rect x="60" y="262" width="42" height="68" rx="5" fill="#0f172a"/>
-    <rect x="112" y="272" width="32" height="58" rx="4" fill="#ffffff"/>
+  <!-- Left Shelves with Supplements & "Tyruss Full" -->
+  <g id="leftShelves">
+    <!-- Shelf 1 (Top left) -->
+    <rect x="0" y="450" width="170" height="18" rx="3" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2"/>
+    <rect x="0" y="452" width="170" height="4" fill="#fde68a" opacity="0.6"/>
+    <!-- Top small bottles -->
+    <g transform="translate(0, 365)">
+      <!-- White bottle 1 -->
+      <rect x="0" y="35" width="30" height="50" rx="5" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
+      <rect x="0" y="52" width="30" height="22" fill="#0284c7"/>
+      <!-- White bottle 2 -->
+      <rect x="34" y="38" width="18" height="47" rx="3" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/>
+      <rect x="54" y="38" width="18" height="47" rx="3" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/>
+      <rect x="74" y="38" width="18" height="47" rx="3" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/>
+      <rect x="94" y="38" width="20" height="47" rx="3" fill="#f8fafc" stroke="#1e293b" stroke-width="2"/>
+    </g>
 
-    <rect x="0" y="470" width="180" height="16" rx="2" fill="#2d1c14"/>
-    <rect x="0" y="486" width="180" height="4" fill="#00e5ff" opacity="0.6"/>
-    <rect x="15" y="415" width="40" height="55" rx="4" fill="#ffffff"/>
-    <rect x="65" y="415" width="40" height="55" rx="4" fill="#ffffff"/>
-    <rect x="115" y="415" width="40" height="55" rx="4" fill="#ffffff"/>
+    <!-- Shelf 2 (Middle left) with Tyruss Full tubs -->
+    <rect x="0" y="575" width="170" height="18" rx="3" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2"/>
+    <rect x="0" y="577" width="170" height="4" fill="#fde68a" opacity="0.6"/>
+    <g transform="translate(0, 505)">
+      <rect x="0" y="10" width="22" height="60" rx="4" fill="#047857" stroke="#1e293b" stroke-width="2.5"/>
+      <rect x="23" y="12" width="28" height="58" rx="4" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
+      <rect x="53" y="12" width="26" height="58" rx="4" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
+      <rect x="81" y="12" width="26" height="58" rx="4" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
+      <rect x="109" y="14" width="26" height="56" rx="4" fill="#f8fafc" stroke="#1e293b" stroke-width="2.5"/>
+    </g>
+
+    <!-- Shelf 3 (Lower left) with BIG TYRUSS FULL TUBS -->
+    <rect x="0" y="750" width="190" height="22" rx="3" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2.5"/>
+    <rect x="0" y="752" width="190" height="5" fill="#fde68a" opacity="0.6"/>
+    <!-- Metal legs structure -->
+    <rect x="155" y="772" width="16" height="252" fill="#1e293b"/>
+    <rect x="135" y="795" width="36" height="12" fill="#334155"/>
+
+    <!-- Tub 1: Tyruss Full -->
+    <g transform="translate(48, 615)">
+      <rect x="0" y="20" width="102" height="115" rx="14" fill="#181c24" stroke="#000000" stroke-width="3"/>
+      <rect x="10" y="6" width="82" height="16" rx="5" fill="#0f172a" stroke="#000000" stroke-width="3"/>
+      <!-- Label -->
+      <rect x="6" y="55" width="90" height="58" rx="4" fill="#2d3748"/>
+      <rect x="6" y="98" width="90" height="8" fill="#00e5ff"/>
+      <text x="51" y="80" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="14" font-weight="900" fill="#ffffff">
+        Tyruss
+      </text>
+      <text x="51" y="93" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="10" font-weight="800" fill="#00e5ff">
+        Full
+      </text>
+    </g>
+    <!-- Tub 0: Tyruss left peek -->
+    <g transform="translate(0, 625)">
+      <rect x="-20" y="20" width="70" height="105" rx="12" fill="#181c24" stroke="#000000" stroke-width="3"/>
+      <text x="15" y="80" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="12" font-weight="900" fill="#ffffff">
+        yruss
+      </text>
+    </g>
+
+    <!-- Bottom White Bottles -->
+    <g transform="translate(0, 845)">
+      <rect x="0" y="30" width="48" height="85" rx="8" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
+      <rect x="5" y="55" width="38" height="38" fill="#38bdf8" opacity="0.3"/>
+      <rect x="52" y="30" width="52" height="85" rx="8" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
+      <rect x="57" y="55" width="42" height="38" fill="#38bdf8" opacity="0.3"/>
+      <rect x="108" y="25" width="55" height="90" rx="8" fill="#ffffff" stroke="#1e293b" stroke-width="3"/>
+      <rect x="113" y="52" width="45" height="40" fill="#38bdf8" opacity="0.3"/>
+    </g>
   </g>
 
-  <!-- 2. Neon ColShopi Sign in Background (Exact match to photograph) -->
-  <g transform="translate(170, 180)">
-    <!-- Cyan Neon Ring Glow -->
-    <circle cx="0" cy="0" r="140" fill="#01060c" stroke="#00f0ff" stroke-width="7" filter="url(#neonSignGlow)"/>
-    <circle cx="0" cy="0" r="140" fill="none" stroke="#ffffff" stroke-width="2.2" opacity="0.9"/>
+  <!-- 2. Neon ColShopi Logo in Background -->
+  <g transform="translate(200, 230)">
+    <!-- Neon Outer Cyan Ring -->
+    <circle cx="0" cy="0" r="175" fill="#091b24" stroke="#00f0ff" stroke-width="12" filter="url(#neonCyanGlow)"/>
+    <circle cx="0" cy="0" r="175" fill="none" stroke="#ffffff" stroke-width="3.5" opacity="0.9"/>
     
-    <!-- Neon Text "Colshopi" in Cursive -->
-    <text x="0" y="-10" text-anchor="middle" font-family="'Dancing Script', 'Brush Script MT', cursive, sans-serif" font-size="70" font-weight="700" fill="#00f0ff" filter="url(#neonSignGlow)">
+    <!-- Neon Script: Colshopi -->
+    <text x="0" y="-14" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="95" font-weight="700" fill="#00f0ff" filter="url(#neonCyanGlow)">
       Colshopi
     </text>
-    <text x="0" y="-10" text-anchor="middle" font-family="'Dancing Script', 'Brush Script MT', cursive, sans-serif" font-size="70" font-weight="700" fill="#ffffff">
+    <text x="0" y="-14" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="95" font-weight="700" fill="#ffffff">
       Colshopi
     </text>
 
-    <!-- Tienda with Cyan Lines -->
-    <line x1="-92" y1="20" x2="-52" y2="20" stroke="#00f0ff" stroke-width="3.5" stroke-linecap="round" filter="url(#neonSignGlow)"/>
-    <line x1="-92" y1="20" x2="-52" y2="20" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
-    <text x="0" y="26" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="16" font-weight="700" letter-spacing="4px" fill="#ffffff">
+    <!-- Tienda -->
+    <line x1="-120" y1="26" x2="-68" y2="26" stroke="#00f0ff" stroke-width="4.5" stroke-linecap="round" filter="url(#neonCyanGlow)"/>
+    <line x1="-120" y1="26" x2="-68" y2="26" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+    <text x="0" y="34" text-anchor="middle" font-family="'Montserrat', sans-serif" font-size="22" font-weight="800" letter-spacing="5px" fill="#ffffff">
       TIENDA
     </text>
-    <line x1="52" y1="20" x2="92" y2="20" stroke="#00f0ff" stroke-width="3.5" stroke-linecap="round" filter="url(#neonSignGlow)"/>
-    <line x1="52" y1="20" x2="92" y2="20" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="68" y1="26" x2="120" y2="26" stroke="#00f0ff" stroke-width="4.5" stroke-linecap="round" filter="url(#neonCyanGlow)"/>
+    <line x1="68" y1="26" x2="120" y2="26" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
 
-    <!-- By Leps Digital in Cursive -->
-    <text x="0" y="60" text-anchor="middle" font-family="'Dancing Script', 'Brush Script MT', cursive, sans-serif" font-size="24" font-weight="700" fill="#ffffff" filter="url(#neonSignGlow)">
+    <!-- By Leps Digital -->
+    <text x="0" y="80" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="36" font-weight="700" fill="#ffffff" filter="url(#neonCyanGlow)">
       By Leps Digital
     </text>
-    <text x="0" y="60" text-anchor="middle" font-family="'Dancing Script', 'Brush Script MT', cursive, sans-serif" font-size="24" font-weight="700" fill="#ffffff">
+    <text x="0" y="80" text-anchor="middle" font-family="'Brush Script MT', 'Dancing Script', cursive, sans-serif" font-size="36" font-weight="700" fill="#ffffff">
       By Leps Digital
     </text>
   </g>
 
-  <!-- Ambient Cyan Lighting Reflected onto Marie's left side -->
-  <circle cx="440" cy="380" r="240" fill="#00e5ff" opacity="0.06"/>
+  <!-- Right Shelves Background -->
+  <g id="rightShelves" transform="translate(710, 0)">
+    <!-- Vertical Support Beam -->
+    <rect x="40" y="0" width="16" height="1024" fill="#1e293b"/>
 
-  <!-- 3. Marié - Realistic Hair Back Layers -->
-  <path d="M 310 220 C 270 240 250 310 255 400 C 265 440 285 470 320 480 C 330 460 325 390 330 350 Z" fill="url(#hairDark)"/>
-  <path d="M 570 220 C 610 240 630 310 625 400 C 615 440 595 470 560 480 C 550 460 555 390 550 350 Z" fill="url(#hairDark)"/>
+    <!-- Shelf 1 (Top) -->
+    <rect x="0" y="80" width="314" height="24" rx="4" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2.5"/>
+    <rect x="0" y="82" width="314" height="6" fill="#fde68a" opacity="0.6"/>
+    <!-- Jars & pouches -->
+    <rect x="20" y="10" width="34" height="68" rx="4" fill="#1e3a5f" stroke="#0f172a" stroke-width="2"/>
+    <rect x="60" y="0" width="45" height="78" rx="4" fill="#854d0e" stroke="#0f172a" stroke-width="2"/>
+    <rect x="110" y="0" width="45" height="78" rx="4" fill="#0284c7" stroke="#0f172a" stroke-width="2"/>
+    <rect x="160" y="0" width="55" height="78" rx="4" fill="#d97706" stroke="#0f172a" stroke-width="2"/>
 
-  <!-- 4. Upper Torso Foundation -->
-  <path d="M 230 580 C 250 470 320 450 370 445 L 510 445 C 560 450 630 470 650 580 L 690 800 L 190 800 Z" fill="url(#suitWhite)"/>
-  <path d="M 360 445 Q 440 500 520 445 L 540 610 L 340 610 Z" fill="#ffffff"/>
-
-  <!-- Neck & Collarbone -->
-  <path d="M 390 370 L 388 460 Q 440 490 492 460 L 490 370 Z" fill="url(#skinBase)"/>
-  <path d="M 390 370 Q 440 405 490 370 Q 440 435 390 370 Z" fill="url(#neckGrad)" opacity="0.85"/>
-
-  <!-- 5. Head Structure (Realistic Soft Contours) -->
-  <g id="marieHeadRealistic">
-    <!-- Face Base -->
-    <path d="M 342 280 C 335 200 390 145 440 145 C 490 145 545 200 538 280 C 532 342 498 392 440 392 C 382 392 348 342 342 280 Z" fill="url(#skinBase)"/>
-    
-    <!-- Forehead Highlight -->
-    <ellipse cx="440" cy="210" rx="65" ry="35" fill="url(#foreheadLight)"/>
-
-    <!-- Cheek Radiance -->
-    <ellipse cx="378" cy="305" rx="35" ry="20" fill="url(#cheekLeft)"/>
-    <ellipse cx="502" cy="305" rx="35" ry="20" fill="url(#cheekRight)"/>
-
-    <!-- Subtle Natural Ears -->
-    <path d="M 340 280 C 332 270 332 305 342 315 Z" fill="#e3ae97"/>
-    <path d="M 540 280 C 548 270 548 305 538 315 Z" fill="#e3ae97"/>
-
-    <!-- Eyebrows (Realistic Fine Arches) -->
-    <path d="M 368 244 Q 392 232 418 242" stroke="#2d1912" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-    <path d="M 368 244 Q 392 232 418 242" stroke="#4a2a1e" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-
-    <path d="M 462 242 Q 488 232 512 244" stroke="#2d1912" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-    <path d="M 462 242 Q 488 232 512 244" stroke="#4a2a1e" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-
-    <!-- Left Eye (Detailed Warm Brown) -->
-    <g transform="translate(393, 268)">
-      <path d="M -20 0 Q 0 -12 20 0 Q 0 12 -20 0 Z" fill="#ffffff"/>
-      <ellipse cx="0" cy="0" rx="10" ry="10" fill="url(#irisBrown)"/>
-      <circle cx="0" cy="0" r="6" fill="#120603"/>
-      <!-- Catchlight reflection -->
-      <circle cx="-3" cy="-3" r="2.5" fill="#ffffff"/>
-      <circle cx="3" cy="2" r="1.2" fill="#ffffff" opacity="0.8"/>
-      <!-- Eyeliner & Upper Lashes -->
-      <path d="M -22 0 Q 0 -13 22 0" stroke="#1c0b06" stroke-width="3" stroke-linecap="round" fill="none"/>
-      <!-- Lower eyelid crease -->
-      <path d="M -16 2 Q 0 11 16 2" stroke="#c98c74" stroke-width="1.2" fill="none"/>
+    <!-- Shelf 2 -->
+    <rect x="0" y="245" width="314" height="24" rx="4" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2.5"/>
+    <rect x="0" y="247" width="314" height="6" fill="#fde68a" opacity="0.6"/>
+    <!-- Potted Plant on shelf -->
+    <g transform="translate(90, 140)">
+      <polygon points="18,100 68,100 74,60 12,60" fill="#ffffff" stroke="#334155" stroke-width="2.5"/>
+      <ellipse cx="43" cy="60" rx="31" ry="7" fill="#f1f5f9" stroke="#334155" stroke-width="2.5"/>
+      <path d="M 43 58 C 25 30 10 35 2 48 C 18 60 34 60 43 58 Z" fill="#4ade80" stroke="#166534" stroke-width="2.5"/>
+      <path d="M 43 58 C 40 18 60 12 70 28 C 60 45 52 54 43 58 Z" fill="#22c55e" stroke="#166534" stroke-width="2.5"/>
+      <path d="M 43 58 C 24 40 34 5 43 -8 C 54 5 60 40 43 58 Z" fill="#16a34a" stroke="#15803d" stroke-width="2.5"/>
+      <path d="M 43 58 C 60 38 85 36 94 50 C 76 60 56 59 43 58 Z" fill="#86efac" stroke="#166534" stroke-width="2.5"/>
     </g>
+    <!-- Jars around plant -->
+    <rect x="22" y="170" width="36" height="72" rx="6" fill="#0284c7" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="58" y="175" width="28" height="67" rx="5" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="180" y="180" width="55" height="62" rx="4" fill="#0284c7" stroke="#0f172a" stroke-width="2"/>
+    <rect x="238" y="172" width="38" height="70" rx="6" fill="#15803d" stroke="#0f172a" stroke-width="2.5"/>
 
-    <!-- Right Eye (Detailed Warm Brown) -->
-    <g transform="translate(487, 268)">
-      <path d="M -20 0 Q 0 -12 20 0 Q 0 12 -20 0 Z" fill="#ffffff"/>
-      <ellipse cx="0" cy="0" rx="10" ry="10" fill="url(#irisBrown)"/>
-      <circle cx="0" cy="0" r="6" fill="#120603"/>
-      <!-- Catchlight reflection -->
-      <circle cx="-3" cy="-3" r="2.5" fill="#ffffff"/>
-      <circle cx="3" cy="2" r="1.2" fill="#ffffff" opacity="0.8"/>
-      <!-- Eyeliner & Upper Lashes -->
-      <path d="M -22 0 Q 0 -13 22 0" stroke="#1c0b06" stroke-width="3" stroke-linecap="round" fill="none"/>
-      <!-- Lower eyelid crease -->
-      <path d="M -16 2 Q 0 11 16 2" stroke="#c98c74" stroke-width="1.2" fill="none"/>
-    </g>
+    <!-- Shelf 3 (Pouches) -->
+    <rect x="0" y="425" width="314" height="24" rx="4" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2.5"/>
+    <rect x="0" y="427" width="314" height="6" fill="#fde68a" opacity="0.6"/>
+    <!-- Pouches -->
+    <rect x="20" y="325" width="32" height="98" rx="4" fill="#d97706" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="54" y="325" width="34" height="98" rx="4" fill="#d97706" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="90" y="325" width="62" height="98" rx="5" fill="#ca8a04" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="155" y="310" width="60" height="112" rx="5" fill="#06b6d4" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="218" y="305" width="65" height="117" rx="5" fill="#0284c7" stroke="#0f172a" stroke-width="2.5"/>
 
-    <!-- Nose (Refined 3D Gradient Shading) -->
-    <path d="M 436 265 Q 432 308 424 318 Q 440 325 456 318 Q 448 308 444 265" fill="#db9a81" opacity="0.35"/>
-    <path d="M 426 316 Q 440 322 454 316" stroke="#b87258" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-    <ellipse cx="426" cy="316" rx="4" ry="2.2" fill="#8c4731"/>
-    <ellipse cx="454" cy="316" rx="4" ry="2.2" fill="#8c4731"/>
+    <!-- Shelf 4 -->
+    <rect x="0" y="585" width="314" height="24" rx="4" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2.5"/>
+    <rect x="0" y="587" width="314" height="6" fill="#fde68a" opacity="0.6"/>
+    <!-- Green and brown items -->
+    <rect x="12" y="475" width="46" height="106" rx="4" fill="#0284c7" stroke="#0f172a" stroke-width="2"/>
+    <rect x="62" y="475" width="48" height="106" rx="4" fill="#059669" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="114" y="475" width="48" height="106" rx="4" fill="#10b981" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="165" y="490" width="55" height="92" rx="4" fill="#b45309" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="225" y="495" width="65" height="87" rx="4" fill="#78350f" stroke="#0f172a" stroke-width="2.5"/>
 
-    <!-- Mouth & Warm Confident Smile -->
-    <g transform="translate(440, 348)">
-      <!-- Upper Lip -->
-      <path d="M -38 0 Q -18 -8 0 -4 Q 18 -8 38 0 Q 18 -2 0 -1 Q -18 -2 -38 0 Z" fill="url(#lipGrad)"/>
-      <!-- White Teeth Line -->
-      <path d="M -32 0 Q 0 12 32 0 Q 0 3 -32 0 Z" fill="#ffffff"/>
-      <!-- Lower Lip -->
-      <path d="M -34 0 Q 0 18 34 0 Q 0 7 -34 0 Z" fill="url(#lipGrad)" opacity="0.95"/>
-      <!-- Lip Highlight -->
-      <ellipse cx="0" cy="6" rx="14" ry="3" fill="#ffffff" opacity="0.35"/>
-      <!-- Smile Dimples -->
-      <path d="M -41 -2 C -39 2 -37 6 -35 9" stroke="#b87258" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-      <path d="M 41 -2 C 39 2 37 6 35 9" stroke="#b87258" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-    </g>
+    <!-- Shelf 5 (Supplements) -->
+    <rect x="0" y="745" width="314" height="24" rx="4" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2.5"/>
+    <rect x="0" y="747" width="314" height="6" fill="#fde68a" opacity="0.6"/>
+    <rect x="15" y="635" width="32" height="108" rx="6" fill="#15803d" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="50" y="635" width="34" height="108" rx="6" fill="#15803d" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="88" y="642" width="34" height="100" rx="6" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="125" y="642" width="34" height="100" rx="6" fill="#f8fafc" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="162" y="648" width="38" height="94" rx="6" fill="#e2e8f0" stroke="#0f172a" stroke-width="2.5"/>
+
+    <!-- Shelf 6 (Bottom) -->
+    <rect x="0" y="905" width="314" height="24" rx="4" fill="url(#woodShelf)" stroke="#3f2719" stroke-width="2.5"/>
+    <rect x="0" y="907" width="314" height="6" fill="#fde68a" opacity="0.6"/>
+    <rect x="15" y="755" width="48" height="148" rx="8" fill="#047857" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="68" y="775" width="38" height="128" rx="8" fill="#0284c7" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="110" y="780" width="38" height="122" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
+    <rect x="152" y="780" width="38" height="122" rx="8" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
   </g>
 
-  <!-- 6. Hair Front Layers & Bob Cut Silhouette -->
-  <g id="marieHairFront">
-    <!-- Top & Side Part Volume -->
-    <path d="M 338 250 C 330 180 375 125 440 125 C 500 125 550 175 545 240 C 555 295 550 370 528 420 C 515 380 520 315 515 260 C 500 190 460 165 415 170 C 370 178 350 225 345 285 C 342 335 345 390 330 425 C 315 375 315 295 338 250 Z" fill="url(#hairDark)"/>
+  <!-- 3. Marié - Illustration Figure (Semi-Realistic Caricature Style) -->
+  <g id="marieFigureCaricatura" filter="url(#subtleShadow)">
     
-    <!-- Left Hair Strands -->
-    <path d="M 425 130 C 370 135 335 170 328 230 C 322 290 325 370 310 430 C 322 422 338 380 342 325 C 348 260 360 195 425 165 Z" fill="url(#hairDark)"/>
+    <!-- Hair Back Layers -->
+    <path d="M 370 280 C 310 320 280 430 300 540 C 320 580 370 610 430 610 C 440 570 410 460 410 400 Z" fill="url(#hairMain)" stroke="#1a0a04" stroke-width="4"/>
+    <path d="M 720 280 C 780 320 810 430 790 540 C 770 580 720 610 660 610 C 650 570 680 460 680 400 Z" fill="url(#hairMain)" stroke="#1a0a04" stroke-width="4"/>
 
-    <!-- Right Hair Strands -->
-    <path d="M 445 130 C 500 135 545 180 550 240 C 555 300 558 380 542 440 C 535 390 530 330 522 275 C 515 205 498 165 445 155 Z" fill="url(#hairDark)"/>
+    <!-- White Blazer Torso Base -->
+    <path d="M 270 700 C 300 560 410 520 490 510 L 660 510 C 740 520 850 560 880 700 L 920 1024 L 230 1024 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
+    
+    <!-- White Inner Blouse / Crew Neck Top -->
+    <path d="M 480 520 Q 575 580 670 520 L 690 750 L 460 750 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2.5"/>
 
-    <!-- Hair Sheen Reflection -->
-    <ellipse cx="430" cy="160" rx="80" ry="20" fill="url(#hairSheen)" transform="rotate(-6, 430, 160)"/>
-  </g>
+    <!-- Neck & Throat -->
+    <path d="M 500 420 L 500 535 Q 575 570 650 535 L 650 420 Z" fill="url(#skinTone)" stroke="#0f172a" stroke-width="4"/>
+    <!-- Neck shadow under chin -->
+    <path d="M 502 420 Q 575 480 648 420 Q 575 530 502 420 Z" fill="#e2a082" stroke="#0f172a" stroke-width="2"/>
 
-  <!-- 7. Tailored White Blazer Suit & Arms Crossed (Matching Exact Composition) -->
-  <g id="marieBlazerSuit">
-    <!-- Left Blazer Lapel -->
-    <path d="M 355 445 L 310 635 L 415 720 L 440 530 Z" fill="url(#lapelLeftGrad)" stroke="#cbd5e1" stroke-width="2"/>
-    <path d="M 310 635 L 355 445 L 390 445 L 430 610 Z" fill="#ffffff"/>
-
-    <!-- Right Blazer Lapel -->
-    <path d="M 525 445 L 570 635 L 465 720 L 440 530 Z" fill="url(#lapelRightGrad)" stroke="#cbd5e1" stroke-width="2"/>
-    <path d="M 570 635 L 525 445 L 490 445 L 450 610 Z" fill="#ffffff"/>
-
-    <!-- Left Shoulder & Sleeve -->
-    <path d="M 220 610 C 228 500 300 460 355 445 L 380 540 L 280 705 C 240 690 215 650 220 610 Z" fill="url(#suitWhite)"/>
-
-    <!-- Right Shoulder & Sleeve -->
-    <path d="M 660 610 C 652 500 580 460 525 445 L 500 540 L 600 705 C 640 690 665 650 660 610 Z" fill="url(#suitWhite)"/>
-
-    <!-- Crossed Arms Foundation -->
-    <path d="M 270 675 C 310 670 440 660 570 725 C 540 780 420 795 290 775 C 260 745 255 705 270 675 Z" fill="url(#suitWhite)" stroke="#cbd5e1" stroke-width="2"/>
-    <path d="M 610 675 C 570 670 440 660 310 725 C 340 780 460 795 590 775 C 620 745 625 705 610 675 Z" fill="url(#suitWhite)" stroke="#cbd5e1" stroke-width="2"/>
-
-    <!-- Marié's Delicate Crossed Hands & Fingers -->
-    <!-- Right Hand resting on left arm -->
-    <path d="M 295 710 C 282 710 272 725 280 745 C 290 758 310 760 330 750 C 338 738 325 718 295 710 Z" fill="url(#skinBase)"/>
-    <path d="M 290 728 Q 306 730 322 738" stroke="#a46852" stroke-width="1.5" fill="none"/>
-    <path d="M 294 738 Q 310 740 326 746" stroke="#a46852" stroke-width="1.5" fill="none"/>
-
-    <!-- Left Hand resting on right arm -->
-    <path d="M 585 710 C 598 710 608 725 600 745 C 590 758 570 760 550 750 C 542 738 555 718 585 710 Z" fill="url(#skinBase)"/>
-    <path d="M 590 728 Q 574 730 558 738" stroke="#a46852" stroke-width="1.5" fill="none"/>
-    <path d="M 586 738 Q 570 740 554 746" stroke="#a46852" stroke-width="1.5" fill="none"/>
-
-    <!-- 8. Real Official Black Acrylic Name Tag: [ MARIÉ ] on Left Chest -->
-    <g transform="translate(490, 555)" filter="url(#dropShadow)">
-      <!-- Black Badge Plate -->
-      <rect x="-56" y="-18" width="112" height="36" rx="5" fill="#090d14" stroke="#475569" stroke-width="1.5"/>
+    <!-- 4. Head & Face (Clean Line Art & Expressive Features) -->
+    <g id="faceGroup">
+      <!-- Face Base Shape -->
+      <path d="M 440 330 C 430 210 500 150 575 150 C 650 150 720 210 710 330 C 700 415 650 480 575 480 C 500 480 450 415 440 330 Z" fill="url(#skinTone)" stroke="#0f172a" stroke-width="4.5"/>
       
-      <!-- Crisp White Badge Label: MARIÉ -->
-      <text 
-        x="0" 
-        y="6" 
-        text-anchor="middle" 
-        font-family="'Montserrat', sans-serif" 
-        font-size="18" 
-        font-weight="800" 
-        letter-spacing="3.5px" 
-        fill="#ffffff"
-      >
-        MARIÉ
-      </text>
+      <!-- Rosy Cheeks Blush -->
+      <ellipse cx="485" cy="365" rx="38" ry="20" fill="url(#cheekBlush)"/>
+      <ellipse cx="665" cy="365" rx="38" ry="20" fill="url(#cheekBlush)"/>
 
-      <!-- Glossy Reflection on Badge -->
-      <rect x="-54" y="-16" width="108" height="3" fill="#ffffff" opacity="0.35"/>
+      <!-- Delicate Ears -->
+      <path d="M 440 330 C 420 315 420 370 442 385 Z" fill="#fbbfa3" stroke="#0f172a" stroke-width="3.5"/>
+      <path d="M 710 330 C 730 315 730 370 708 385 Z" fill="#fbbfa3" stroke="#0f172a" stroke-width="3.5"/>
+
+      <!-- Eyebrows (Expressive Dark Arches) -->
+      <path d="M 470 285 Q 508 268 545 285" stroke="#241009" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+      <path d="M 605 285 Q 642 268 680 285" stroke="#241009" stroke-width="6.5" stroke-linecap="round" fill="none"/>
+
+      <!-- Left Eye (Big Expressive Cartoon/Anime Style) -->
+      <g transform="translate(508, 318)">
+        <!-- Sclera -->
+        <path d="M -30 0 Q 0 -22 30 0 Q 0 20 -30 0 Z" fill="#ffffff" stroke="#1a0a04" stroke-width="3.5"/>
+        <!-- Iris -->
+        <ellipse cx="2" cy="-1" rx="17" ry="17" fill="url(#eyeIris)"/>
+        <!-- Pupil -->
+        <circle cx="2" cy="-1" r="10" fill="#000000"/>
+        <!-- Highlights -->
+        <circle cx="-3" cy="-6" r="5" fill="#ffffff"/>
+        <circle cx="7" cy="4" r="2.5" fill="#ffffff" opacity="0.85"/>
+        <!-- Upper Eyelid & Bold Lashes -->
+        <path d="M -34 0 Q 0 -25 34 0" stroke="#120502" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <path d="M 22 -14 L 32 -22" stroke="#120502" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- Lower eyelid -->
+        <path d="M -24 3 Q 0 18 24 3" stroke="#c27d60" stroke-width="2.5" fill="none"/>
+        <!-- Eyelid crease above -->
+        <path d="M -22 -20 Q 0 -28 22 -20" stroke="#b46e50" stroke-width="2.5" fill="none"/>
+      </g>
+
+      <!-- Right Eye (Big Expressive Cartoon/Anime Style) -->
+      <g transform="translate(642, 318)">
+        <!-- Sclera -->
+        <path d="M -30 0 Q 0 -22 30 0 Q 0 20 -30 0 Z" fill="#ffffff" stroke="#1a0a04" stroke-width="3.5"/>
+        <!-- Iris -->
+        <ellipse cx="-2" cy="-1" rx="17" ry="17" fill="url(#eyeIris)"/>
+        <!-- Pupil -->
+        <circle cx="-2" cy="-1" r="10" fill="#000000"/>
+        <!-- Highlights -->
+        <circle cx="-7" cy="-6" r="5" fill="#ffffff"/>
+        <circle cx="3" cy="4" r="2.5" fill="#ffffff" opacity="0.85"/>
+        <!-- Upper Eyelid & Bold Lashes -->
+        <path d="M -34 0 Q 0 -25 34 0" stroke="#120502" stroke-width="6" stroke-linecap="round" fill="none"/>
+        <path d="M -22 -14 L -32 -22" stroke="#120502" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- Lower eyelid -->
+        <path d="M -24 3 Q 0 18 24 3" stroke="#c27d60" stroke-width="2.5" fill="none"/>
+        <!-- Eyelid crease above -->
+        <path d="M -22 -20 Q 0 -28 22 -20" stroke="#b46e50" stroke-width="2.5" fill="none"/>
+      </g>
+
+      <!-- Nose (Cute Defined Stroke) -->
+      <path d="M 570 315 Q 565 372 552 384 Q 575 394 598 384" stroke="#c27255" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <ellipse cx="554" cy="382" rx="4" ry="2.5" fill="#a45337"/>
+      <ellipse cx="594" cy="382" rx="4" ry="2.5" fill="#a45337"/>
+
+      <!-- Mouth (Warm Enthusiastic Smile with Bright White Teeth) -->
+      <g transform="translate(575, 418)">
+        <!-- Outer Lip Path -->
+        <path d="M -54 0 Q 0 42 54 0 Q 0 -8 -54 0 Z" fill="#e11d48" stroke="#0f172a" stroke-width="4"/>
+        <!-- Teeth (White Arch) -->
+        <path d="M -48 0 Q 0 28 48 0 Q 0 -4 -48 0 Z" fill="#ffffff"/>
+        <!-- Lower Lip Plump Underline -->
+        <path d="M -30 22 Q 0 34 30 22" stroke="#f43f5e" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <!-- Smile Corners Dimples -->
+        <path d="M -57 -3 C -55 4 -52 10 -48 14" stroke="#b45309" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <path d="M 57 -3 C 55 4 52 10 48 14" stroke="#b45309" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      </g>
     </g>
+
+    <!-- 5. Hair Front (Smooth Bob Cut with Glossy Sheen) -->
+    <g id="hairFrontGroup">
+      <!-- Main Front Volume -->
+      <path d="M 435 300 C 420 180 485 105 575 105 C 665 105 730 180 715 300 C 735 375 735 480 700 540 C 675 485 680 400 670 330 C 650 230 600 200 540 210 C 480 220 455 285 450 360 C 445 425 450 495 430 540 C 405 480 410 370 435 300 Z" fill="url(#hairMain)" stroke="#1a0a04" stroke-width="4.5"/>
+      
+      <!-- Side Strands -->
+      <path d="M 550 110 C 475 120 425 170 418 250 C 410 330 415 440 395 515 C 410 505 430 450 435 380 C 442 300 458 220 550 175 Z" fill="url(#hairHighlight)" stroke="#1a0a04" stroke-width="3.5"/>
+
+      <path d="M 580 110 C 655 120 710 175 715 255 C 722 335 725 445 745 515 C 730 505 710 450 702 380 C 695 295 675 220 580 175 Z" fill="url(#hairHighlight)" stroke="#1a0a04" stroke-width="3.5"/>
+
+      <!-- Glossy Hair Highlight Ribbons -->
+      <path d="M 470 170 Q 565 135 660 170 Q 565 155 470 170 Z" fill="#9a5b42" opacity="0.8"/>
+      <path d="M 485 175 Q 565 145 645 175" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+    </g>
+
+    <!-- 6. Tailored White Doctor / Lab Blazer Coat & Arms Crossed -->
+    <g id="blazerGroup">
+      <!-- Left Lapel -->
+      <path d="M 475 510 L 415 760 L 550 880 L 575 640 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
+      <path d="M 415 760 L 475 510 L 515 510 L 565 730 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+
+      <!-- Right Lapel -->
+      <path d="M 675 510 L 735 760 L 600 880 L 575 640 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
+      <path d="M 735 760 L 675 510 L 635 510 L 585 730 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+
+      <!-- Left Shoulder and Arm -->
+      <path d="M 280 720 C 290 580 395 530 475 510 L 505 635 L 365 860 C 310 840 275 780 280 720 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
+
+      <!-- Right Shoulder and Arm -->
+      <path d="M 870 720 C 860 580 755 530 675 510 L 645 635 L 785 860 C 840 840 875 780 870 720 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
+
+      <!-- Crossed Forearms Structure -->
+      <path d="M 350 820 C 410 810 575 800 740 890 C 700 970 540 990 375 960 C 335 920 330 865 350 820 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
+      <path d="M 800 820 C 740 810 575 800 410 890 C 450 970 610 990 775 960 C 815 920 820 865 800 820 Z" fill="url(#coatWhite)" stroke="#0f172a" stroke-width="4"/>
+
+      <!-- Marié's Illustrated Hands Resting on Crossed Arms -->
+      <!-- Left Hand resting on right sleeve -->
+      <g transform="translate(385, 875)">
+        <path d="M 0 0 C -25 5 -35 25 -25 55 C -10 75 25 80 50 65 C 65 48 45 20 0 0 Z" fill="url(#skinTone)" stroke="#0f172a" stroke-width="3.5"/>
+        <!-- Fingers outlines -->
+        <path d="M -12 28 Q 15 32 38 42" stroke="#a45337" stroke-width="3" fill="none"/>
+        <path d="M -6 44 Q 18 48 40 56" stroke="#a45337" stroke-width="3" fill="none"/>
+        <path d="M 0 60 Q 22 62 42 68" stroke="#a45337" stroke-width="3" fill="none"/>
+      </g>
+
+      <!-- Right Hand resting on left sleeve -->
+      <g transform="translate(765, 875)">
+        <path d="M 0 0 C 25 5 35 25 25 55 C 10 75 -25 80 -50 65 C -65 48 -45 20 0 0 Z" fill="url(#skinTone)" stroke="#0f172a" stroke-width="3.5"/>
+        <!-- Fingers outlines -->
+        <path d="M 12 28 Q -15 32 -38 42" stroke="#a45337" stroke-width="3" fill="none"/>
+        <path d="M 6 44 Q -18 48 -40 56" stroke="#a45337" stroke-width="3" fill="none"/>
+        <path d="M 0 60 Q -22 62 -42 68" stroke="#a45337" stroke-width="3" fill="none"/>
+      </g>
+
+      <!-- 7. Official White Badge with Dark Border: [ MARIÉ ] on Left Chest -->
+      <g transform="translate(660, 685)" filter="url(#subtleShadow)">
+        <!-- White Rounded Badge Plate -->
+        <rect x="-60" y="-20" width="120" height="40" rx="8" fill="#f8fafc" stroke="#0f172a" stroke-width="3.5"/>
+        
+        <!-- Crisp Dark Badge Label: MARIÉ -->
+        <text 
+          x="0" 
+          y="7" 
+          text-anchor="middle" 
+          font-family="'Montserrat', 'Arial Black', sans-serif" 
+          font-size="20" 
+          font-weight="900" 
+          letter-spacing="4px" 
+          fill="#0f172a"
+        >
+          MARIÉ
+        </text>
+      </g>
+    </g>
+
   </g>
 </svg>`;
 
@@ -366,35 +447,46 @@ async function main() {
     fs.mkdirSync(publicDir, { recursive: true });
   }
 
-  // 1. Save Photorealistic Vector Render
-  fs.writeFileSync(path.join(publicDir, 'marie-avatar.svg'), photorealisticMarieSvg);
-  fs.writeFileSync(path.join(publicDir, 'marie-photo.svg'), photorealisticMarieSvg);
-  console.log('Saved photorealistic marie-avatar.svg and marie-photo.svg');
+  // 1. Write the new Caricatura SVG
+  fs.writeFileSync(path.join(publicDir, 'marie-caricatura.svg'), marieCaricaturaSvg);
+  fs.writeFileSync(path.join(publicDir, 'marie-avatar.svg'), marieCaricaturaSvg);
+  fs.writeFileSync(path.join(publicDir, 'marie-photo.svg'), marieCaricaturaSvg);
+  console.log('Saved new caricature SVG files');
 
-  // 2. Generate High Resolution PNG and JPG assets using Sharp
-  const marieBuffer = Buffer.from(photorealisticMarieSvg);
+  // 2. Generate PNG and JPEG files at various resolutions matching the attachment
+  const svgBuffer = Buffer.from(marieCaricaturaSvg);
 
-  await sharp(marieBuffer)
-    .resize(800, 800)
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
+    .jpeg({ quality: 98 })
+    .toFile(path.join(publicDir, 'Marié Caricatura App.jpeg'));
+
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
+    .jpeg({ quality: 98 })
+    .toFile(path.join(publicDir, 'Marie Caricatura App.jpeg'));
+
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
+    .png({ quality: 100 })
+    .toFile(path.join(publicDir, 'marie-caricatura.png'));
+
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
     .png({ quality: 100 })
     .toFile(path.join(publicDir, 'marie-avatar.png'));
 
-  await sharp(marieBuffer)
-    .resize(800, 800)
-    .jpeg({ quality: 98 })
-    .toFile(path.join(publicDir, 'marie-photo.jpg'));
-
-  await sharp(marieBuffer)
-    .resize(800, 800)
-    .jpeg({ quality: 98 })
-    .toFile(path.join(publicDir, 'Marie JPG App.jpg'));
-
-  await sharp(marieBuffer)
-    .resize(1000, 1000)
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
     .png({ quality: 100 })
     .toFile(path.join(publicDir, 'marie-hero.png'));
 
-  console.log('Generated marie-avatar.png, marie-photo.jpg, "Marie JPG App.jpg", and marie-hero.png');
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
+    .jpeg({ quality: 98 })
+    .toFile(path.join(publicDir, 'marie-photo.jpg'));
+
+  console.log('Successfully generated all Marié Caricatura image assets in /public');
 }
 
 main().catch(err => {
