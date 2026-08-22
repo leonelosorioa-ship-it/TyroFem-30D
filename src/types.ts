@@ -58,6 +58,7 @@ export interface DayProgress {
   sleepStars: number; // 1 to 5
   notes: string;
   completedAt?: string;
+  isLockedAfterSubmit?: boolean;
 }
 
 export interface Recipe {

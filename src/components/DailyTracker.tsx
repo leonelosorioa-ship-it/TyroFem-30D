@@ -20,7 +20,8 @@ import {
   Lock,
   Clock,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Eye
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayProgress, UserProfile } from '../types';
@@ -29,6 +30,7 @@ import { TransformationReportModal } from './TransformationReportModal';
 import { generateTransformationReportPDF } from '../utils/pdfGenerator';
 import { getMaxUnlockedDay } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
+import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
 
 interface DailyTrackerProps {
   userProfile: UserProfile;
@@ -84,15 +86,24 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
     notes: ''
   };
 
+  // Day is strictly locked if it has been registered/saved
+  const isSelectedDayAlreadyLocked = Boolean(
+    currentDayData.isLockedAfterSubmit || 
+    (currentDayData.completedAt && currentDayData.tyrussTaken && currentDayData.water2L)
+  );
+
   const [activeSubTab, setActiveSubTab] = useState<'registro' | 'curva' | 'informe'>('registro');
   const [energyLevel, setEnergyLevel] = useState<number>(currentDayData.energyLevel || 4);
   const [digestion, setDigestion] = useState<DayProgress['digestion']>(currentDayData.digestion || 'liviana');
   const [mood, setMood] = useState<DayProgress['mood']>(currentDayData.mood || 'tranquila');
   const [sleepStars, setSleepStars] = useState<number>(currentDayData.sleepStars || 4);
-  const [waterGlasses, setWaterGlasses] = useState<number>(currentDayData.water2L ? 8 : 4);
+  const [waterGlasses, setWaterGlasses] = useState<number>(currentDayData.water2L ? 8 : (currentDayData.waterGlasses || 4));
   const [notes, setNotes] = useState<string>(currentDayData.notes || '');
+  const [tyrussTaken, setTyrussTaken] = useState<boolean>(currentDayData.tyrussTaken || false);
+  const [antiinflammatoryMeal, setAntiinflammatoryMeal] = useState<boolean>(currentDayData.antiinflammatoryMeal || false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isQuickDownloading, setIsQuickDownloading] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   // Sync inputs when selectedDay changes
   useEffect(() => {
@@ -112,8 +123,10 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
     setDigestion(data.digestion || 'liviana');
     setMood(data.mood || 'tranquila');
     setSleepStars(data.sleepStars || 4);
-    setWaterGlasses(data.water2L ? 8 : (data.waterGlasses || 4));
+    setWaterGlasses(data.water2L ? 8 : 4);
     setNotes(data.notes || '');
+    setTyrussTaken(data.tyrussTaken || false);
+    setAntiinflammatoryMeal(data.antiinflammatoryMeal || false);
   }, [selectedDay, progressMap]);
 
   const completedDays = (Object.values(progressMap) as DayProgress[]).filter(p => p.completedAt || (p.tyrussTaken && p.water2L)).length;
@@ -134,34 +147,56 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
     }
   };
 
-  const handleUpdate = (updatedFields: Partial<DayProgress>) => {
-    if (!isSelectedDayUnlocked) return;
-
-    const updated: DayProgress = {
-      ...currentDayData,
-      energyLevel,
-      digestion,
-      mood,
-      sleepStars,
-      water2L: waterGlasses >= 8,
-      notes,
-      ...updatedFields
-    };
+  const handleDraftUpdate = (updatedFields: Partial<DayProgress>) => {
+    if (!isSelectedDayUnlocked || isSelectedDayAlreadyLocked) return;
 
     if (updatedFields.energyLevel !== undefined) setEnergyLevel(updatedFields.energyLevel);
     if (updatedFields.digestion !== undefined) setDigestion(updatedFields.digestion);
     if (updatedFields.mood !== undefined) setMood(updatedFields.mood);
     if (updatedFields.sleepStars !== undefined) setSleepStars(updatedFields.sleepStars);
     if (updatedFields.notes !== undefined) setNotes(updatedFields.notes);
-
-    onSaveProgress(selectedDay, updated);
+    if (updatedFields.tyrussTaken !== undefined) setTyrussTaken(updatedFields.tyrussTaken);
+    if (updatedFields.antiinflammatoryMeal !== undefined) setAntiinflammatoryMeal(updatedFields.antiinflammatoryMeal);
   };
 
   const handleAddGlass = () => {
-    if (!isSelectedDayUnlocked) return;
+    if (!isSelectedDayUnlocked || isSelectedDayAlreadyLocked) return;
     const next = Math.min(8, waterGlasses + 1);
     setWaterGlasses(next);
-    handleUpdate({ water2L: next >= 8 });
+  };
+
+  const handleSaveAndLockDay = () => {
+    if (!isSelectedDayUnlocked || isSelectedDayAlreadyLocked) return;
+
+    const finalProgress: DayProgress = {
+      ...currentDayData,
+      dayNumber: selectedDay,
+      tyrussTaken: true, // Mark Tyruss taken when registering the day
+      water2L: waterGlasses >= 8,
+      antiinflammatoryMeal: true,
+      extraHabit: true,
+      energyLevel,
+      digestion,
+      mood,
+      sleepStars,
+      notes,
+      completedAt: currentDayData.completedAt || new Date().toISOString(),
+      isLockedAfterSubmit: true
+    };
+
+    onSaveProgress(selectedDay, finalProgress);
+
+    try {
+      confetti({
+        particleCount: 75,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    } catch (e) {
+      // silent
+    }
+
+    setShowConfirmationModal(true);
   };
 
 
@@ -383,7 +418,54 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
           </div>
 
           {/* If the selected day is LOCKED, show the 24H countdown timer hero and disable inputs */}
-          {!isSelectedDayUnlocked ? (
+          {isSelectedDayAlreadyLocked ? (
+            <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-3xl p-5 sm:p-6 border border-emerald-400/40 shadow-xl space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shrink-0">
+                    <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-400/40">
+                        Registro Asegurado & Consolidado
+                      </span>
+                      <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-400/40 flex items-center gap-1">
+                        <Lock className="w-3 h-3 text-amber-400" />
+                        Día {selectedDay} Bloqueado para Edición
+                      </span>
+                    </div>
+                    <h4 className="text-base sm:text-lg font-bold text-white font-serif-luxury mt-1">
+                      Tus datos del Día {selectedDay} están listos en tu Informe Clínico 📄
+                    </h4>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsReportModalOpen(true)}
+                    className="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Ver en Informe PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSubTab('curva')}
+                    className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold rounded-xl transition-all border border-cyan-500/30 flex items-center gap-1.5 cursor-pointer shrink-0"
+                  >
+                    <TrendingUp className="w-4 h-4 text-cyan-400" />
+                    <span>Ver Curva Recharts</span>
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-xs text-emerald-100/90 leading-relaxed border-t border-emerald-900/60 pt-2.5">
+                Para prevenir reprocesos y proteger la fidelidad de tu historial metabólico, este día ha sido <strong>sellado</strong>. Todos los parámetros se encuentran almacenados y disponibles para consulta continua de la <strong>Nutricionista Marié</strong>.
+              </p>
+            </div>
+          ) : !isSelectedDayUnlocked ? (
             <div className="space-y-4">
               <DayCountdownClock
                 dayNumber={selectedDay}
@@ -426,7 +508,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
           )}
 
           {/* Daily Metrics Dashboard */}
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!isSelectedDayUnlocked ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${(!isSelectedDayUnlocked || isSelectedDayAlreadyLocked) ? 'opacity-85 pointer-events-none' : ''}`}>
             {/* Metric 1: Energy Level */}
             <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
@@ -448,8 +530,8 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <button
                     key={star}
                     type="button"
-                    disabled={!isSelectedDayUnlocked}
-                    onClick={() => handleUpdate({ energyLevel: star })}
+                    disabled={!isSelectedDayUnlocked || isSelectedDayAlreadyLocked}
+                    onClick={() => handleDraftUpdate({ energyLevel: star })}
                     className={`flex-1 py-3 rounded-xl flex flex-col items-center gap-1 transition-all cursor-pointer ${
                       energyLevel >= star 
                         ? 'text-amber-500' 
@@ -485,8 +567,8 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <button
                     key={opt.id}
                     type="button"
-                    disabled={!isSelectedDayUnlocked}
-                    onClick={() => handleUpdate({ digestion: opt.id as DayProgress['digestion'] })}
+                    disabled={!isSelectedDayUnlocked || isSelectedDayAlreadyLocked}
+                    onClick={() => handleDraftUpdate({ digestion: opt.id as DayProgress['digestion'] })}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       digestion === opt.id
                         ? 'bg-emerald-50 border-emerald-600 text-emerald-950 font-bold shadow-xs'
@@ -517,10 +599,9 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <button
                     key={g}
                     type="button"
-                    disabled={!isSelectedDayUnlocked}
+                    disabled={!isSelectedDayUnlocked || isSelectedDayAlreadyLocked}
                     onClick={() => {
                       setWaterGlasses(g);
-                      handleUpdate({ water2L: g >= 8 });
                     }}
                     className={`h-11 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
                       waterGlasses >= g
@@ -539,7 +620,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                 <span>{waterGlasses >= 8 ? '🎉 ¡Meta de 2L alcanzada!' : `Faltan ${8 - waterGlasses} vasos (250ml c/u)`}</span>
                 <button
                   type="button"
-                  disabled={!isSelectedDayUnlocked}
+                  disabled={!isSelectedDayUnlocked || isSelectedDayAlreadyLocked}
                   onClick={handleAddGlass}
                   className="text-teal-700 font-bold hover:underline cursor-pointer disabled:opacity-50"
                 >
@@ -571,8 +652,8 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <button
                     key={m.id}
                     type="button"
-                    disabled={!isSelectedDayUnlocked}
-                    onClick={() => handleUpdate({ mood: m.id as DayProgress['mood'] })}
+                    disabled={!isSelectedDayUnlocked || isSelectedDayAlreadyLocked}
+                    onClick={() => handleDraftUpdate({ mood: m.id as DayProgress['mood'] })}
                     className={`flex-1 py-2 px-1.5 rounded-xl border text-center transition-all cursor-pointer ${
                       mood === m.id
                         ? 'bg-rose-50 border-rose-400 text-rose-950 font-bold shadow-xs'
@@ -596,8 +677,8 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                     <button
                       key={s}
                       type="button"
-                      disabled={!isSelectedDayUnlocked}
-                      onClick={() => handleUpdate({ sleepStars: s })}
+                      disabled={!isSelectedDayUnlocked || isSelectedDayAlreadyLocked}
+                      onClick={() => handleDraftUpdate({ sleepStars: s })}
                       className="cursor-pointer disabled:opacity-50"
                     >
                       <Star className={`w-4 h-4 ${sleepStars >= s ? 'fill-indigo-500 text-indigo-500' : 'text-slate-300'}`} />
@@ -607,6 +688,37 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Action Bar: Submit & Lock Day to prevent re-processing */}
+          {isSelectedDayUnlocked && !isSelectedDayAlreadyLocked && (
+            <div className="bg-gradient-to-r from-emerald-800 via-teal-900 to-emerald-950 text-white rounded-3xl p-6 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 border border-emerald-400/30">
+              <div className="space-y-1 text-center sm:text-left">
+                <div className="flex items-center gap-2 justify-center sm:justify-start">
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-400/40">
+                    Cierre de Test Diario
+                  </span>
+                  <span className="text-[10px] text-amber-300 font-bold">
+                    Día {selectedDay}
+                  </span>
+                </div>
+                <h4 className="text-base sm:text-lg font-bold font-serif-luxury text-white">
+                  ¿Lista para registrar tus datos de hoy, {userProfile.name}? 🌿
+                </h4>
+                <p className="text-xs text-emerald-100/90 max-w-xl">
+                  Al confirmar, este día se guardará de forma blindada en tu <strong>Informe Clínico Oficial</strong> y se bloqueará para evitar reprocesos. Podrás consultarlo siempre que desees.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSaveAndLockDay}
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs font-black rounded-2xl shadow-lg transition-all transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0"
+              >
+                <ShieldCheck className="w-4 h-4 text-slate-950" />
+                <span>Registrar y Asegurar Día {selectedDay}</span>
+              </button>
+            </div>
+          )}
 
           {/* Quick jump to Trend Chart */}
           <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 flex items-center justify-between gap-3">
@@ -785,6 +897,26 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         userProfile={userProfile}
         progressMap={progressMap}
         currentDay={currentDay}
+      />
+
+      {/* Confirmation modal upon registering and sealing a day */}
+      <DayRegistrationConfirmedModal
+        isOpen={showConfirmationModal}
+        onClose={() => setShowConfirmationModal(false)}
+        dayNumber={selectedDay}
+        userProfile={userProfile}
+        onOpenReport={() => {
+          setShowConfirmationModal(false);
+          setIsReportModalOpen(true);
+        }}
+        onOpenTrend={() => {
+          setShowConfirmationModal(false);
+          setActiveSubTab('curva');
+        }}
+        onOpenChat={() => {
+          setShowConfirmationModal(false);
+          onOpenChat();
+        }}
       />
     </div>
   );
