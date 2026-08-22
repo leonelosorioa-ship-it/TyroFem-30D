@@ -453,8 +453,28 @@ async function main() {
   fs.writeFileSync(path.join(publicDir, 'marie-photo.svg'), marieCaricaturaSvg);
   console.log('Saved new caricature SVG files');
 
-  // 2. Generate PNG and JPEG files at various resolutions matching the attachment
+  // 2. Generate WebP, PNG, and JPEG files at various resolutions matching the attachment
   const svgBuffer = Buffer.from(marieCaricaturaSvg);
+
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
+    .webp({ quality: 98 })
+    .toFile(path.join(publicDir, 'Marié Caricatura App webs.webp'));
+
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
+    .webp({ quality: 98 })
+    .toFile(path.join(publicDir, 'Marie Caricatura App webs.webp'));
+
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
+    .webp({ quality: 98 })
+    .toFile(path.join(publicDir, 'marie-caricatura.webp'));
+
+  await sharp(svgBuffer)
+    .resize(1024, 1024)
+    .webp({ quality: 98 })
+    .toFile(path.join(publicDir, 'marie-avatar.webp'));
 
   await sharp(svgBuffer)
     .resize(1024, 1024)
@@ -486,7 +506,7 @@ async function main() {
     .jpeg({ quality: 98 })
     .toFile(path.join(publicDir, 'marie-photo.jpg'));
 
-  console.log('Successfully generated all Marié Caricatura image assets in /public');
+  console.log('Successfully generated all Marié Caricatura image assets in WebP, PNG, JPG in /public');
 }
 
 main().catch(err => {
