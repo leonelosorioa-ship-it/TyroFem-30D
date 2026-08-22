@@ -40,6 +40,7 @@ import { WhatsAppShareButton } from './components/WhatsAppShareButton';
 import { AdminPanel } from './components/AdminPanel';
 import { UserSuspendedModal } from './components/UserSuspendedModal';
 import { MarieWelcomeAudioModal } from './components/MarieWelcomeAudioModal';
+import { AppEntryAudioPlayer } from './components/AppEntryAudioPlayer';
 import { promptPWAInstall } from './utils/pwaManager';
 import { findUserByCodeOrEmail } from './data/usersDatabase';
 import { CALENDAR_DAYS } from './data/calendarData';
@@ -285,6 +286,9 @@ export default function App() {
           onClose={() => setIsOrderModalOpen(false)}
           isReorder={false}
         />
+
+        {/* ColShopi App Automatic Entry Audio Player */}
+        <AppEntryAudioPlayer isWelcomeAudioModalOpen={false} />
       </div>
     );
   }
@@ -694,6 +698,9 @@ export default function App() {
           setActiveTab('calendario');
         }}
       />
+
+      {/* ColShopi App Automatic Entry Audio Player */}
+      <AppEntryAudioPlayer isWelcomeAudioModalOpen={isWelcomeAudioModalOpen} />
 
       {/* Rich Corporate Brand Footer */}
       <footer className="text-slate-400 border-t border-slate-800 bg-[#070b10] py-8 px-4 text-xs mb-16 sm:mb-0">
