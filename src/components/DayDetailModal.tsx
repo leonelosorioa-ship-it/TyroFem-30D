@@ -21,7 +21,9 @@ import {
   TrendingUp,
   Eye,
   Headphones,
-  Award
+  Award,
+  Sun,
+  Star
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayPlan, DayProgress, UserProfile } from '../types';
@@ -507,6 +509,120 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                   </div>
                   <Smile className={`w-4 h-4 shrink-0 ${extraHabit ? 'text-slate-700' : 'text-slate-300'}`} />
                 </button>
+              </div>
+            </div>
+
+            {/* Test Somático y Estado de Ánimo Emocional */}
+            <div className={`space-y-3 p-4 rounded-2xl bg-gradient-to-br from-slate-50 via-rose-50/20 to-emerald-50/20 border border-slate-200 ${(!isDayUnlocked || isDayAlreadyLocked) ? 'opacity-90' : ''}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  <Smile className="w-4 h-4 text-rose-500" />
+                  <span>Estado de Ánimo & Bienestar Emocional</span>
+                </div>
+                <span className="text-xs font-bold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded-full capitalize">
+                  {mood}
+                </span>
+              </div>
+
+              {/* Emoji Mood Selector */}
+              <div className="grid grid-cols-5 gap-1.5">
+                {[
+                  { id: 'radiante', emoji: '🌸', label: 'Radiante', desc: 'Plena & Vital' },
+                  { id: 'tranquila', emoji: '🧘‍♀️', label: 'Tranquila', desc: 'En Paz & Calma' },
+                  { id: 'enfocada', emoji: '🎯', label: 'Enfocada', desc: 'Clara & Firme' },
+                  { id: 'sensible', emoji: '🥺', label: 'Sensible', desc: 'Emotiva' },
+                  { id: 'agotada', emoji: '😩', label: 'Agotada', desc: 'Sobrecargada' },
+                ].map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    disabled={!isDayUnlocked || isDayAlreadyLocked}
+                    onClick={() => {
+                      if (isDayUnlocked && !isDayAlreadyLocked) {
+                        setMood(m.id as DayProgress['mood']);
+                      }
+                    }}
+                    className={`p-2 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+                      mood === m.id
+                        ? 'bg-rose-50 border-rose-400 text-rose-950 font-bold shadow-xs scale-[1.02] ring-2 ring-rose-200'
+                        : 'bg-white border-slate-200 text-slate-600 hover:border-rose-200 hover:bg-rose-50/40'
+                    }`}
+                  >
+                    <span className="text-lg sm:text-xl block">{m.emoji}</span>
+                    <span className="text-[10px] font-bold block truncate w-full leading-tight">{m.label}</span>
+                    <span className="text-[8px] text-slate-400 hidden sm:block leading-tight">{m.desc}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Secondary Somatic: Energy Level & Digestion in Modal */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200/80">
+                {/* Energy Stars */}
+                <div className="bg-white p-3 rounded-xl border border-slate-200 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-700 font-bold flex items-center gap-1">
+                      <Sun className="w-3.5 h-3.5 text-amber-500" />
+                      Nivel de Energía:
+                    </span>
+                    <span className="text-amber-700 font-bold text-[11px]">{energyLevel}/5 ★</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-1 bg-amber-50/50 p-1.5 rounded-lg">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        disabled={!isDayUnlocked || isDayAlreadyLocked}
+                        onClick={() => {
+                          if (isDayUnlocked && !isDayAlreadyLocked) {
+                            setEnergyLevel(star);
+                          }
+                        }}
+                        className={`flex-1 py-1 flex items-center justify-center transition-all cursor-pointer ${
+                          energyLevel >= star ? 'text-amber-500' : 'text-slate-300'
+                        }`}
+                      >
+                        <Star className={`w-4 h-4 ${energyLevel >= star ? 'fill-amber-400 text-amber-400' : ''}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Digestion Pills */}
+                <div className="bg-white p-3 rounded-xl border border-slate-200 space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-700 font-bold flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      Digestión:
+                    </span>
+                    <span className="text-emerald-700 font-bold text-[11px] capitalize">{digestion}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1">
+                    {[
+                      { id: 'liviana', label: '🌿 Liviana' },
+                      { id: 'normal', label: '✨ Normal' },
+                      { id: 'pesada', label: '🍂 Pesada' },
+                      { id: 'inflamada', label: '⚠️ Inflamada' }
+                    ].map((d) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        disabled={!isDayUnlocked || isDayAlreadyLocked}
+                        onClick={() => {
+                          if (isDayUnlocked && !isDayAlreadyLocked) {
+                            setDigestion(d.id as DayProgress['digestion']);
+                          }
+                        }}
+                        className={`py-1 px-1.5 rounded-lg border text-[10px] font-bold text-center transition-all cursor-pointer truncate ${
+                          digestion === d.id
+                            ? 'bg-emerald-50 border-emerald-600 text-emerald-950'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
