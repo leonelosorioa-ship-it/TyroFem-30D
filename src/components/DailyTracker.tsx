@@ -34,6 +34,7 @@ import { getMaxUnlockedDay } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
 import { Day15CelebrationModal } from './Day15CelebrationModal';
+import { Day30CelebrationModal } from './Day30CelebrationModal';
 import { ExecutiveSummaryPanel } from './ExecutiveSummaryPanel';
 import { ExecutiveEnergyChartPanel } from './ExecutiveEnergyChartPanel';
 
@@ -110,6 +111,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   const [isQuickDownloading, setIsQuickDownloading] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showDay15CelebrationModal, setShowDay15CelebrationModal] = useState(false);
+  const [showDay30CelebrationModal, setShowDay30CelebrationModal] = useState(false);
 
   // Sync inputs when selectedDay changes
   useEffect(() => {
@@ -204,8 +206,10 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
       totalCompletedDays: updatedCompletedDays
     });
 
-    // If day 15 is submitted/registered, activate Day 15 celebration modal with audio & WhatsApp
-    if (selectedDay === 15) {
+    // If day 30 is submitted/registered, activate Day 30 celebration modal with graduation audio, PDF download, and WhatsApp reorder link
+    if (selectedDay === 30) {
+      setShowDay30CelebrationModal(true);
+    } else if (selectedDay === 15) {
       setShowDay15CelebrationModal(true);
     } else {
       setShowConfirmationModal(true);
@@ -586,6 +590,39 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
             </div>
           )}
 
+          {/* Day 30 Grand Graduation Banner */}
+          {selectedDay === 30 && (
+            <div className="bg-gradient-to-r from-amber-500/20 via-yellow-500/15 to-emerald-500/20 border-2 border-amber-400 rounded-3xl p-4 sm:p-5 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 flex items-center justify-center text-slate-950 font-black text-xl shadow-md shrink-0 ring-4 ring-amber-300/40">
+                  👑
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-950 bg-gradient-to-r from-amber-400 to-yellow-300 px-3 py-0.5 rounded-full mb-1 border border-amber-500/50 shadow-2xs">
+                    <Sparkles className="w-3 h-3 text-slate-950" />
+                    <span>¡GRADUACIÓN OFICIAL RETO TYROFEM 30D (100% CUMPLIDO)!</span>
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                    {isSelectedDayAlreadyLocked
+                      ? '¡Felicidades por culminar tus 30 días de transformación metabólica y hormonal!'
+                      : '¡Al registrar tu día 30 se activará automáticamente tu graduación, audio oficial y descarga del informe clínico firmado!'}
+                  </h4>
+                  <p className="text-xs text-slate-600">
+                    Escucha el audio de cierre de Marié, descarga tu informe en PDF y activa tu recompra con beneficio VIP.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDay30CelebrationModal(true)}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs shadow-md transition-all active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
+              >
+                <Award className="w-4 h-4 text-slate-950" />
+                <span>Graduación & Audio Día 30</span>
+              </button>
+            </div>
+          )}
+
           {/* Daily Metrics Dashboard */}
           <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${(!isSelectedDayUnlocked || isSelectedDayAlreadyLocked) ? 'opacity-85 pointer-events-none' : ''}`}>
             {/* Metric 1: Energy Level */}
@@ -927,7 +964,9 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                 <div
                   key={badge.id}
                   onClick={() => {
-                    if (badge.day === 15) {
+                    if (badge.day === 30) {
+                      setShowDay30CelebrationModal(true);
+                    } else if (badge.day === 15) {
                       setShowDay15CelebrationModal(true);
                     } else if (badge.unlocked) {
                       setSelectedDay(badge.day);
@@ -1017,6 +1056,22 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         }}
         onOpenTrend={() => {
           setShowDay15CelebrationModal(false);
+          setActiveSubTab('curva');
+        }}
+      />
+
+      {/* Day 30 Special Graduation Celebration Modal with Audio, Signed PDF & WhatsApp Reorder */}
+      <Day30CelebrationModal
+        isOpen={showDay30CelebrationModal}
+        onClose={() => setShowDay30CelebrationModal(false)}
+        userProfile={userProfile}
+        progressMap={progressMap}
+        onOpenFullReport={() => {
+          setShowDay30CelebrationModal(false);
+          setIsReportModalOpen(true);
+        }}
+        onOpenTrend={() => {
+          setShowDay30CelebrationModal(false);
           setActiveSubTab('curva');
         }}
       />

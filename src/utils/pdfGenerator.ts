@@ -367,35 +367,35 @@ export function generateTransformationReportPDF({
   // -------------------------------------------------------------
   // Line
   doc.setDrawColor(203, 213, 225);
-  doc.line(margin + 15, y + 10, margin + 70, y + 10);
+  doc.line(margin + 10, y + 10, margin + 75, y + 10);
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
+  doc.setFontSize(8.5);
   doc.setTextColor(15, 23, 42);
-  doc.text('Nutricionista Marié', margin + 25, y + 14);
+  doc.text('Marié - Nutricionista de ColShopi Tienda', margin + 12, y + 14);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Asesora Nutricional & Metabólica', margin + 21, y + 17.5);
-  doc.text('ColShopi Tienda By Leps Digital', margin + 22, y + 20.5);
+  doc.text('Especialista en Salud Hormonal y Metabólica Femenina', margin + 12, y + 17.5);
+  doc.text('Programa Clínico TyroFem 30D • ColShopi Tienda', margin + 12, y + 20.5);
 
   // Digital Seal on right side
   doc.setFillColor(241, 245, 249);
   doc.setDrawColor(0, 229, 255);
-  doc.roundedRect(pageWidth - margin - 65, y + 2, 65, 20, 2, 2, 'FD');
+  doc.roundedRect(pageWidth - margin - 70, y + 2, 70, 20, 2, 2, 'FD');
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7);
   doc.setTextColor(6, 78, 59);
-  doc.text('SELLO DIGITAL DE VALIDEZ', pageWidth - margin - 58, y + 7);
+  doc.text('SELLO DIGITAL DE VALIDEZ CLÍNICA', pageWidth - margin - 65, y + 7);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6);
   doc.setTextColor(71, 85, 105);
-  doc.text(`Expediente Nro: TYR-${userProfile.accessCode || '849201'}`, pageWidth - margin - 58, y + 11);
-  doc.text('Producto Original INVIMA NSA-0012896-2022', pageWidth - margin - 58, y + 14.5);
+  doc.text(`Expediente Oficial Nro: TYR-${userProfile.accessCode || '849201'}`, pageWidth - margin - 65, y + 11);
+  doc.text('Producto Original INVIMA NSA-0012896-2022', pageWidth - margin - 65, y + 14.5);
   doc.setTextColor(0, 150, 180);
-  doc.text('ColShopi Tienda • Atención: +57 310 400 7428', pageWidth - margin - 58, y + 18);
+  doc.text('ColShopi Tienda • Atención VIP: +57 310 400 7428', pageWidth - margin - 65, y + 18);
 
   // Footer bar
   doc.setFillColor(7, 12, 18);

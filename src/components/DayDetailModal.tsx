@@ -20,7 +20,8 @@ import {
   FileText,
   TrendingUp,
   Eye,
-  Headphones
+  Headphones,
+  Award
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayPlan, DayProgress, UserProfile } from '../types';
@@ -28,6 +29,7 @@ import { getMaxUnlockedDay } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
 import { Day15CelebrationModal } from './Day15CelebrationModal';
+import { Day30CelebrationModal } from './Day30CelebrationModal';
 
 interface DayDetailModalProps {
   dayPlan: DayPlan | null;
@@ -85,6 +87,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   const [mood, setMood] = useState(currentProgress?.mood || 'tranquila');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showDay15CelebrationModal, setShowDay15CelebrationModal] = useState(false);
+  const [showDay30CelebrationModal, setShowDay30CelebrationModal] = useState(false);
 
   useEffect(() => {
     if (currentProgress) {
@@ -174,7 +177,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
       // silent
     }
 
-    if (dayPlan.dayNumber === 15) {
+    if (dayPlan.dayNumber === 30) {
+      setShowDay30CelebrationModal(true);
+    } else if (dayPlan.dayNumber === 15) {
       setShowDay15CelebrationModal(true);
     } else {
       setShowConfirmationModal(true);
@@ -267,6 +272,16 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                     >
                       <Headphones className="w-3.5 h-3.5 text-amber-100" />
                       <span>🎧 Audio de Marié (Día 15)</span>
+                    </button>
+                  )}
+                  {dayPlan.dayNumber === 30 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDay30CelebrationModal(true)}
+                      className="text-[11px] font-black text-slate-950 hover:text-slate-900 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 border border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    >
+                      <Award className="w-3.5 h-3.5 text-slate-950" />
+                      <span>👑 Graduación & Audio Día 30</span>
                     </button>
                   )}
                   <button
@@ -607,6 +622,39 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
         }}
         onOpenTrend={() => {
           setShowDay15CelebrationModal(false);
+          onOpenTrend?.();
+        }}
+      />
+      {/* Day 30 Special Graduation Celebration Modal */}
+      <Day30CelebrationModal
+        isOpen={showDay30CelebrationModal}
+        onClose={() => {
+          setShowDay30CelebrationModal(false);
+          onClose();
+        }}
+        userProfile={userProfile}
+        progressMap={{
+          [dayPlan.dayNumber]: {
+            dayNumber: dayPlan.dayNumber,
+            tyrussTaken,
+            water2L,
+            antiinflammatoryMeal,
+            extraHabit,
+            energyLevel,
+            digestion,
+            mood,
+            sleepStars: currentProgress?.sleepStars || 4,
+            notes,
+            completedAt: currentProgress?.completedAt || new Date().toISOString(),
+            isLockedAfterSubmit: true
+          }
+        }}
+        onOpenFullReport={() => {
+          setShowDay30CelebrationModal(false);
+          onOpenReport?.();
+        }}
+        onOpenTrend={() => {
+          setShowDay30CelebrationModal(false);
           onOpenTrend?.();
         }}
       />
