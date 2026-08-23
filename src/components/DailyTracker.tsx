@@ -21,7 +21,8 @@ import {
   Clock,
   ShieldCheck,
   AlertCircle,
-  Eye
+  Eye,
+  Headphones
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { triggerDayCompletionConfetti } from '../utils/confettiCelebration';
@@ -32,6 +33,7 @@ import { generateTransformationReportPDF } from '../utils/pdfGenerator';
 import { getMaxUnlockedDay } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
+import { Day15CelebrationModal } from './Day15CelebrationModal';
 import { ExecutiveSummaryPanel } from './ExecutiveSummaryPanel';
 import { ExecutiveEnergyChartPanel } from './ExecutiveEnergyChartPanel';
 
@@ -107,6 +109,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isQuickDownloading, setIsQuickDownloading] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showDay15CelebrationModal, setShowDay15CelebrationModal] = useState(false);
 
   // Sync inputs when selectedDay changes
   useEffect(() => {
@@ -201,7 +204,12 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
       totalCompletedDays: updatedCompletedDays
     });
 
-    setShowConfirmationModal(true);
+    // If day 15 is submitted/registered, activate Day 15 celebration modal with audio & WhatsApp
+    if (selectedDay === 15) {
+      setShowDay15CelebrationModal(true);
+    } else {
+      setShowConfirmationModal(true);
+    }
   };
 
 
@@ -229,6 +237,15 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
       unlocked: completedDays >= 14,
       icon: '⚡',
       desc: 'Tiroides nutrida con selenio y yodo orgánico.'
+    },
+    {
+      id: 'b15',
+      title: 'Mitad del Reto 15D',
+      day: 15,
+      unlocked: completedDays >= 15 || Boolean(progressMap[15]?.completedAt || progressMap[15]?.isLockedAfterSubmit),
+      icon: '🌟',
+      desc: '¡Audio especial de Marié y 50% alcanzado!',
+      isDay15Special: true
     },
     {
       id: 'b21',
@@ -534,6 +551,39 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                 />
               </div>
             )
+          )}
+
+          {/* Day 15 Special Celebration Banner */}
+          {selectedDay === 15 && (
+            <div className="bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-teal-500/15 border-2 border-amber-400/80 rounded-3xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-md shrink-0 ring-4 ring-amber-300/30">
+                  15D
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-900 bg-amber-200/90 px-2.5 py-0.5 rounded-full mb-1 border border-amber-400/50">
+                    <Sparkles className="w-3 h-3 text-amber-700" />
+                    <span>¡Hito Oficial: 15 Días (Mitad del Reto 50%)!</span>
+                  </div>
+                  <h4 className="text-sm font-bold text-slate-900 leading-snug">
+                    {isSelectedDayAlreadyLocked
+                      ? '¡Has completado con éxito el día 15 de tu transformación!'
+                      : '¡Al registrar tu día 15 se activará automáticamente tu felicitación y audio de Marié!'}
+                  </h4>
+                  <p className="text-xs text-slate-600">
+                    Escucha el mensaje de voz de Marié y comunícate con ella por WhatsApp (+57 310 400 7428).
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDay15CelebrationModal(true)}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-2 shrink-0 cursor-pointer"
+              >
+                <Headphones className="w-4 h-4 text-amber-300" />
+                <span>Audio de Marié (Día 15)</span>
+              </button>
+            </div>
           )}
 
           {/* Daily Metrics Dashboard */}
@@ -872,11 +922,18 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
               {badges.map((badge) => (
                 <div
                   key={badge.id}
-                  className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-between ${
+                  onClick={() => {
+                    if (badge.day === 15) {
+                      setShowDay15CelebrationModal(true);
+                    } else if (badge.unlocked) {
+                      setSelectedDay(badge.day);
+                    }
+                  }}
+                  className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center justify-between cursor-pointer hover:scale-[1.02] ${
                     badge.unlocked
                       ? 'bg-gradient-to-b from-amber-50 to-white border-amber-300 shadow-xs ring-1 ring-amber-400/20'
                       : 'bg-slate-50/80 border-slate-200/80 opacity-60'
@@ -946,6 +1003,21 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         onOpenChat={() => {
           setShowConfirmationModal(false);
           onOpenChat();
+        }}
+      />
+
+      {/* Day 15 Special Celebration Modal with Audio & WhatsApp */}
+      <Day15CelebrationModal
+        isOpen={showDay15CelebrationModal}
+        onClose={() => setShowDay15CelebrationModal(false)}
+        userProfile={userProfile}
+        onOpenReport={() => {
+          setShowDay15CelebrationModal(false);
+          setIsReportModalOpen(true);
+        }}
+        onOpenTrend={() => {
+          setShowDay15CelebrationModal(false);
+          setActiveSubTab('curva');
         }}
       />
     </div>

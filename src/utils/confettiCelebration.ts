@@ -22,7 +22,7 @@ export interface ConfettiTriggerOptions {
 export function triggerDayCompletionConfetti({ dayNumber, totalCompletedDays }: ConfettiTriggerOptions) {
   try {
     const isGraduation = dayNumber >= 30 || totalCompletedDays >= 30;
-    const isMajorMilestone = dayNumber === 7 || dayNumber === 14 || dayNumber === 21 || totalCompletedDays === 7 || totalCompletedDays === 14 || totalCompletedDays === 21;
+    const isMajorMilestone = dayNumber === 7 || dayNumber === 14 || dayNumber === 15 || dayNumber === 21 || totalCompletedDays === 7 || totalCompletedDays === 14 || totalCompletedDays === 15 || totalCompletedDays === 21;
 
     if (isGraduation) {
       // 👑 GRADUACIÓN DÍA 30: Espectáculo de fuegos artificiales de confeti dorado y esmeralda de 3 segundos

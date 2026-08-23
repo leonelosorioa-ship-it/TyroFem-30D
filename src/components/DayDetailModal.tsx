@@ -19,13 +19,15 @@ import {
   AlertCircle,
   FileText,
   TrendingUp,
-  Eye
+  Eye,
+  Headphones
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayPlan, DayProgress, UserProfile } from '../types';
 import { getMaxUnlockedDay } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
+import { Day15CelebrationModal } from './Day15CelebrationModal';
 
 interface DayDetailModalProps {
   dayPlan: DayPlan | null;
@@ -82,6 +84,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   const [digestion, setDigestion] = useState(currentProgress?.digestion || 'liviana');
   const [mood, setMood] = useState(currentProgress?.mood || 'tranquila');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showDay15CelebrationModal, setShowDay15CelebrationModal] = useState(false);
 
   useEffect(() => {
     if (currentProgress) {
@@ -171,7 +174,11 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
       // silent
     }
 
-    setShowConfirmationModal(true);
+    if (dayPlan.dayNumber === 15) {
+      setShowDay15CelebrationModal(true);
+    } else {
+      setShowConfirmationModal(true);
+    }
   };
 
   const isFullyCompleted = tyrussTaken && water2L && antiinflammatoryMeal;
@@ -251,7 +258,17 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 <p className="text-xs text-emerald-100/90 leading-relaxed">
                   Los datos de este día ya fueron guardados exitosamente y están integrados en tu <strong>Informe Clínico de Transformación (PDF)</strong> y en tus reportes. Para evitar reprocesos o alteraciones, este día se mantiene bloqueado para edición.
                 </p>
-                <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center gap-2 pt-1 flex-wrap">
+                  {dayPlan.dayNumber === 15 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDay15CelebrationModal(true)}
+                      className="text-[11px] font-bold text-amber-200 hover:text-white bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 border border-amber-300 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    >
+                      <Headphones className="w-3.5 h-3.5 text-amber-100" />
+                      <span>🎧 Audio de Marié (Día 15)</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -574,6 +591,23 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
         onOpenChat={() => {
           setShowConfirmationModal(false);
           onOpenChat();
+        }}
+      />
+      {/* Day 15 Special Milestone Celebration Modal */}
+      <Day15CelebrationModal
+        isOpen={showDay15CelebrationModal}
+        onClose={() => {
+          setShowDay15CelebrationModal(false);
+          onClose();
+        }}
+        userProfile={userProfile}
+        onOpenReport={() => {
+          setShowDay15CelebrationModal(false);
+          onOpenReport?.();
+        }}
+        onOpenTrend={() => {
+          setShowDay15CelebrationModal(false);
+          onOpenTrend?.();
         }}
       />
     </>
