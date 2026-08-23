@@ -261,10 +261,10 @@ export const ExecutiveEnergyChartPanel: React.FC<ExecutiveEnergyChartPanelProps>
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight block">
-              Estado Clínico
+              Estado de Vitalidad
             </span>
             <span className="text-xs font-black text-emerald-900 block truncate">
-              {avgEnergy >= 4 ? 'Metabolismo Alto' : 'En Calibración'}
+              {avgEnergy >= 4 ? 'Metabolismo & Energía Alta' : 'En Calibración Progresiva'}
             </span>
           </div>
         </div>
@@ -287,7 +287,7 @@ export const ExecutiveEnergyChartPanel: React.FC<ExecutiveEnergyChartPanelProps>
           </div>
 
           <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-            Escala Clínica: 1 (Baja) a 5 (Radiante)
+            Escala de Bienestar: 1 (Baja) a 5 (Radiante)
           </span>
         </div>
 

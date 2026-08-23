@@ -409,7 +409,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
             }`}
           >
             <FileText className="w-4 h-4" />
-            <span>3. Informe Clínico PDF & Logros</span>
+            <span>3. Informe de Bienestar & Hábitos (PDF)</span>
           </button>
         </div>
       </div>
@@ -486,7 +486,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                       </span>
                     </div>
                     <h4 className="text-base sm:text-lg font-bold text-white font-serif-luxury mt-1">
-                      Tus datos del Día {selectedDay} están listos en tu Informe Clínico 📄
+                      Tus datos del Día {selectedDay} están listos en tu Informe de Bienestar 📄
                     </h4>
                   </div>
                 </div>
@@ -604,8 +604,8 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   </div>
                   <h4 className="text-sm font-bold text-slate-900 leading-snug">
                     {isSelectedDayAlreadyLocked
-                      ? '¡Felicidades por culminar tus 30 días de transformación metabólica y hormonal!'
-                      : '¡Al registrar tu día 30 se activará automáticamente tu graduación, audio oficial y descarga del informe clínico firmado!'}
+                      ? '¡Felicidades por culminar tus 30 días de transformación y hábitos saludables!'
+                      : '¡Al registrar tu día 30 se activará automáticamente tu graduación, audio oficial y descarga del informe de bienestar avalado!'}
                   </h4>
                   <p className="text-xs text-slate-600">
                     Escucha el audio de cierre de Marié, descarga tu informe en PDF y activa tu recompra con beneficio VIP.
@@ -821,7 +821,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   ¿Lista para registrar tus datos de hoy, {userProfile.name}? 🌿
                 </h4>
                 <p className="text-xs text-emerald-100/90 max-w-xl">
-                  Al confirmar, este día se guardará de forma blindada en tu <strong>Informe Clínico Oficial</strong> y se bloqueará para evitar reprocesos. Podrás consultarlo siempre que desees.
+                  Al confirmar, este día se guardará de forma blindada en tu <strong>Informe de Bienestar Oficial</strong> y se bloqueará para evitar reprocesos. Podrás consultarlo siempre que desees.
                 </p>
               </div>
 
@@ -844,10 +844,10 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
               </div>
               <div>
                 <strong className="text-xs text-emerald-950 block">
-                  ¿Quieres analizar tu evolución metabólica?
+                  ¿Quieres analizar tu evolución y niveles de vitalidad?
                 </strong>
                 <span className="text-[11px] text-emerald-800">
-                  Explora la curva de 30 días generada con Recharts y mira tus saltos de energía.
+                  Explora la curva de 30 días generada con Recharts y mira tus saltos de bienestar.
                 </span>
               </div>
             </div>
@@ -872,7 +872,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         </div>
       )}
 
-      {/* SUB-TAB 3: Informe Clínico PDF & Logros */}
+      {/* SUB-TAB 3: Informe de Bienestar PDF & Logros */}
       {activeSubTab === 'informe' && (
         <div className="space-y-6">
           {/* Official 30-Day Transformation Report (PDF Card Banner) */}
@@ -881,7 +881,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-400/40">
-                    Documento Clínico Oficial TyroFem
+                    Documento Oficial TyroFem
                   </span>
                   <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-400/40">
                     VIP #{userProfile.accessCode || '849201'}

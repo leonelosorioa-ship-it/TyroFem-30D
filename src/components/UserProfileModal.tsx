@@ -154,19 +154,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
           </div>
 
-          {/* Clinical Report Destination Card */}
+          {/* Wellness Report Destination Card */}
           <div className="rounded-2xl p-4 bg-cyan-50/80 border border-cyan-200 space-y-2 text-xs text-cyan-950">
             <div className="flex items-center gap-2 font-bold text-cyan-900">
               <FileCheck2 className="w-4 h-4 text-cyan-700 shrink-0" />
-              <span>Informe Clínico al Finalizar tus 30 Días:</span>
+              <span>Informe de Bienestar al Finalizar tus 30 Días:</span>
             </div>
             
             <p className="text-[11px] leading-relaxed text-slate-700">
-              Tu reporte oficial{' '}
+              Tu informe de avance{' '}
               <strong className="text-cyan-950 font-bold">
-                "Informe Clínico de Evolución Tiroidea, Balance Hormonal & Biometría Metabólica TyroFem 30D"
+                "Informe de Bienestar & Hábitos Saludables TyroFem 30D"
               </strong>{' '}
-              se generará y enviará al completar el Día 30 a tu correo:
+              se generará y podrás descargarlo o recibirlo al completar el Día 30 a tu correo:
             </p>
 
             <div className="p-2.5 rounded-xl bg-white border border-cyan-200/80 flex items-center gap-2">
@@ -193,14 +193,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-300 leading-relaxed">
-              Tu acceso está activo durante tu ciclo de tratamiento. Para reactivar tu App por <strong>30 días más</strong>, solicita tu nuevo pedido de Tyruss Full a la línea de ColShopi.
+              Tu acceso está activo durante tu ciclo de hábitos. Para reactivar tu App por <strong>30 días más</strong>, solicita tu nuevo pedido de Tyruss Full a la línea de ColShopi.
             </p>
           </div>
 
           {/* Health Objective Registered */}
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
             <span className="text-[10px] uppercase font-bold text-slate-500 block">
-              Enfoque Clínico Seleccionado
+              Área de Enfoque Seleccionada
             </span>
             <div className="flex items-center gap-2">
               <span className="text-base">

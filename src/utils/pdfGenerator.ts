@@ -69,7 +69,7 @@ export function generateTransformationReportPDF({
 
   doc.setFontSize(7.5);
   doc.setTextColor(200, 215, 230);
-  doc.text('LINEA NUTRICIONAL & METABOLICA FEMENINA', margin, 22);
+  doc.text('LINEA DE NUTRICION Y BIENESTAR FEMENINO', margin, 22);
 
   // Right Header Badges
   doc.setFont('helvetica', 'bold');
@@ -92,15 +92,15 @@ export function generateTransformationReportPDF({
   // 2. DOCUMENT TITLE & USER PROFILE CARD
   // -------------------------------------------------------------
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
+  doc.setFontSize(12.5);
   doc.setTextColor(6, 78, 59); // Emerald Dark
-  doc.text('INFORME DE TRANSFORMACION & HABITOS SALUDABLES', margin, y);
+  doc.text('INFORME DE BIENESTAR & HABITOS SALUDABLES TYROFEM 30D', margin, y);
   
   y += 5;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Reto de 30 Días de Hábitos Saludables y Bienestar TyroFem con Tyruss Full (500g)', margin, y);
+  doc.text('Reto 30 Días: Guía de Bienestar TyroFem • Guía de Hábitos y Alimentación Consciente', margin, y);
 
   y += 6;
 
@@ -135,7 +135,7 @@ export function generateTransformationReportPDF({
   doc.text(`${userProfile.ageGroup || 'Adulto'}`, rightColX + 28, y + 6);
 
   doc.setFont('helvetica', 'bold');
-  doc.text('Enfoque Principal:', rightColX, y + 12);
+  doc.text('Área de Enfoque:', rightColX, y + 12);
   doc.setFont('helvetica', 'normal');
   doc.text(
     userProfile.primaryAngle === 'tiroides_metabolismo' ? 'Tiroides & Metabolismo' :
@@ -146,10 +146,10 @@ export function generateTransformationReportPDF({
   );
 
   doc.setFont('helvetica', 'bold');
-  doc.text('Especialista:', rightColX, y + 18);
+  doc.text('Guía de Hábitos:', rightColX, y + 18);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(5, 150, 105);
-  doc.text('Nutricionista Marié (ColShopi)', rightColX + 28, y + 18);
+  doc.text('Marié – Guía de Bienestar', rightColX + 28, y + 18);
 
   y += 30;
 
@@ -217,7 +217,7 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
   doc.setTextColor(15, 23, 42);
-  doc.text('1. CUMPLIMIENTO DE PILARES TERAPEUTICOS TYRFEM', margin, y);
+  doc.text('1. CUMPLIMIENTO DE PILARES DE BIENESTAR TYROFEM', margin, y);
 
   y += 4;
 
@@ -229,8 +229,8 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
   doc.setTextColor(51, 65, 85);
-  doc.text('Pilar Terapéutico Evaluado', margin + 4, y + 4.5);
-  doc.text('Objetivo Clínico', margin + 65, y + 4.5);
+  doc.text('Pilar de Bienestar Evaluado', margin + 4, y + 4.5);
+  doc.text('Objetivo de Hábitos', margin + 65, y + 4.5);
   doc.text('Cumplimiento Registrado', margin + 120, y + 4.5);
   doc.text('Estado', margin + 155, y + 4.5);
 
@@ -372,13 +372,13 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(15, 23, 42);
-  doc.text('Marié - Guía de Bienestar ColShopi Tienda', margin + 12, y + 14);
+  doc.text('Marié – Guía de Bienestar & Hábitos Saludables', margin + 12, y + 14);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Asistente Virtual Inteligente & Guía de Hábitos Saludables', margin + 12, y + 17.5);
-  doc.text('Reto TyroFem 30D • ColShopi Tienda By Leps Digital', margin + 12, y + 20.5);
+  doc.text('Asistente Virtual Inteligente & Guía de Hábitos • ColShopi Tienda', margin + 12, y + 17.5);
+  doc.text('Reto 30 Días: Guía de Bienestar TyroFem • By Leps Digital', margin + 12, y + 20.5);
 
   // Digital Seal on right side
   doc.setFillColor(241, 245, 249);
@@ -392,7 +392,7 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6);
   doc.setTextColor(71, 85, 105);
-  doc.text(`Informe Oficial Nro: TYR-${userProfile.accessCode || '849201'}`, pageWidth - margin - 65, y + 11);
+  doc.text(`Informe de Bienestar Nro: TYR-${userProfile.accessCode || '849201'}`, pageWidth - margin - 65, y + 11);
   doc.text('Producto Original INVIMA RSA-0021928-2022', pageWidth - margin - 65, y + 14.5);
   doc.setTextColor(0, 150, 180);
   doc.text('ColShopi Tienda • Atención VIP: +57 310 400 7428', pageWidth - margin - 65, y + 18);
@@ -402,16 +402,16 @@ export function generateTransformationReportPDF({
   doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
+  doc.setFontSize(6);
   doc.setTextColor(200, 215, 230);
   doc.text(
-    'ColShopi Tienda By Leps Digital • Tyruss Full 500g • Documento de seguimiento de hábitos personales. No reemplaza diagnóstico ni tratamiento médico.',
+    'Marié es una IA de orientación de hábitos desarrollada para la comunidad ColShopi. Los productos comercializados cuentan con registro INVIMA. No constituye prescripción médica.',
     pageWidth / 2,
     pageHeight - 3,
     { align: 'center' }
   );
 
   // Save the PDF file
-  const fileName = `Informe_Transformacion_30D_${userProfile.name.replace(/\s+/g, '_')}_TyroFem.pdf`;
+  const fileName = `Informe_Bienestar_30D_${userProfile.name.replace(/\s+/g, '_')}_TyroFem.pdf`;
   doc.save(fileName);
 }

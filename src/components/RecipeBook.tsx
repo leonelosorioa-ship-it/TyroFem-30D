@@ -63,13 +63,13 @@ export const RecipeBook: React.FC<RecipeBookProps> = ({
         <div className="relative z-10 space-y-2">
           <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-400/30">
             <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-            <span>Recetario Funcional Tyruss Full</span>
+            <span>Sugerencias de Menú Balanceado • Tyruss Full</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold font-serif-luxury">
-            Combinaciones & Batidos de Marié {userProfile?.name ? `para ${userProfile.name}` : ''} 🍏🍍
+            Sugerencias de Menú Balanceado & Batidos de Marié {userProfile?.name ? `para ${userProfile.name}` : ''} 🍏🍍
           </h2>
           <p className="text-sm text-emerald-100/90 max-w-2xl leading-relaxed">
-            Hola {userProfile?.name ? <strong>{userProfile.name}</strong> : 'hermosa'}, potencia los superalimentos de tu <strong>Tyruss Full</strong> (espirulina, chlorella, selenio y colágeno) con frutas funcionales, hierbas y grasas saludables para cada momento de tu día.
+            Hola {userProfile?.name ? <strong>{userProfile.name}</strong> : 'hermosa'}, en esta sección de <strong>Sugerencias de Menú Balanceado</strong> encuentras combinaciones deliciosas para acompañar tu <strong>Tyruss Full</strong> (espirulina, chlorella, selenio y colágeno) con frutas frescas, semillas y alimentos naturales para tu día a día.
           </p>
         </div>
       </div>
@@ -169,11 +169,11 @@ export const RecipeBook: React.FC<RecipeBookProps> = ({
               </p>
             </div>
 
-            {/* Clinical Benefit Highlight */}
+            {/* Nutritional & Wellness Benefit Highlight */}
             <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/80 rounded-2xl p-4 text-xs text-emerald-950 space-y-1">
               <div className="flex items-center gap-1.5 font-bold text-emerald-900">
                 <Sparkles className="w-4 h-4 text-amber-500" />
-                <span>Beneficio Clínico & Hormonal:</span>
+                <span>Aporte Nutricional & Bienestar:</span>
               </div>
               <p className="leading-relaxed text-slate-700">
                 {activeRecipe.clinicalBenefit}

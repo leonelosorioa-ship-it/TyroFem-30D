@@ -141,7 +141,7 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
                   <FileText className="w-4 h-4 text-emerald-700" />
                   <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-700 group-hover:translate-x-0.5 transition-all" />
                 </div>
-                <strong className="text-xs text-slate-900 block font-bold">Informe Clínico PDF</strong>
+                <strong className="text-xs text-slate-900 block font-bold">Informe de Bienestar PDF</strong>
                 <span className="text-[10px] text-slate-500">Incluido en tu reporte oficial 30D</span>
               </button>
 
@@ -166,9 +166,9 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
           {/* Marié tip note */}
           <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-lg">👩‍⚕️</span>
+              <span className="text-lg">🌿</span>
               <span className="text-[11px] text-slate-600">
-                ¿Deseas consultar alguna duda con Marié sobre tu evolución?
+                ¿Deseas consultar alguna duda de hábitos con Marié sobre tu evolución?
               </span>
             </div>
             <button

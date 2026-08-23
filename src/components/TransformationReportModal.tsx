@@ -97,7 +97,7 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[9px] sm:text-[10px] font-black text-cyan-300 uppercase tracking-wider bg-cyan-950 px-2 py-0.5 rounded border border-cyan-400/40">
-                    Expediente Clínico Oficial
+                    Documento Oficial TyroFem
                   </span>
                   <span className="text-[9px] sm:text-[10px] font-bold text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded border border-amber-400/40">
                     VIP #{userProfile.accessCode || '849201'}

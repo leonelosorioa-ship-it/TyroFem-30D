@@ -528,17 +528,17 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-900 text-sm font-medium"
                   />
                   
-                  {/* Explicit Explanation of the 30-Day Clinical Report */}
+                  {/* Explicit Explanation of the 30-Day Wellness Report */}
                   <div className="mt-2.5 p-3 rounded-xl bg-cyan-50/80 border border-cyan-200/80 text-cyan-950 text-xs space-y-1">
                     <div className="flex items-center gap-1.5 font-bold text-cyan-900">
                       <FileCheck2 className="w-4 h-4 text-cyan-700" />
                       <span>¿Por qué te solicitamos tu correo?</span>
                     </div>
                     <p className="text-[11px] leading-relaxed text-cyan-950">
-                      Al finalizar tus 30 días con Tyruss Full, la Nutricionista Marié generará y te enviará a este correo tu{' '}
+                      Al finalizar tus 30 días con Tyruss Full, Marié generará tu{' '}
                       <strong className="text-cyan-900 font-extrabold underline decoration-cyan-400">
-                        "Informe Clínico de Evolución Tiroidea, Balance Hormonal & Biometría Metabólica TyroFem 30D"
-                      </strong>, con la comparativa de tus niveles de energía, digestión, síntomas y tu plan de mantenimiento.
+                        "Informe de Bienestar & Hábitos Saludables TyroFem 30D"
+                      </strong>, con el balance de tus niveles de energía, digestión, hábitos saludables y tu plan de mantenimiento.
                     </p>
                   </div>
                 </div>

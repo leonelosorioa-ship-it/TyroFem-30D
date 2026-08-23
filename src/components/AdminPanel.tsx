@@ -493,7 +493,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               onChange={e => setAngleFilter(e.target.value as any)}
               className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-300 focus:outline-hidden focus:border-cyan-400"
             >
-              <option value="all">Todos los Objetivos Clínicos</option>
+              <option value="all">Todos los Objetivos de Bienestar</option>
               <option value="tiroides_metabolismo">Tiroides & Metabolismo</option>
               <option value="desbalance_menopausia">Hormonal & Menopausia</option>
               <option value="ciclos_spm">Ciclos SPM & Dolor</option>
@@ -547,7 +547,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               <Users className="w-12 h-12 text-slate-700 mx-auto" />
               <h4 className="text-sm font-bold text-slate-300">No se encontraron usuarias con los filtros aplicados</h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Intenta modificar el término de búsqueda o restablecer los filtros de estado clínico.
+                Intenta modificar el término de búsqueda o restablecer los filtros de búsqueda.
               </p>
               <button
                 type="button"
@@ -564,7 +564,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                   <tr>
                     <th className="py-3 px-4">Usuaria & Contacto</th>
                     <th className="py-3 px-3">Código VIP</th>
-                    <th className="py-3 px-3">Objetivo Clínico</th>
+                    <th className="py-3 px-3">Objetivo de Bienestar</th>
                     <th className="py-3 px-3">Progreso 30D</th>
                     <th className="py-3 px-3">Estado Actual</th>
                     <th className="py-3 px-3">Fecha Registro</th>
@@ -981,11 +981,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                 </div>
               </div>
 
-              {/* Clinical Objective & Symptoms */}
+              {/* Wellness Objective & Symptoms */}
               <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Diagnóstico de Salud</span>
+                <span className="text-[10px] text-slate-400 uppercase font-bold block">Enfoque de Hábitos</span>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Objetivo Clínico:</span>
+                  <span className="text-slate-400">Objetivo de Bienestar:</span>
                   <span className="font-bold text-amber-300">{getAngleLabel(selectedUserForDetail.primaryAngle)}</span>
                 </div>
                 {selectedUserForDetail.symptoms && selectedUserForDetail.symptoms.length > 0 && (
@@ -1168,7 +1168,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-bold block">Objetivo Clínico de Salud:</label>
+                <label className="text-slate-300 font-bold block">Objetivo de Bienestar:</label>
                 <select
                   value={newUserAngle}
                   onChange={e => setNewUserAngle(e.target.value as HealthAngle)}

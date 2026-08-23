@@ -261,7 +261,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-emerald-100/90 leading-relaxed">
-                  Los datos de este día ya fueron guardados exitosamente y están integrados en tu <strong>Informe Clínico de Transformación (PDF)</strong> y en tus reportes. Para evitar reprocesos o alteraciones, este día se mantiene bloqueado para edición.
+                  Los datos de este día ya fueron guardados exitosamente y están integrados en tu <strong>Informe de Bienestar y Hábitos (PDF)</strong> y en tus reportes. Para evitar reprocesos o alteraciones, este día se mantiene asegurado.
                 </p>
                 <div className="flex items-center gap-2 pt-1 flex-wrap">
                   {dayPlan.dayNumber === 15 && (

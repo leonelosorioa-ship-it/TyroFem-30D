@@ -478,12 +478,12 @@ export const Day30CelebrationModal: React.FC<Day30CelebrationModalProps> = ({
                 ) : isGeneratingPDF ? (
                   <>
                     <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                    <span>Generando Expediente Clínico PDF...</span>
+                    <span>Generando Informe de Bienestar PDF...</span>
                   </>
                 ) : (
                   <>
                     <Download className="w-4 h-4 text-slate-950" />
-                    <span>Descargar Informe Clínico en PDF (Firmado)</span>
+                    <span>Descargar Informe de Bienestar en PDF</span>
                   </>
                 )}
               </button>
@@ -504,7 +504,7 @@ export const Day30CelebrationModal: React.FC<Day30CelebrationModalProps> = ({
 
             <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] text-cyan-200/90 pt-0.5">
               <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span>Avalado con Sello Digital INVIMA NSA-0012896-2022 y Firma Profesional</span>
+              <span>Avalado con Sello Digital INVIMA RSA-0021928-2022 y Firma de Marié</span>
             </div>
           </div>
 
