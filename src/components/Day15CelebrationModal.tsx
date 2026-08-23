@@ -36,7 +36,7 @@ interface Day15CelebrationModalProps {
   onOpenTrend?: () => void;
 }
 
-const DAY_15_AUDIO_URL = 'https://f005.backblazeb2.com/file/ColShopi/Tyruss+Full/Audio+Mari%C3%A9+15+dias+Clientes.mp3';
+const DAY_15_AUDIO_URL = 'https://f005.backblazeb2.com/file/ColShopi/Tyruss+Full/Audio+Mari%C3%A9+15+dias+Clientes+-+Guia.mp3';
 const WHATSAPP_DAY_15_LINK = 'https://wa.link/ffch56';
 const WHATSAPP_PHONE_DISPLAY = '+57 310 400 7428';
 

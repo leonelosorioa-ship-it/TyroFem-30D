@@ -34,7 +34,7 @@ interface MarieWelcomeAudioModalProps {
   onContinueToPlan?: () => void;
 }
 
-const WELCOME_AUDIO_URL = 'https://f005.backblazeb2.com/file/ColShopi/Tyruss+Full/Audio+de+Bienvenida+de+Mari%C3%A9+App.mp3';
+const WELCOME_AUDIO_URL = 'https://f005.backblazeb2.com/file/ColShopi/Tyruss+Full/Audio+de+Bienvenida+de+Mari%C3%A9+App+-+Guia.mp3';
 
 export const MarieWelcomeAudioModal: React.FC<MarieWelcomeAudioModalProps> = ({
   isOpen,
