@@ -41,6 +41,8 @@ import { AdminPanel } from './components/AdminPanel';
 import { UserSuspendedModal } from './components/UserSuspendedModal';
 import { MarieWelcomeAudioModal } from './components/MarieWelcomeAudioModal';
 import { AppEntryAudioPlayer } from './components/AppEntryAudioPlayer';
+import { MotivationalToast } from './components/MotivationalToast';
+import { getMotivationalNotification, sendBrowserNotification, LocalNotification } from './utils/localNotifications';
 import { promptPWAInstall } from './utils/pwaManager';
 import { findUserByCodeOrEmail, syncUserSessionToServer } from './data/usersDatabase';
 import { CALENDAR_DAYS } from './data/calendarData';
@@ -115,6 +117,7 @@ export default function App() {
   const [isPwaInstallModalOpen, setIsPwaInstallModalOpen] = useState(false);
   const [isWelcomeAudioModalOpen, setIsWelcomeAudioModalOpen] = useState(false);
   const [isReorderTrigger, setIsReorderTrigger] = useState(false);
+  const [motivationalNotification, setMotivationalNotification] = useState<LocalNotification | null>(null);
   const [isAdminViewOpen, setIsAdminViewOpen] = useState<boolean>(() => {
     return userProfile?.isAdmin === true;
   });
@@ -188,6 +191,18 @@ export default function App() {
     setProgressMap(prev => {
       const updated = { ...prev, [dayNumber]: progress };
       
+      // Calculate updated completed days
+      const totalCompleted = (Object.values(updated) as DayProgress[]).filter(
+        p => p.completedAt || (p.tyrussTaken && p.water2L) || p.isLockedAfterSubmit
+      ).length;
+
+      // Generate local motivational notification from Marie
+      const notif = getMotivationalNotification(dayNumber, totalCompleted);
+      setMotivationalNotification(notif);
+
+      // Attempt native browser notification if allowed
+      sendBrowserNotification(notif.title, notif.message, notif.icon);
+
       // Update currentDay if progressing
       if (userProfile && dayNumber >= userProfile.currentDay && progress.completedAt) {
         const nextDay = Math.min(30, dayNumber + 1);
@@ -705,6 +720,12 @@ export default function App() {
           setIsWelcomeAudioModalOpen(false);
           setActiveTab('calendario');
         }}
+      />
+
+      {/* Motivational Local Toast Notification for Daily Tracker Registration */}
+      <MotivationalToast
+        notification={motivationalNotification}
+        onClose={() => setMotivationalNotification(null)}
       />
 
       {/* ColShopi App Automatic Entry Audio Player */}
