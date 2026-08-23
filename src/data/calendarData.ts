@@ -486,7 +486,7 @@ export const CALENDAR_DAYS: DayPlan[] = [
       { id: 't23_1', label: 'Tomar dosis diaria de Tyruss Full', category: 'tyruss' },
       { id: 't23_2', label: 'Consumir plato multicolor en almuerzo', category: 'nutrition' },
       { id: 't23_3', label: '2L de agua bebidos durante el día', category: 'water' },
-      { id: 't23_4', label: 'Consultar dudas con la Nutricionista Marié en el Chat', category: 'mindset' },
+      { id: 't23_4', label: 'Consultar dudas con Marié – Guía de Bienestar en el Chat', category: 'mindset' },
     ],
     educationalSnippet: 'El zinc y el selenio estimulan la proliferación clonal de linfocitos T colaboradores y la actividad citotóxica natural.',
     recipeSuggestionId: 'bowl-energetico'

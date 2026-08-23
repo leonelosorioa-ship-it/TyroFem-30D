@@ -461,7 +461,7 @@ export const Day15CelebrationModal: React.FC<Day15CelebrationModalProps> = ({
 
             <div className="flex items-center justify-center gap-1 text-[10px] text-emerald-800 font-medium">
               <ShieldCheck className="w-3 h-3 text-emerald-600" />
-              <span>Línea oficial de soporte clínico y nutricional ColShopi</span>
+              <span>Línea oficial de soporte de bienestar y hábitos ColShopi</span>
             </div>
           </div>
 

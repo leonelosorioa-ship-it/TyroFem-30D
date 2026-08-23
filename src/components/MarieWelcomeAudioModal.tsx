@@ -304,7 +304,7 @@ export const MarieWelcomeAudioModal: React.FC<MarieWelcomeAudioModalProps> = ({
               {/* Online indicator badge */}
               <div className="absolute -bottom-2 bg-slate-950/95 border border-cyan-400/80 text-cyan-300 text-[10px] font-black px-3 py-0.5 rounded-full shadow-lg flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-emerald-400 animate-ping' : 'bg-emerald-400'}`} />
-                <span>{isPlaying ? 'Marié te está hablando...' : 'Directora Nutricional Marié'}</span>
+                <span>{isPlaying ? 'Marié te está hablando...' : 'Marié • Guía de Bienestar & Hábitos Saludables'}</span>
               </div>
             </div>
 

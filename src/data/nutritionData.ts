@@ -141,7 +141,7 @@ export const OFFICIAL_PACKAGES: ProductPackage[] = [
       'Loción Termoactiva Herbal de REGALO 🎁',
       'Garantiza completar los 30 días y fijar metabolismo',
       'Envío GRATIS y Pago Contra Entrega',
-      'Seguimiento prioritario con Nutricionista Marié'
+      'Acompañamiento prioritario con Marié – Guía de Bienestar'
     ]
   },
   {
@@ -184,7 +184,7 @@ export const OFFICIAL_PACKAGES: ProductPackage[] = [
 
 export const COLSHOPI_INFO = {
   storeName: 'ColShopi Tienda By Leps Digital',
-  creatorName: 'Nutricionista Marié',
+  creatorName: 'Marié – Guía de Bienestar & Hábitos Saludables',
   phone: '3104007428',
   phoneInternational: '+573104007428',
   instagram: 'https://www.instagram.com/colshopitienda',

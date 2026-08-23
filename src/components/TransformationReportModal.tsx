@@ -145,9 +145,9 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
 
             <div className="text-left sm:text-right">
               <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">
-                Guía de Bienestar & Hábitos
+                Guía & Acompañamiento
               </span>
-              <p className="text-xs font-bold text-slate-800">Marié (Asistente Virtual)</p>
+              <p className="text-xs font-bold text-slate-800">Marié – Guía de Bienestar & Hábitos Saludables</p>
               <span className="text-[11px] text-slate-500">ColShopi Tienda By Leps Digital</span>
             </div>
           </div>

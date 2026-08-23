@@ -86,7 +86,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                   Credencial de Compradora VIP
                 </span>
                 <h3 className="text-sm sm:text-base font-bold text-white font-serif-luxury">
-                  Expediente & Datos de Acceso
+                  Perfil de Bienestar & Datos de Acceso
                 </h3>
               </div>
             </div>

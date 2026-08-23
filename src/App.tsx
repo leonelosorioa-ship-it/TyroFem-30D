@@ -357,7 +357,7 @@ export default function App() {
             <button
               onClick={() => setIsUserProfileModalOpen(true)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-900 transition-colors cursor-pointer"
-              title="Ver mi credencial VIP y expediente clínico"
+              title="Ver mi credencial VIP e Informe de Hábitos"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Alumna: <strong className="text-slate-900">{userProfile.name}</strong></span>
@@ -782,8 +782,8 @@ export default function App() {
               <p>Colombia</p>
             </div>
             <div>
-              <span className="text-slate-200 font-bold block mb-1">Nutricionista</span>
-              <p className="text-emerald-300 font-semibold">Marié de ColShopi</p>
+              <span className="text-slate-200 font-bold block mb-1">Guía de Bienestar</span>
+              <p className="text-emerald-300 font-semibold">Marié – Hábitos Saludables</p>
               <p>Guía TyroFem 30D</p>
               <p>Tyruss Full (500g)</p>
             </div>
