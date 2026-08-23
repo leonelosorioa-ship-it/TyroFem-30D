@@ -4,22 +4,22 @@ export const INITIAL_MARIE_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-welcome-1',
     sender: 'marie',
-    text: '¡Hola hermosa! 🌿💚 ¿Cómo estás hoy?\n\nSoy **Marié**, experta en nutrición y bienestar integral de **ColShopi Tienda By Leps Digital** 💚. Esta aplicación es nuestro obsequio exclusivo para garantizar que tengas los mejores resultados en tu transformación.',
+    text: '¡Hola hermosa! 🌿💚 ¿Cómo estás hoy?\n\nSoy **Marié**, tu **Asistente Virtual Inteligente y Guía de Bienestar de ColShopi Tienda** 💚🤖. Estoy aquí para acompañarte día a día durante tu "Reto de 30 Días de Hábitos Saludables y Bienestar" junto a **Tyruss Full** con certificación INVIMA.',
     timestamp: 'Ahora'
   },
   {
     id: 'msg-welcome-2',
     sender: 'marie',
-    text: 'Cuéntame… ¿Cuál de estas situaciones se parece más a lo que estás viviendo actualmente? 👇\n\n1️⃣ **Tengo hipotiroidismo o siento que mi metabolismo está demasiado lento** 🦋\n2️⃣ **Tengo problemas hormonales, sofocos, ansiedad o cambios de humor** 🌸\n3️⃣ **Me siento cansada, agotada o sin energía la mayor parte del día** ⚡\n4️⃣ **Sufro de inflamación, digestión pesada o estreñimiento frecuente** 🌿\n\nToca una de las opciones rápidas o escríbeme lo que sientas.',
+    text: 'Cuéntame… ¿Cuál de estas situaciones se parece más a lo que estás viviendo actualmente? 👇\n\n1️⃣ **Quiero reactivar mi metabolismo y cuidar mi tiroides con buenos hábitos** 🦋\n2️⃣ **Tengo cambios hormonales, sofocos o fatiga frecuente** 🌸\n3️⃣ **Me siento cansada, sin energía o con sueño durante el día** ⚡\n4️⃣ **Sufro de inflamación, pesadez o digestión lenta** 🌿\n\nToca una de las opciones rápidas o escríbeme lo que sientas.',
     timestamp: 'Ahora',
     quickReplies: [
-      '1️⃣ Tiroides & Metabolismo Lento 🦋',
-      '2️⃣ Sofocos & Desbalance Hormonal 🌸',
-      '3️⃣ Fatiga & Falta de Energía ⚡',
-      '4️⃣ Inflamación & Digestión Pesada 🌿',
+      '1️⃣ Tiroides & Metabolismo 🦋',
+      '2️⃣ Sofocos & Bienestar Hormonal 🌸',
+      '3️⃣ Energía & Vitalidad Diaria ⚡',
+      '4️⃣ Digestión & Desinflamación 🌿',
       '🥤 ¿Cómo se toma y prepara?',
       '🛡️ ¿Tiene registro INVIMA?',
-      '🎁 ¿Cuál es mi obsequio?',
+      '🤖 ¿Quién es Marié?',
       '📦 Ver Promociones y Precios'
     ]
   }
@@ -36,28 +36,38 @@ export interface FaqTopic {
 
 export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
   {
-    triggers: ['1', 'tiroides', 'hipotiroidismo', 'metabolismo', 'lento', 'peso', 'subir de peso', 'adelgazar'],
-    response: '🦋 Te entiendo perfectamente… y debe ser muy frustrante sentir que haces de todo y aun así tu cuerpo no responde igual 💜\n\nMuchas mujeres con metabolismo o tiroides lenta sienten cansancio, inflamación, pesadez y acumulación de grasa.\n\n**Tyruss Full** aporta nutrientes esenciales como **Yodo orgánico y Selenio**, que ayudan a apoyar la función tiroidea mientras nutres tu cuerpo desde adentro con espirulina, chlorella y fibra 🌿.\n\nMuchas de nuestras clientas empiezan a sentirse más ligeras, más activas y con mejor bienestar desde los primeros días ✨.\n\n👉 *Cuéntame… ¿lo que más te afecta es el cansancio o la sensación de inflamación?*',
+    triggers: ['quien eres', 'eres nutricionista', 'eres medica', 'eres doctora', 'eres ia', 'eres real', 'eres robot', 'profesional de la salud', 'dietista'],
+    response: '🤖 **¡Hola! Te cuento con total transparencia sobre mí:**\n\nSoy **Marié**, la **Asistente Virtual Inteligente y Guía de Bienestar de ColShopi Tienda** 🌿💚.\n\n✨ **¿Cuál es mi labor?**\nAcompañarte durante tu Reto de 30 Días con ideas de menús balanceados, recetas saludables, pautas de hidratación, motivación constante y resolver tus dudas sobre los beneficios e ingredientes de nuestros productos con certificación INVIMA (como **Tyruss Full**).\n\n📌 **Aclaración importante de salud:**\nNo soy médica, nutricionista ni dietista profesional. Mi objetivo es guiarte en hábitos saludables cotidianos. Si presentas condiciones médicas agudas, síntomas severos o patologías específicas, recuerda siempre consultar con tu médico especialista tratante 👩🏻‍⚕️💜.',
     quickReplies: [
-      'Me afecta más el cansancio',
-      'Me afecta más la inflamación',
-      '¿Qué alimentos debo evitar?',
-      '¿Cómo debo tomar Tyruss Full?'
+      '🥤 ¿Cómo se toma Tyruss Full?',
+      '🥗 Ideas de menús saludables',
+      '🛡️ Certificación INVIMA',
+      '💬 Hablar con el equipo ColShopi'
+    ]
+  },
+  {
+    triggers: ['1', 'tiroides', 'hipotiroidismo', 'metabolismo', 'lento', 'peso', 'subir de peso', 'adelgazar'],
+    response: '🦋 Te entiendo perfectamente… y sé lo frustrante que puede ser sentir que el metabolismo va a un ritmo más lento 💜\n\nMuchas mujeres experimentan cansancio, pesadez o inflamación cuando sus hábitos y su tiroides necesitan un apoyo nutricional balanceado.\n\n**Tyruss Full** aporta nutrientes funcionales clave como **Yodo orgánico y Selenio**, además de espirulina, chlorella y fibra natural 🌿, que apoyan el bienestar metabólico general dentro de un estilo de vida activo y saludable.\n\n*(Recuerda: Si tienes un diagnóstico de hipotiroidismo severo u otra patología médica, es fundamental mantener los controles periódicos con tu médico tratante).* ✨\n\n👉 *Cuéntame… ¿lo que más te gustaría mejorar es tu nivel de energía o la ligereza digestiva?*',
+    quickReplies: [
+      'Mejorar mi energía diaria',
+      'Mejorar mi digestión',
+      'Ideas de alimentos balanceados',
+      '¿Cómo tomar Tyruss Full?'
     ],
     actionLink: {
-      text: 'Ver cómo ayuda a la Tiroides en el Calendario 📅',
+      text: 'Ver cómo apoya el Bienestar en el Calendario 📅',
       type: 'recipe',
       targetId: 'smoothie-verde-tiroides'
     }
   },
   {
     triggers: ['2', 'hormonas', 'hormonal', 'sofocos', 'calores', 'menopausia', 'sudores', 'humor', 'ansiedad', 'ciclos', 'spm', 'colicos'],
-    response: '🌸 Debe ser muy incómodo pasar por eso… muchas mujeres durante cambios hormonales o la etapa de menopausia sienten exactamente lo mismo 💜\n\nLos sofocos, la irritabilidad y el agotamiento suelen aparecer cuando el cuerpo experimenta fluctuaciones estrogénicas y necesita más equilibrio y soporte nutricional.\n\n**Tyruss Full** aporta superalimentos como crema de coco, linaza molida, omega 3 y antioxidantes que ayudan a apoyar el bienestar hormonal y energético 🌿.\n\nMuchas mujeres nos cuentan que empiezan a sentirse más estables, más tranquilas y con menor frecuencia de calores.\n\n👉 *¿También estás sintiendo mucho cansancio durante el día o te cuesta dormir de noche?*',
+    response: '🌸 Comprendo lo incómodos que pueden ser los sofocos y los cambios en el estado de ánimo durante las distintas etapas hormonales 💜\n\nEl cuerpo suele beneficiarse enormemente de una alimentación antiinflamatoria, hidratación óptima y nutrientes con antioxidantes y ácidos grasos saludables.\n\n**Tyruss Full** incluye ingredientes naturales como crema de coco, linaza molida y antioxidantes que complementan tus hábitos diarios para favorecer una sensación de mayor calma, confort y estabilidad energética 🌿.\n\n*(Nota de bienestar: Ante cualquier síntoma agudo o cambio hormonal severo, siempre te aconsejo consultar con tu ginecólogo o médico tratante).* ✨\n\n👉 *¿Te cuesta conciliar el sueño por las noches o sientes más fatiga durante el día?*',
     quickReplies: [
-      'Me cuesta mucho dormir por los calores',
-      'Tengo mucha ansiedad y cansancio',
+      'Me cuesta dormir bien',
+      'Siento mucha fatiga en el día',
       'Receta de Smoothie Hormonas en Calma',
-      'Pedir Asesoría por WhatsApp'
+      'Pedir Asistencia por WhatsApp'
     ],
     actionLink: {
       text: 'Ver Receta Hormonas en Calma 🌸',
@@ -67,10 +77,10 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
   },
   {
     triggers: ['3', 'energia', 'cansancio', 'fatiga', 'agotada', 'sin energia', 'agotamiento', 'sueño', 'despertar cansada'],
-    response: '💜 Te entiendo con el corazón… y muchas mujeres nos dicen exactamente lo mismo: "Despierto tan cansada como me acosté".\n\nA veces el cuerpo empieza a sentirse pesado, lento y sin chispa no por pereza, sino porque las mitocondrias celulares carecen de cofactores nutricionales como el complejo B, magnesio, hierro y proteínas limpias ✨.\n\nLa crema de coco, la proteína de arveja y el banano en polvo de **Tyruss Full** proporcionan energía limpia y sostenida sin picos de azúcar ni caídas por cafeína ⚡.\n\n👉 *¿Sueles depender del café en las tardes o te da bajón de energía a las 3:00 PM?*',
+    response: '💜 Te comprendo totalmente… muchas mujeres sienten que despiertan sin la energía suficiente para rendir en el día.\n\nPara que nuestras células funcionen con vitalidad, es clave mantener una buena hidratación, descanso reparador y nutrientes limpios sin depender de estimulantes artificiales ✨.\n\nLa combinación de proteína vegetal, crema de coco y micronutrientes en **Tyruss Full** aporta una fuente de nutrición limpia y sostenida sin provocar picos bruscos de azúcar ⚡.\n\n👉 *¿Sueles tomar café en las tardes o sientes el bajón de energía después del almuerzo?*',
     quickReplies: [
-      'Me da el bajón a las 3:00 PM',
-      'Dependo del café',
+      'Siento el bajón en la tarde',
+      'Tomo mucho café',
       'Ver Bowl Energético Matutino ⚡',
       '¿Cómo tomarlo en la mañana?'
     ],
@@ -82,22 +92,22 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
   },
   {
     triggers: ['4', 'digestion', 'estreñimiento', 'inflamacion', 'pesadez', 'hinchada', 'gases', 'colon', 'vientre'],
-    response: '🌿 Uf… muchas mujeres nos escriben sintiéndose exactamente así y sé lo incómodo que puede llegar a ser tener el vientre hinchado después de cada comida.\n\nCuando la digestión no funciona bien, el cuerpo acumula toxinas, se siente pesado, con estreñimiento y sin energía.\n\n**Tyruss Full** combina 6 gramos de fibra natural (linaza molida y harina de avena) junto con **clorofila, espirulina y chlorella** que ayudan a limpiar suavemente el tránsito intestinal sin laxantes agresivos ✨.\n\n👉 *¿Lo que más te incomoda es el estreñimiento o la inflamación después de comer?*',
+    response: '🌿 Sé lo molesto que resulta tener pesadez e inflamación después de comer.\n\nUn tránsito digestivo ligero depende de tres pilares: consumir suficiente fibra saludable, tomar al menos 2 litros de agua al día y realizar pausas conscientes de movimiento.\n\n**Tyruss Full** aporta fibra natural de linaza y avena, junto con **espirulina y chlorella**, que ayudan a promover la regularidad digestiva y una sensación de ligereza sin acudir a laxantes agresivos ✨.\n\n*(Si experimentas dolor abdominal agudo o persistente, recuerda acudir a valoración médica).* 🩺\n\n👉 *¿Lo que más te inquieta es el estreñimiento o la pesadez estomacal?*',
     quickReplies: [
-      'El estreñimiento me incomoda más',
-      'La inflamación después de comer',
-      '¿Qué es el Batido Verde previo?',
-      'Ver Bebida Digestiva Antiinflamatoria'
+      'El estreñimiento',
+      'La pesadez después de comer',
+      'Consejos de hidratación diaria',
+      'Ver Bebida Digestiva Saludable'
     ],
     actionLink: {
-      text: 'Ver Bebida Digestiva Antiinflamatoria 🌿',
+      text: 'Ver Bebida Digestiva Saludable 🌿',
       type: 'recipe',
       targetId: 'smoothie-digestivo'
     }
   },
   {
     triggers: ['como tomar', 'como se toma', 'como preparo', 'preparacion', 'dosis', 'cucharada', 'horario', 'en ayunas'],
-    response: '🥤 **¡Es súper fácil de preparar y delicioso!**\n\nSolo debes mezclar:\n✨ **1 cucharada + 1/4 dosificadora** de Tyruss Full (aprox. 20g) en un vaso de agua, leche vegetal o tu bebida favorita (200-250 ml).\n\nLuego:\n✔ Revuelves o licúas durante 1 minuto.\n✔ Puedes tomarlo frío o caliente (sabor natural a piña y manzana 🍏🍍).\n✔ *Tip de Marié:* Con unos cubitos de hielo queda como un batido refrescante delicioso 🌿💚.\n\n⏰ **Momento ideal:** En ayunas o con el desayuno para aprovechar sus nutrientes y arrancar con toda la energía.',
+    response: '🥤 **¡Es muy fácil y práctico de preparar!**\n\n1. Agrega **1 cucharada + 1/4 dosificadora** de Tyruss Full (aprox. 20g) en un vaso de agua, bebida vegetal o tu jugo favorito (200 a 250 ml).\n2. Mezcla o licúa durante 1 minuto hasta lograr una textura homogénea.\n3. Disfruta de su agradable sabor natural a piña y manzana 🍏🍍.\n\n💡 *Tip de Marié:* Puedes tomarlo en ayunas o junto con tu desayuno para empezar tu día con nutrición e hidratación.\n\n*(Recuerda complementar con tus 2 litros de agua a lo largo del día para que la fibra actúe al máximo).* 💧',
     quickReplies: [
       '¿Lo puedo tomar con leche de almendras?',
       '¿Cuántas porciones rinde el tarro?',
@@ -106,16 +116,16 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
   },
   {
     triggers: ['invima', 'registro', 'seguro', 'seguridad', 'legal', 'daño', 'contraindicaciones', 'laboratorio'],
-    response: '🛡️ **Puedes sentirte con total tranquilidad y seguridad 💚**\n\n**Tyruss Full** cuenta con **Registro Sanitario INVIMA Oficial: RSA-0021928-2022** ✅.\n\nEs un alimento funcional desarrollado en Colombia por laboratorio certificado, libre de soya, sin maltodextrina, sin azúcar añadida y sin fármacos químicos agresivos. Miles de mujeres en todo el país lo consumen a diario con excelente tolerancia digestiva.\n\n*(Nota médica: Como todo suplemento nutricional, si estás en embarazo, lactancia o bajo tratamiento específico, siempre es prudente comentarlo con tu médico de confianza).*',
+    response: '🛡️ **Tranquilidad y respaldo oficial:**\n\n**Tyruss Full** cuenta con **Registro Sanitario INVIMA Oficial: RSA-0021928-2022** ✅ (Alimento en polvo para consumo humano).\n\nEs un alimento funcional formulado en Colombia por laboratorio certificado, libre de azúcar añadida, sin soya ni fármacos artificiales. Miles de mujeres lo incorporan diariamente en sus rutinas de bienestar.\n\n*(Recordatorio de seguridad: Si estás en periodo de embarazo, lactancia o bajo prescripción médica estricta, siempre es aconsejable mostrar la tabla nutricional a tu médico de cabecera).* 👩🏻‍⚕️',
     quickReplies: [
-      'Ver Ficha Técnica y Tabla Nutricional',
-      '¿Quién fabrica Tyruss Full?',
+      'Ver Ficha Técnica e Ingredientes',
+      '¿Quién elabora Tyruss Full?',
       'Quiero hacer un pedido'
     ]
   },
   {
     triggers: ['obsequio', 'regalo', 'locion', 'termoactiva', 'dolor', 'piernas cansadas', 'gratis'],
-    response: '🎁 **¡Queremos consentirte como te lo mereces!** 💚\n\nPor la compra de tu Tyruss Full, recibes **100% GRATIS nuestra Loción Termoactiva Herbal 🌿🔥**.\n\nEs una loción de uso corporal formulada con extractos botánicos de **Árnica, Hamamelis, Castaño de Indias, Uña de Gato y Chuchuguaza**.\n\nEs maravillosa para pulverizar en piernas cansadas, cuello, hombros o zona lumbar tras un día pesado, brindando frescura, alivio y relajación muscular inmediata ✨.',
+    response: '🎁 **¡Un regalo especial para tu bienestar!** 💚\n\nPor la compra de tu tarro de Tyruss Full en ColShopi Tienda, recibes **100% GRATIS nuestra Loción Termoactiva Herbal 🌿🔥**.\n\nFormulada con extractos botánicos de **Árnica, Hamamelis, Castaño de Indias, Uña de Gato y Chuchuguaza**, es perfecta para masajear piernas cansadas, hombros o zona lumbar tras una jornada intensa, brindando frescura y sensación de alivio ✨.',
     quickReplies: [
       '¿Cómo se aplica la loción?',
       'Ver Promociones con Obsequio 🎁',
@@ -124,16 +134,16 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
   },
   {
     triggers: ['batido verde', 'detox previo', 'limpieza', 'sobre', '15000', 'promo batido'],
-    response: '🌱 **El Batido Verde Detox es el complemento perfecto:**\n\nEs un sobre concentrado (20g) con espirulina, avena, espinaca, jengibre, cúrcuma, apio y vitamina C.\n\n💡 *¿Por qué lo recomendamos antes de empezar?*\nPorque un cuerpo desinflamado y limpio absorbe hasta el doble de rápido los nutrientes de Tyruss Full. Se toma una sola noche en 200 ml de agua antes de iniciar.\n\n💰 Precio regular: $25.000 → **Solo $15.000** al agregarlo a tu pedido de Tyruss Full 💚.',
+    response: '🌱 **Sobre de Batido Verde Funcional:**\n\nEs una porción concentrada (20g) con espirulina, avena, espinaca, jengibre, cúrcuma, apio y vitamina C.\n\n💡 *¿Por qué es un excelente complemento?*\nAyuda a preparar el cuerpo y promover la hidratación celular antes de iniciar tus 30 días de hábitos. Se disuelve en 200 ml de agua.\n\n💰 Precio especial: **Solo $15.000** al incluirlo en tu pedido de Tyruss Full 💚.',
     quickReplies: [
       'Quiero agregarlo a mi pedido',
       'Ver paquetes de Tyruss Full',
-      'Hablar con Marié por WhatsApp'
+      'Hablar con el equipo por WhatsApp'
     ]
   },
   {
     triggers: ['precio', 'cuanto vale', 'costo', 'promociones', 'oferta', 'comprar', 'tarros', 'pedido', 'pago', 'contra entrega'],
-    response: '💰 **Estas son las Promociones Oficiales de Tyruss Full en ColShopi Tienda:**\n\n1️⃣ **1 Tarro (500g / 25 tomas):** $89.900 + Loción Termoactiva GRATIS 🎁\n\n🔥 **OFERTAS ESPECIALES DEL DÍA:**\n2️⃣ **2 Tarros (1000g / 50 tomas):** $134.850 + Obsequio 🎁 *(¡La opción más elegida!)*\n3️⃣ **Pagas 2 y Llevas 3 Tarros:** $179.800 + Obsequio 🎁 *(Ahorro máximo)*\n4️⃣ **Pagas 3 y Llevas 5 Tarros:** $269.700 + Obsequio 🎁 *(Pack Familiar)*\n\n🚚 **Envío 100% GRATIS a toda Colombia**\n💵 **Pago Contra Entrega** (Pagas en efectivo al recibir en tu casa)',
+    response: '💰 **Promociones Oficiales de Tyruss Full en ColShopi Tienda:**\n\n1️⃣ **1 Tarro (500g / 25 tomas):** $89.900 + Loción Termoactiva GRATIS 🎁\n\n🔥 **PAQUETES CON MÁXIMO AHORRO:**\n2️⃣ **2 Tarros (1000g / 50 tomas):** $134.850 + Obsequio 🎁 *(El más solicitado)*\n3️⃣ **Pagas 2 y Llevas 3 Tarros:** $179.800 + Obsequio 🎁 *(Tratamiento continuo)*\n4️⃣ **Pagas 3 y Llevas 5 Tarros:** $269.700 + Obsequio 🎁 *(Pack Familiar)*\n\n🚚 **Envío GRATIS a toda Colombia**\n💵 **Pago Contra Entrega** (Pagas en efectivo al recibir en tu hogar)',
     quickReplies: [
       'Quiero 2 Tarros ($134.850)',
       'Quiero 3 Tarros ($179.800)',
@@ -147,16 +157,16 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
   },
   {
     triggers: ['alimentos evitar', 'dieta', 'que no comer', 'prohibidos', 'tiroides dieta', 'inflaman'],
-    response: '🥗 **Consejo Clave de la Nutricionista Marié:**\n\nSi sientes tu tiroides o metabolismo perezoso, procura reducir:\n\n❌ **Azúcares refinados y jarabes de alta fructosa** (provocan picos de insulina y fatiga).\n❌ **Grasas trans y aceites vegetales ultraprocesados** (soya, palma, maíz comercial).\n❌ **Harinas blancas refinadas** (inflaman la pared del intestino y bloquean la absorción de selenio).\n❌ **Golosinas con colorantes artificiales**.\n\n✅ **En cambio, prioriza:** Aguacate, aceite de oliva, frutos secos, espinacas, manzana verde, huevos, proteínas magras y tu porción diaria de Tyruss Full 🌿💚.',
+    response: '🥗 **Ideas y Pautas de Alimentación Saludable de Marié:**\n\nPara favorecer un metabolismo activo y una digestión ligera, te recomiendo priorizar opciones naturales y moderar:\n\n❌ **Bebidas y postres con azúcares añadidos en exceso**.\n❌ **Grasas ultraprocesadas o frituras recurrentes**.\n❌ **Harinas refinadas en exceso** (pueden generar pesadez digestiva).\n\n✅ **Prioriza alimentos reales y frescos:**\nAguacate, aceite de oliva, vegetales verdes, frutas frescas, frutos secos, proteínas limpias, buena hidratación y tu toma diaria de Tyruss Full 🌿💚.\n\n*(Recuerda que no formulo dietas clínicas restrictivas. Si requieres un plan médico por una patología severa, consulta con un profesional de la salud).*',
     quickReplies: [
-      '¿El gluten afecta la tiroides?',
       'Ver Recetario Saludable',
+      'Ideas para el desayuno',
       '¿Cómo va mi progreso en el Calendario?'
     ]
   },
   {
     triggers: ['codigo', 'digitos', 'acceso', 'activacion', 'bloqueada', 'desbloquear'],
-    response: '🔐 **Código de Acceso VIP de 6 Dígitos:**\n\nEsta App es un beneficio 100% gratuito exclusivo para compradoras de **Tyruss Full (500g)** de ColShopi Tienda. Para acceder, debes ingresar tu código de 6 dígitos numéricos.\n\nSi aún no te lo hemos asignado o recibiste tu producto recientemente, solicítalo al WhatsApp único de ColShopi: **+57 310 400 7428** con el mensaje:\n*"Hola Marié, ya recibí mi producto Tyruss Full y quiero el acceso gratis a la App TyroFem 30D, mi nombre es: [Tu Nombre]"*',
+    response: '🔐 **Código de Acceso VIP de 6 Dígitos:**\n\nEsta App es un beneficio 100% gratuito exclusivo para clientas de **Tyruss Full (500g)** de ColShopi Tienda. Para ingresar, debes usar tu código de 6 dígitos numéricos.\n\nSi necesitas tu código o requieres asistencia, comunícate a la línea oficial de ColShopi: **+57 310 400 7428**:\n*"Hola Marié, ya recibí mi producto Tyruss Full y quiero activar mi acceso a la App TyroFem 30D, mi nombre es: [Tu Nombre]"*',
     actionLink: {
       text: 'Solicitar mi Código VIP al WhatsApp (+57 310 400 7428) 📲',
       type: 'whatsapp',
@@ -164,17 +174,17 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
     }
   },
   {
-    triggers: ['informe', 'informe clinico', 'reporte', 'correo', 'resultado', '30 dias', 'evaluacion', 'pdf', 'descargar'],
-    response: '📋 **Informe de Transformación de 30 Días (PDF Descargable Oficial):**\n\n¡Ya puedes generar y descargar tu informe en formato PDF directamente desde la pestaña **"Mi Registro Diario"**!\n\nTu informe incluye:\n✔ Resumen de adherencia al reto y cumplimiento de tomas de Tyruss Full.\n✔ Curva y gráfica de niveles de energía (Día 1 al 30).\n✔ Porcentaje de desinflamación digestiva y confort gástrico.\n✔ Dictamen nutricional de Marié y sello de validez ColShopi Tienda By Leps Digital.\n\nPuedes descargarlo a tu dispositivo con el botón **"Descargar PDF"** o abrirlo en pantalla con **"Ver Informe Completo"**.',
+    triggers: ['informe', 'reporte', 'correo', 'resultado', '30 dias', 'evaluacion', 'pdf', 'descargar'],
+    response: '📋 **Informe de Progreso y Hábitos 30D (PDF Descargable):**\n\nPuedes generar y descargar tu informe en formato PDF directamente desde la pestaña **"Mi Registro Diario"**.\n\nTu informe consolida:\n✔ Registro de adherencia al reto y cumplimiento de tomas de Tyruss Full.\n✔ Curva y evolución de tus niveles de energía (Día 1 al 30).\n✔ Registro de confort y bienestar digestivo.\n✔ Resumen de hábitos saludables y sello de ColShopi Tienda By Leps Digital.\n\nPuedes descargarlo con el botón **"Descargar PDF"** o revisarlo en pantalla con **"Ver Informe Completo"**.',
     quickReplies: [
       '¿Cómo ver mi código registrado?',
-      '¿Qué alimentos evitar para la tiroides?',
+      'Pautas de bienestar diario',
       'Ver Promociones de Tyruss Full'
     ]
   },
   {
     triggers: ['whatsapp', 'asesoria', 'contacto', 'telefono', 'hablar con marie', 'atencion'],
-    response: '📲 **¡Claro que sí mi bella!**\n\nPuedes chatear directamente conmigo o con mi equipo en la línea oficial de ColShopi Tienda en Colombia: **310 400 7428** 💚.\n\nAtendemos de lunes a sábado con todo el cariño y resolvemos tus inquietudes para tomar tu pedido con envío gratis y pago contra entrega.',
+    response: '📲 **¡Con gusto mi bella!**\n\nPuedes comunicarte con nuestro equipo en la línea oficial de ColShopi Tienda en Colombia: **+57 310 400 7428** 💚.\n\nEstamos atentos para resolver tus dudas de pedidos, entregas con envío gratis y pago contra entrega.',
     actionLink: {
       text: 'Chatear en WhatsApp Oficial (+57 310 400 7428) 💬',
       type: 'whatsapp',
@@ -201,9 +211,9 @@ export function getMarieResponse(userText: string, userName?: string): {
       if (firstName && !respText.includes(firstName)) {
         // Subtle personalization
         if (respText.startsWith('🦋')) {
-          respText = `🦋 ${firstName}, te entiendo perfectamente… y sé lo frustrante que es cuando tu cuerpo no responde igual 💜\n` + respText.substring(respText.indexOf('\n\n') + 2);
+          respText = `🦋 ${firstName}, te entiendo perfectamente… y sé lo importante que es cuidar tu metabolismo con buenos hábitos 💜\n` + respText.substring(respText.indexOf('\n\n') + 2);
         } else if (respText.startsWith('🌸')) {
-          respText = `🌸 ${firstName}, debe ser muy incómodo pasar por eso… muchas mujeres en cambios hormonales o menopausia sienten exactamente lo mismo 💜\n` + respText.substring(respText.indexOf('\n\n') + 2);
+          respText = `🌸 ${firstName}, comprendo cómo te sientes… los cambios en el bienestar hormonal requieren mucha empatía y cuidado 💜\n` + respText.substring(respText.indexOf('\n\n') + 2);
         }
       }
 
@@ -217,17 +227,17 @@ export function getMarieResponse(userText: string, userName?: string): {
     }
   }
 
-  // Empathetic default response in Marié's voice
+  // Empathetic default response in Marié's updated persona
   return {
-    text: `${personalizedGreeting}Te entiendo perfectamente 💜. Muchas mujeres pasan por situaciones similares cuando el cuerpo necesita un apoyo nutricional profundo 🌿.\n\nEn **ColShopi Tienda**, formulamos **Tyruss Full** precisamente con superalimentos (espirulina, chlorella, selenio, yodo orgánico y fibra) para ayudar a desinflamar, reactivar el metabolismo y devolverte tu vitalidad natural ✨.\n\n👉 *¿Te gustaría que revisemos el modo de uso, las promociones vigentes con la Loción Termoactiva de regalo, o prefieres consultar un síntoma en específico?*`,
+    text: `${personalizedGreeting}Te escucho con todo el cariño 💜. Como tu **Asistente Virtual y Guía de Bienestar de ColShopi Tienda**, estoy aquí para acompañarte paso a paso con ideas de hábitos saludables, menús balanceados e hidratación 🌿.\n\nEn **ColShopi Tienda**, vinculamos **Tyruss Full** (con certificación INVIMA) para complementar tu alimentación con espirulina, selenio y nutrientes de origen natural ✨.\n\n*(Recuerda que ante cualquier síntoma médico agudo o condición de salud específica, es fundamental acudir a tu médico tratante).* 🩺\n\n👉 *¿Te gustaría revisar el modo de preparación, ver ideas de recetas saludables o consultar las promociones de Tyruss Full?*`,
     quickReplies: [
       '🥤 ¿Cómo se prepara y toma?',
       '📦 Ver Promociones y Precios',
-      '🦋 ¿Cómo ayuda a la tiroides?',
-      '📲 Chatear por WhatsApp con Marié'
+      '🦋 ¿Cómo apoya a la tiroides?',
+      '🤖 ¿Quién es Marié?'
     ],
     actionLink: {
-      text: 'Pedir Asesoría Directa por WhatsApp 💬',
+      text: 'Pedir Asistencia por WhatsApp 💬',
       type: 'whatsapp',
       url: `https://wa.me/573104007428?text=Hola%20Marié,%20soy%20${encodeURIComponent(firstName || 'usuaria')}%20y%20tengo%20una%20pregunta%20sobre:%20${encodeURIComponent(userText)}`
     }

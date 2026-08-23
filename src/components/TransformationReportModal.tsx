@@ -131,11 +131,11 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
         {/* Scrollable Report Content Preview */}
         <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-5 bg-slate-50/50 overscroll-contain">
           
-          {/* Patient Card */}
+          {/* User Card */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Paciente / Alumna Registrada
+                Usuaria Registrada
               </span>
               <h4 className="text-base font-bold text-slate-900">{userProfile.name}</h4>
               <p className="text-xs text-slate-500">
@@ -145,9 +145,9 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
 
             <div className="text-left sm:text-right">
               <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">
-                Supervisión Nutricional
+                Guía de Bienestar & Hábitos
               </span>
-              <p className="text-xs font-bold text-slate-800">Nutricionista Marié</p>
+              <p className="text-xs font-bold text-slate-800">Marié (Asistente Virtual)</p>
               <span className="text-[11px] text-slate-500">ColShopi Tienda By Leps Digital</span>
             </div>
           </div>
@@ -238,14 +238,14 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
             </div>
           </div>
 
-          {/* Clinical Opinion */}
+          {/* Wellness Summary & Tips */}
           <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-2xl border border-emerald-200 text-xs space-y-2">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <strong className="text-emerald-950 font-serif-luxury">Dictamen Nutricional & Metabólico de Marié:</strong>
+              <strong className="text-emerald-950 font-serif-luxury">Resumen de Bienestar & Hábitos de Marié:</strong>
             </div>
             <p className="text-emerald-900 leading-relaxed text-[11px]">
-              El aporte diario de <strong>Tyruss Full (500g)</strong> ha generado una optimización progresiva en tus receptores metabólicos, estabilizando los picos de fatiga y protegiendo tu mucosa gástrica. Se recomienda mantener la dosis de soporte diario para evitar rebotes y mantener el tono tiroideo activo.
+              El aporte diario de <strong>Tyruss Full (500g)</strong> junto con tus pautas de hidratación y hábitos saludables ha generado una optimización progresiva en tu bienestar diario y confort digestivo. Te animamos a mantener estos hábitos y tu constancia diaria para consolidar tu energía.
             </p>
           </div>
 

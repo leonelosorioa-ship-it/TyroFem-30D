@@ -53,32 +53,32 @@ export const ColshopiVipPerksModal: React.FC<ColshopiVipPerksModalProps> = ({
     {
       icon: <Smartphone className="w-6 h-6 text-cyan-400" />,
       title: 'App Exclusiva 30 Días con Reactivación en Recompra',
-      desc: 'Tu acceso a la App TyroFem 30D y bio-monitoreo está habilitado por 30 días calendario correspondientes a tu tarro de Tyruss Full. Al realizar tu recompra en ColShopi Tienda, tu acceso se reactiva automáticamente por 30 días adicionales para continuar tu evolución.',
+      desc: 'Tu acceso a la App TyroFem 30D y seguimiento de hábitos está habilitado por 30 días calendario correspondientes a tu tarro de Tyruss Full. Al realizar tu recompra en ColShopi Tienda, tu acceso se reactiva automáticamente por 30 días adicionales para continuar tu evolución.',
       badge: 'Vigencia 30D'
     },
     {
       icon: <Award className="w-6 h-6 text-emerald-400" />,
-      title: 'Acompañamiento Clínico Personalizado con Marié',
-      desc: 'No estás sola en tu proceso. Cuentas con consulta directa, resolución de dudas de tomas, ajuste de dosis y evaluación de síntomas con Marié, nuestra nutricionista y directora de bienestar.',
+      title: 'Acompañamiento Personalizado con Marié',
+      desc: 'No estás sola en tu proceso. Cuentas con consulta directa, resolución de dudas de tomas, pautas de hidratación y motivación con Marié, tu Asistente Virtual Inteligente y Guía de Bienestar de ColShopi Tienda.',
       badge: 'Atención 1 a 1'
     },
     {
       icon: <Truck className="w-6 h-6 text-amber-400" />,
       title: 'Envíos Prioritarios & Pago Contra Entrega Nacional',
-      desc: 'Pide tus tratamientos con total tranquilidad. Enviamos a cualquier ciudad o municipio de Colombia con pago en efectivo cuando recibes en la puerta de tu casa.',
+      desc: 'Pide tus productos con total tranquilidad. Enviamos a cualquier ciudad o municipio de Colombia con pago en efectivo cuando recibes en la puerta de tu casa.',
       badge: '100% Seguro'
     },
     {
       icon: <Gift className="w-6 h-6 text-rose-400" />,
       title: 'Descuentos VIP en Recompra & Portafolio Completo',
-      desc: 'Por haber adquirido Tyruss Full y validar tu código VIP, accedes a precios especiales y descuentos preferenciales permanentes para continuar tu mantenimiento y explorar todo nuestro portafolio de bienestar.',
+      desc: 'Por haber adquirido Tyruss Full y validar tu código VIP, accedes a precios especiales y descuentos preferenciales permanentes para continuar tu bienestar y explorar todo nuestro portafolio.',
       badge: 'Ahorro VIP'
     },
     {
       icon: <ShieldCheck className="w-6 h-6 text-teal-400" />,
       title: 'Registro Sanitario INVIMA & Fórmulas Certificadas',
-      desc: 'Nuestros productos cuentan con registro oficial INVIMA (RSA-0021928-2022), materias primas puras y la máxima concentración de nutrientes botánicos sin químicos perjudiciales.',
-      badge: 'Calidad Médica'
+      desc: 'Nuestros productos cuentan con registro oficial INVIMA (RSA-0021928-2022), ingredientes de calidad y nutrientes esenciales para tu rutina diaria.',
+      badge: 'Calidad Certificada'
     }
   ];
 

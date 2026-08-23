@@ -40,38 +40,38 @@ export const WhatsAppShareButton: React.FC<WhatsAppShareButtonProps> = ({
       id: 'evolucion',
       title: '🌟 Mi Evolución & Energía (Recomendado)',
       badge: 'Más Compartido',
-      message: `¡Hola! 👋 Te quería compartir algo que me ha cambiado la vida. ✨
-Estoy en mi día *${currentDay} del tratamiento TyroFem 30D* con *Tyruss Full* y me he sentido con muchísima más energía, desinflamada y en equilibrio hormonal. 🌿💚
+      message: `¡Hola! 👋 Te quería compartir algo que me ha encantado. ✨
+Estoy en mi día *${currentDay} del Reto TyroFem 30D* con *Tyruss Full* y me he sentido con muchísima más energía, ligera y en bienestar general. 🌿💚
 
-Lo mejor es que *ColShopi Tienda* es la única que te da una *App Exclusiva* guiada por la *Nutricionista Marié* para acompañar todo tu proceso paso a paso. 📲👩🏻‍⚕️
+Lo mejor es que *ColShopi Tienda* es la única que te da una *App Exclusiva* con *Marié*, su Asistente Virtual y Guía de Bienestar, para acompañar todo tu proceso paso a paso. 📲✨
 
-Si quieres probarlo o tienes dudas de tiroides o metabolismo, puedes hablar directo con Marié aquí 👇
+Si quieres probarlo o conocer sobre este reto de hábitos, puedes hablar directo con Marié aquí 👇
 ${marieDirectLink}
 
 ¡100% recomendado! 🌸✨`
     },
     {
       id: 'desinflamacion',
-      title: '🍃 Cero Inflamación & Bienestar',
-      badge: 'Digestivo',
-      message: `¡Amiga! 💚 Tienes que conocer esto. Llevo *${completedDaysCount > 0 ? `${completedDaysCount} días` : `iniciando`}* con *Tyruss Full* (Selenio + Espirulina) de *ColShopi Tienda* y mi digestión y energía han mejorado del cielo a la tierra. 🚀✨
+      title: '🍃 Confort & Bienestar Diario',
+      badge: 'Hábitos',
+      message: `¡Amiga! 💚 Tienes que conocer esto. Llevo *${completedDaysCount > 0 ? `${completedDaysCount} días` : `iniciando`}* con *Tyruss Full* (Selenio + Espirulina) de *ColShopi Tienda* y mi bienestar diario y energía han mejorado muchísimo. 🚀✨
 
-Viene con acceso gratis a su App de nutrición y recetas guiadas por la Nutricionista Marié.
+Viene con acceso gratis a su App de hábitos, recetas saludables y pautas guiadas por Marié.
 
-Habla con Marié directamente en su WhatsApp oficial aquí para que te asesore: 👇
+Habla con Marié directamente en su WhatsApp oficial aquí para que te oriente: 👇
 ${marieDirectLink}
 
 ¡Te va a encantar! 🌿`
     },
     {
       id: 'motivacion',
-      title: '💪 Reto Salud Femenina 30 Días',
+      title: '💪 Reto Hábitos Saludables 30 Días',
       badge: 'Reto VIP',
-      message: `¡Hola a todas! 🌸 Me uní al protocolo de 30 días de *Tyruss Full* con la asesoría de *ColShopi Tienda*. ¡Los cambios en mi vitalidad y metabolismo se sienten desde la primera semana! 🥑✨
+      message: `¡Hola a todas! 🌸 Me uní al reto de 30 días de hábitos con *Tyruss Full* y el acompañamiento de *ColShopi Tienda*. ¡Los cambios en mi vitalidad y constancia se sienten desde la primera semana! 🥑✨
 
-Es un tratamiento 100% natural con registro INVIMA y viene con una App interactiva increíble. 
+Es un producto con registro INVIMA y viene con una App interactiva increíble. 
 
-Consulta con la Nutricionista Marié para pedir el tuyo con envío gratis y pago contra entrega: 👇
+Escríbele a Marié para pedir el tuyo con envío gratis y pago contra entrega: 👇
 ${marieDirectLink}`
     }
   ];

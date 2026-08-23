@@ -512,7 +512,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
               </div>
 
               <p className="text-xs text-emerald-100/90 leading-relaxed border-t border-emerald-900/60 pt-2.5">
-                Para prevenir reprocesos y proteger la fidelidad de tu historial metabólico, este día ha sido <strong>sellado</strong>. Todos los parámetros se encuentran almacenados y disponibles para consulta continua de la <strong>Nutricionista Marié</strong>.
+                Para proteger la fidelidad de tu historial de bienestar, este día ha sido <strong>sellado</strong>. Todos los parámetros se encuentran almacenados y disponibles para consulta y guía de <strong>Marié (Guía de Bienestar)</strong>.
               </p>
             </div>
           ) : !isSelectedDayUnlocked ? (
@@ -891,7 +891,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   Informe de Transformación de 30 Días (PDF) 📄
                 </h3>
                 <p className="text-xs text-slate-300 max-w-xl">
-                  Genera tu expediente descargable que consolida tu adherencia al reto, evolución de niveles de energía, desinflamación digestiva y dictamen de la <strong>Nutricionista Marié</strong>.
+                  Genera tu informe descargable que consolida tu adherencia al reto, evolución de niveles de energía, confort digestivo y resumen avalado por <strong>Marié y ColShopi Tienda</strong>.
                 </p>
               </div>
 
@@ -1004,7 +1004,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
             ¿Tienes dudas sobre tus síntomas o cómo ajustar tu dosis?
           </h4>
           <p className="text-xs text-emerald-100 max-w-xl">
-            La Nutricionista Marié está disponible para orientarte en cualquier momento del reto.
+            Marié, tu Asistente Virtual y Guía de Bienestar, está disponible para orientarte en cualquier momento del reto.
           </p>
         </div>
         <button

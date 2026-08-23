@@ -151,7 +151,7 @@ export const MarieChat: React.FC<MarieChatProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-white font-serif-luxury">
-                  Nutricionista Marié
+                  Marié
                 </h2>
                 <span className="text-[10px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-400/40 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
@@ -159,12 +159,12 @@ export const MarieChat: React.FC<MarieChatProps> = ({
                 </span>
               </div>
               <p className="text-xs text-cyan-200/90 font-medium">
-                Especialista en Salud Femenina & Guía Nutricional TyroFem 30D
+                Asistente Virtual Inteligente & Guía de Bienestar TyroFem 30D
               </p>
               <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
                 <span>By Leps Digital</span>
                 <span>•</span>
-                <span className="text-emerald-300">Asesorando a {userProfile?.name || 'nuestra clienta'}</span>
+                <span className="text-emerald-300">Acompañando a {userProfile?.name || 'nuestra clienta'}</span>
               </div>
             </div>
           </div>
@@ -211,7 +211,7 @@ export const MarieChat: React.FC<MarieChatProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-600">
-              Escucha las instrucciones clínicas de Marié para tu toma de Tyruss Full.
+              Escucha las instrucciones de Marié para tu toma de Tyruss Full y hábitos diarios.
             </p>
           </div>
         </div>
@@ -367,7 +367,7 @@ export const MarieChat: React.FC<MarieChatProps> = ({
           type="text"
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
-          placeholder={`Escríbele tu duda a la Nutricionista Marié, ${userProfile.name}...`}
+          placeholder={`Escríbele tu duda o consulta a Marié, ${userProfile.name}...`}
           className="flex-1 px-3 py-2 text-xs sm:text-sm text-slate-800 focus:outline-none bg-transparent"
         />
         <button
@@ -382,6 +382,11 @@ export const MarieChat: React.FC<MarieChatProps> = ({
           <Send className="w-4 h-4" />
         </button>
       </form>
+
+      {/* Legal & Health Disclaimer */}
+      <p className="text-[10px] text-center text-slate-400 leading-tight px-4">
+        ✨ <strong>Marié</strong> es una Asistente Virtual Inteligente y Guía de Hábitos y Bienestar de ColShopi Tienda. No es profesional médica ni dietista. Si tienes síntomas agudos o patologías médicas, consulta siempre a tu médico especialista.
+      </p>
     </div>
   );
 };

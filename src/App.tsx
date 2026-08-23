@@ -532,7 +532,7 @@ export default function App() {
                     </h4>
                   </div>
                   <p className="text-xs text-slate-200 leading-relaxed">
-                    Tu acceso a la <strong>App TyroFem 30D</strong> y el acompañamiento personalizado de la <strong>Nutricionista Marié</strong> está habilitado durante tus <strong>30 días calendario de tratamiento</strong>.
+                    Tu acceso a la <strong>App TyroFem 30D</strong> y el acompañamiento personalizado de <strong>Marié (Guía de Bienestar)</strong> está habilitado durante tus <strong>30 días calendario de reto</strong>.
                   </p>
                   <div className="bg-emerald-950/80 rounded-2xl p-3.5 border border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-emerald-100">
                     <div>

@@ -50,33 +50,33 @@ export const MarieProfileCard: React.FC<MarieProfileCardProps> = ({
             {/* Status Pill */}
             <div className="mt-2 bg-slate-900/90 border border-cyan-400/60 text-cyan-300 text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1.5 shadow-lg">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Directora Nutricional ColShopi</span>
+              <span>Guía de Bienestar ColShopi</span>
             </div>
           </div>
 
-          {/* Bio and Nutritional Mission */}
+          {/* Bio and Mission */}
           <div className="space-y-3 text-center md:text-left flex-1">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
               <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                Nutrición Funcional & Salud Femenina
+                Hábitos Saludables & Bienestar
               </span>
               <span className="text-xs font-medium text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-500/30">
-                ⭐ Única Tienda con App Exclusiva
+                ⭐ Asistente Virtual Inteligente
               </span>
             </div>
 
             <div>
               <h3 className="text-xl sm:text-2xl font-bold text-white font-serif-luxury flex items-center justify-center md:justify-start gap-2">
-                <span>Nutricionista Marié</span>
+                <span>Marié</span>
                 <Sparkles className="w-5 h-5 text-cyan-400" />
               </h3>
               <p className="text-xs text-cyan-200/90 font-medium mt-0.5">
-                Directora de Bienestar en ColShopi Tienda By Leps Digital & Creadora de la Guía TyroFem 30D
+                Asistente Virtual Inteligente y Guía de Bienestar de ColShopi Tienda By Leps Digital
               </p>
             </div>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
-              "Hola {userProfile?.name ? <strong className="text-white">{userProfile.name}</strong> : 'hermosa'}, en <strong>ColShopi Tienda By Leps Digital</strong> no solo te vendemos un suplemento; te acompañamos en todo tu proceso. Somos la <strong>única tienda naturista con una App propia</strong> para que registres tu evolución, desinflames tu organismo con <strong>Tyruss Full</strong> y sientas el cambio real día a día."
+              "Hola {userProfile?.name ? <strong className="text-white">{userProfile.name}</strong> : 'hermosa'}, en <strong>ColShopi Tienda By Leps Digital</strong> no solo te entregamos un producto con certificación INVIMA; te acompañamos día a día. Como tu <strong>Asistente Virtual y Guía de Bienestar</strong>, te brindo ideas de menús balanceados, pautas de hidratación y motivación durante tu <strong>Reto de 30 Días</strong> con <strong>Tyruss Full</strong>."
             </p>
 
             {/* Quick credentials & guarantees */}

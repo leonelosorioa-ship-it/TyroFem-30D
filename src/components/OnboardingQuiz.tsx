@@ -412,7 +412,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                       </h3>
                     </div>
                     <p className="text-xs text-cyan-200/90 leading-relaxed mt-1">
-                      Somos la <strong>única Tienda Online Naturista con una App Exclusiva</strong> para acompañar tu tratamiento con Tyruss Full. Para activar tu protocolo de 30 días, ingresa tu <strong>código VIP de 6 dígitos</strong>.
+                      Soy tu <strong>Asistente Virtual y Guía de Bienestar</strong>. ColShopi es la <strong>única Tienda Online Naturista con una App Exclusiva</strong> para acompañar tu reto de hábitos con Tyruss Full. Para activar tu acceso de 30 días, ingresa tu <strong>código VIP de 6 dígitos</strong>.
                     </p>
                   </div>
                 </div>
@@ -705,7 +705,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   ¿Cuáles de estos síntomas has experimentado últimamente?
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Marca todos los que apliquen. Estos datos se registrarán en tu <strong>Informe Clínico TyroFem 30D</strong>:
+                  Marca todos los que apliquen. Estos datos se registrarán en tu <strong>Informe de Bienestar TyroFem 30D</strong>:
                 </p>
               </div>
 
@@ -766,7 +766,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                     Activando Protocolo VIP para {name}...
                   </h4>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Calibrando dosis de Tyruss Full, guía de hidratación y preparando la apertura de tu expediente clínico.
+                    Calibrando pautas de Tyruss Full, guía de hidratación y preparando la apertura de tu reto de hábitos.
                   </p>
                 </div>
               ) : (
@@ -810,10 +810,10 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   <div className="p-4 rounded-2xl bg-cyan-50/90 border border-cyan-200 space-y-2 text-xs text-cyan-950">
                     <div className="flex items-center gap-2 font-bold text-cyan-900">
                       <Mail className="w-4 h-4 text-cyan-700 shrink-0" />
-                      <span>Destino del Informe Clínico (Día 30):</span>
+                      <span>Destino del Informe de Bienestar (Día 30):</span>
                     </div>
                     <p className="text-[11px] leading-relaxed">
-                      Al completar tus 30 días, recibirás tu <strong>"Informe Clínico de Evolución Tiroidea & Balance Metabólico TyroFem 30D"</strong> en: <strong className="text-cyan-950 underline">{email}</strong>.
+                      Al completar tus 30 días, podrás descargar tu <strong>"Informe de Transformación & Hábitos TyroFem 30D"</strong> o recibirlo en: <strong className="text-cyan-950 underline">{email}</strong>.
                     </p>
                   </div>
 

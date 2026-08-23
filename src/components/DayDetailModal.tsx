@@ -321,19 +321,19 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               />
             )}
 
-            {/* Tip de la Nutricionista Marié */}
+            {/* Tip de Bienestar de Marié */}
             <div className="bg-gradient-to-br from-emerald-50/90 via-teal-50/50 to-white border border-emerald-200/80 rounded-2xl p-4 sm:p-5 relative shadow-xs">
               <div className="flex items-start gap-3.5">
                 <div className="w-10 h-10 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs ring-2 ring-emerald-200">
-                  👩‍⚕️
+                  ✨
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
                     <h4 className="text-xs font-bold text-emerald-900 uppercase tracking-wider">
-                      Tip de la Nutricionista Marié
+                      Tip de Bienestar de Marié
                     </h4>
                     <span className="text-[10px] text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded font-semibold">
-                      ColShopi
+                      ColShopi Tienda
                     </span>
                   </div>
                   <p className="text-xs text-slate-700 leading-relaxed italic">

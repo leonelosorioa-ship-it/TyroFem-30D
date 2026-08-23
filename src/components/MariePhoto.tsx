@@ -74,7 +74,7 @@ export const MariePhoto: React.FC<MariePhotoProps> = ({
         {/* Exact Real Photo */}
         <img
           src={PHOTO_SOURCES[sourceIndex]}
-          alt="Nutricionista Marié - ColShopi Tienda"
+          alt="Marié - Guía de Bienestar ColShopi Tienda"
           className="w-full h-full object-cover object-top sm:object-center"
           loading="eager"
           referrerPolicy="no-referrer"
@@ -86,7 +86,7 @@ export const MariePhoto: React.FC<MariePhotoProps> = ({
           <div className="absolute bottom-1.5 z-20">
             <span className={`${badgeTextSize} font-bold rounded-full bg-slate-950/90 text-cyan-300 border border-cyan-400/60 shadow-lg backdrop-blur-xs flex items-center gap-1`}>
               <ShieldCheck className="w-2.5 h-2.5 text-cyan-400 shrink-0" />
-              <span>Nutricionista Marié</span>
+              <span>Marié • Bienestar</span>
             </span>
           </div>
         )}

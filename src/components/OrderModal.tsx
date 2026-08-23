@@ -62,7 +62,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   // Direct fast message to WhatsApp line +57 310 400 7428
   const handleFastWhatsAppMessage = () => {
     const namePart = userName ? `, mi nombre es *${userName}*` : '';
-    const text = `¡Hola equipo ColShopi Tienda / Nutricionista Marié! 💚 Deseo hacer un NUEVO PEDIDO de Tyruss Full${namePart}. Ya soy usuaria activa de la App TyroFem 30D (voy en el Día ${currentDay} de 30) y quiero mantenerme activa en el tratamiento de la app y reactivar mis 30 días adicionales. ¿Me pueden ayudar con el despacho contra entrega? ✨`;
+    const text = `¡Hola equipo ColShopi Tienda / Marié! 💚 Deseo hacer un NUEVO PEDIDO de Tyruss Full${namePart}. Ya soy usuaria activa de la App TyroFem 30D (voy en el Día ${currentDay} de 30) y quiero mantenerme activa en el acompañamiento de la app y reactivar mis 30 días adicionales. ¿Me pueden ayudar con el despacho contra entrega? ✨`;
 
     const url = `https://wa.me/573104007428?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -75,7 +75,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
       ? `Reclamar en Oficina Interrapidísimo de ${city}` 
       : `${address}`;
 
-    const text = `¡Hola equipo ColShopi Tienda / Nutricionista Marié! 💚 Deseo hacer un NUEVO PEDIDO de Tyruss Full. Ya soy usuaria activa de la App TyroFem 30D (Día ${currentDay}) y quiero mantenerme activa en el tratamiento de la app y reactivar mis 30 días:
+    const text = `¡Hola equipo ColShopi Tienda / Marié! 💚 Deseo hacer un NUEVO PEDIDO de Tyruss Full. Ya soy usuaria activa de la App TyroFem 30D (Día ${currentDay}) y quiero mantenerme activa en el seguimiento de la app y reactivar mis 30 días:
 
 ☑️ Nombre Completo: ${fullName || userProfile.name}
 ☑️ Celular: ${phone || 'Por confirmar'}
@@ -160,7 +160,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               </strong>
             </div>
             <p className="text-xs text-slate-200 leading-relaxed">
-              Tu acceso a la <strong>App TyroFem 30D</strong> y el acompañamiento personalizado de la <strong>Nutricionista Marié</strong> está habilitado por <strong>30 días calendario</strong> (correspondientes a la duración de tu tarro de Tyruss Full). 
+              Tu acceso a la <strong>App TyroFem 30D</strong> y el acompañamiento personalizado de <strong>Marié (Guía de Bienestar)</strong> está habilitado por <strong>30 días calendario</strong> (correspondientes a la duración de tu tarro de Tyruss Full). 
             </p>
             <div className="bg-emerald-900/60 rounded-xl p-2.5 border border-emerald-400/30 flex items-start gap-2 text-xs text-emerald-100">
               <RefreshCw className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />

@@ -131,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
               <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate max-w-[130px] xs:max-w-[180px] sm:max-w-xs flex items-center gap-1">
                 <span>Por</span> 
-                <span className="text-emerald-800 font-bold">Nutricionista Marié</span>
+                <span className="text-emerald-800 font-bold">Marié • Guía de Bienestar</span>
               </p>
             </div>
           </button>

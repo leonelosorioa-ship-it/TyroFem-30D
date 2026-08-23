@@ -445,19 +445,19 @@ export const Day30CelebrationModal: React.FC<Day30CelebrationModalProps> = ({
             </div>
           </div>
 
-          {/* BOTÓN 1: DESCARGA DE INFORME CLÍNICO EN PDF (FIRMADO POR MARIÉ) */}
+          {/* BOTÓN 1: DESCARGA DE INFORME DE BIENESTAR EN PDF (AVALADO POR MARIÉ Y COLSHOPI) */}
           <div className="bg-gradient-to-r from-slate-900 to-emerald-950 text-white rounded-2xl p-4 sm:p-4.5 border border-cyan-400/40 shadow-md space-y-2.5">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-1.5 text-[10px] font-black text-cyan-300 uppercase bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-400/30">
                   <FileText className="w-3 h-3 text-cyan-300" />
-                  <span>Expediente Clínico & Certificado Oficial 30D</span>
+                  <span>Informe de Progreso & Certificado Oficial 30D</span>
                 </div>
                 <h4 className="text-xs sm:text-sm font-bold text-white leading-tight">
-                  Informe de Resultados, Valoraciones y Cambios
+                  Informe de Resultados, Hábitos y Transformación
                 </h4>
                 <p className="text-[11px] text-slate-300 leading-snug">
-                  Descarga tu informe clínico en PDF con el balance completo de tus 30 días, métricas somáticas y recomendaciones de mantenimiento, firmado oficialmente por <strong>Marié Nutricionista de ColShopi Tienda</strong>.
+                  Descarga tu informe en PDF con el balance completo de tus 30 días, métricas de bienestar y pautas de mantenimiento, emitido por <strong>Marié y ColShopi Tienda</strong>.
                 </p>
               </div>
             </div>

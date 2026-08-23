@@ -75,7 +75,7 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(255, 255, 255);
-  doc.text('INFORME CLINICO 30D', pageWidth - margin, 12, { align: 'right' });
+  doc.text('INFORME DE BIENESTAR 30D', pageWidth - margin, 12, { align: 'right' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
@@ -94,13 +94,13 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(6, 78, 59); // Emerald Dark
-  doc.text('INFORME DE TRANSFORMACION & EVOLUCION METABOLICA', margin, y);
+  doc.text('INFORME DE TRANSFORMACION & HABITOS SALUDABLES', margin, y);
   
   y += 5;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Protocolo de Acompañamiento Nutricional TyroFem 30D con Tyruss Full (500g)', margin, y);
+  doc.text('Reto de 30 Días de Hábitos Saludables y Bienestar TyroFem con Tyruss Full (500g)', margin, y);
 
   y += 6;
 
@@ -112,7 +112,7 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(30, 41, 59);
-  doc.text('Paciente / Alumna:', margin + 4, y + 6);
+  doc.text('Usuaria Registrada:', margin + 4, y + 6);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(15, 23, 42);
   doc.text(`${userProfile.name}`, margin + 35, y + 6);
@@ -287,12 +287,12 @@ export function generateTransformationReportPDF({
   y += 5;
 
   // -------------------------------------------------------------
-  // 5. CLINICAL PROGRESS & METABOLIC TRANSFORMATION ANALYSIS
+  // 5. PROGRESS & HABITS TRANSFORMATION ANALYSIS
   // -------------------------------------------------------------
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
   doc.setTextColor(15, 23, 42);
-  doc.text('2. EVOLUCION CLINICA & EVALUACION METABOLICA', margin, y);
+  doc.text('2. EVOLUCION DE HABITOS & BIENESTAR', margin, y);
 
   y += 4;
 
@@ -303,7 +303,7 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.setTextColor(6, 78, 59);
-  doc.text('Dictamen Nutricional de la Especialista:', margin + 4, y + 5);
+  doc.text('Resumen de Hábitos y Bienestar de Marié:', margin + 4, y + 5);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
@@ -311,19 +311,19 @@ export function generateTransformationReportPDF({
 
   const angleText = 
     userProfile.primaryAngle === 'tiroides_metabolismo'
-      ? `Durante este periodo se evidenció una reactivación metabólica favorable gracias al aporte continuo de selenio orgánico, espirulina y yodo de Tyruss Full. La paciente reporta un incremento en la vitalidad diurna y menor pesadez al despertar.`
+      ? `Durante este periodo se evidenció una mejoría favorable en el bienestar diario gracias al aporte continuo de selenio, espirulina y nutrientes de Tyruss Full. La usuaria reporta un incremento en la vitalidad diurna y menor pesadez al despertar.`
       : userProfile.primaryAngle === 'desbalance_menopausia'
-      ? `Se observa una disminución en la frecuencia de sofocos y despertares nocturnos, acompañado de una regulación térmica corporal y mejor tono de descanso profundo.`
+      ? `Se observa un balance positivo en la rutina diaria, regulación del bienestar térmico y mejor tono de descanso durante las noches.`
       : userProfile.primaryAngle === 'ciclos_spm'
-      ? `El protocolo ha mitigado los picos de hinchazón pélvica premenstrual y atracones por azúcar, favoreciendo un ambiente hormonal más estable.`
-      : `El tracto digestivo presenta un descongestionamiento progresivo con mejor frecuencia de evacuación y reducción notable de distensión abdominal postprandial.`;
+      ? `El protocolo de hábitos ha favorecido una mayor ligereza y bienestar general a lo largo de las semanas.`
+      : `El tracto digestivo presenta mayor confort con una rutina de hidratación balanceada y hábitos diarios consistentes.`;
 
   const splitText = doc.splitTextToSize(angleText, contentWidth - 8);
   doc.text(splitText, margin + 4, y + 10);
 
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 41, 59);
-  doc.text('Síntomas Atendidos:', margin + 4, y + 21);
+  doc.text('Áreas de Enfoque:', margin + 4, y + 21);
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(71, 85, 105);
@@ -337,7 +337,7 @@ export function generateTransformationReportPDF({
   doc.text('Recomendación:', margin + 4, y + 27);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(51, 65, 85);
-  doc.text('Continuar con la dosis de mantenimiento (1 cucharada diaria) para consolidar los receptores tiroideos.', margin + 28, y + 27);
+  doc.text('Continuar con la dosis de mantenimiento (1 cucharada diaria) y tus pautas de hidratación diaria.', margin + 28, y + 27);
 
   y += 37;
 
@@ -356,7 +356,7 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(4, 120, 87);
-  doc.text('• Conservar el hábito de toma matutina en ayunas para evitar rebotes metabólicos.', margin + 4, y + 10);
+  doc.text('• Conservar el hábito de toma matutina para consolidar tu bienestar diario.', margin + 4, y + 10);
   doc.text('• Tu membresía en ColShopi te garantiza Envío Gratis y Pago Contra Entrega en Colombia.', margin + 4, y + 14);
   doc.text('• Solicita tu reposición de Tyruss Full al WhatsApp oficial: +57 310 400 7428 para mantener tu descuento.', margin + 4, y + 18);
 
@@ -372,13 +372,13 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(15, 23, 42);
-  doc.text('Marié - Nutricionista de ColShopi Tienda', margin + 12, y + 14);
+  doc.text('Marié - Guía de Bienestar ColShopi Tienda', margin + 12, y + 14);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Especialista en Salud Hormonal y Metabólica Femenina', margin + 12, y + 17.5);
-  doc.text('Programa Clínico TyroFem 30D • ColShopi Tienda', margin + 12, y + 20.5);
+  doc.text('Asistente Virtual Inteligente & Guía de Hábitos Saludables', margin + 12, y + 17.5);
+  doc.text('Reto TyroFem 30D • ColShopi Tienda By Leps Digital', margin + 12, y + 20.5);
 
   // Digital Seal on right side
   doc.setFillColor(241, 245, 249);
@@ -388,12 +388,12 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7);
   doc.setTextColor(6, 78, 59);
-  doc.text('SELLO DIGITAL DE VALIDEZ CLÍNICA', pageWidth - margin - 65, y + 7);
+  doc.text('SELLO DIGITAL DE AUTENTICIDAD COLSHOPI', pageWidth - margin - 65, y + 7);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6);
   doc.setTextColor(71, 85, 105);
-  doc.text(`Expediente Oficial Nro: TYR-${userProfile.accessCode || '849201'}`, pageWidth - margin - 65, y + 11);
-  doc.text('Producto Original INVIMA NSA-0012896-2022', pageWidth - margin - 65, y + 14.5);
+  doc.text(`Informe Oficial Nro: TYR-${userProfile.accessCode || '849201'}`, pageWidth - margin - 65, y + 11);
+  doc.text('Producto Original INVIMA RSA-0021928-2022', pageWidth - margin - 65, y + 14.5);
   doc.setTextColor(0, 150, 180);
   doc.text('ColShopi Tienda • Atención VIP: +57 310 400 7428', pageWidth - margin - 65, y + 18);
 
@@ -405,7 +405,7 @@ export function generateTransformationReportPDF({
   doc.setFontSize(6.5);
   doc.setTextColor(200, 215, 230);
   doc.text(
-    'ColShopi Tienda By Leps Digital • Registro Sanitario INVIMA • Tyruss Full 500g • Documento emitido para uso confidencial de la paciente.',
+    'ColShopi Tienda By Leps Digital • Tyruss Full 500g • Documento de seguimiento de hábitos personales. No reemplaza diagnóstico ni tratamiento médico.',
     pageWidth / 2,
     pageHeight - 3,
     { align: 'center' }

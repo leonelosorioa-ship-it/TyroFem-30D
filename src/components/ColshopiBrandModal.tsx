@@ -159,7 +159,7 @@ export const ColshopiBrandModal: React.FC<ColshopiBrandModalProps> = ({
               </li>
               <li className="flex items-center gap-2">
                 <Award className="w-4 h-4 text-amber-400 shrink-0" />
-                <span><strong>Acompañamiento Nutricional Gratuito:</strong> Soporte con la Nutricionista Marié durante tus 30 días.</span>
+                <span><strong>Acompañamiento en Hábitos & Bienestar:</strong> Asistencia con Marié durante tus 30 días de reto.</span>
               </li>
             </ul>
           </div>
