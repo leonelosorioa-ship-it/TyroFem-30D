@@ -762,6 +762,51 @@ export default function App() {
             </div>
           </div>
 
+          {/* Citas Inspiradoras & Historias de Éxito de Usuarias en Footer */}
+          <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-left space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="font-serif-luxury">Historias de Éxito • Reto 30 Días</span>
+              </div>
+              <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                ★ 5.0 / 5.0 Calificación Promedio
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-[11px]">
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+                <p className="text-slate-300 italic font-serif leading-snug">
+                  “Al día 12 la pesadez y la fatiga desaparecieron. Mi digestión y energía están como hace una década.”
+                </p>
+                <div className="text-[10px] text-cyan-300 font-medium pt-0.5 flex items-center justify-between">
+                  <span>Martha Cecilia R. (52 años)</span>
+                  <span className="text-slate-500">Medellín</span>
+                </div>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+                <p className="text-slate-300 italic font-serif leading-snug">
+                  “Dormir 7 horas seguidas sin sofocos ni bochornos fue el mayor alivio. La guía te acompaña paso a paso.”
+                </p>
+                <div className="text-[10px] text-rose-300 font-medium pt-0.5 flex items-center justify-between">
+                  <span>Claudia Patricia G. (49 años)</span>
+                  <span className="text-slate-500">Bogotá</span>
+                </div>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+                <p className="text-slate-300 italic font-serif leading-snug">
+                  “Cerrar el botón del pantalón sin hinchazón ni dolor en las tardes fue mi gran victoria. 100% recomendado.”
+                </p>
+                <div className="text-[10px] text-teal-300 font-medium pt-0.5 flex items-center justify-between">
+                  <span>Yolanda Mercedes C. (44 años)</span>
+                  <span className="text-slate-500">Cali</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[11px] text-slate-400 text-center sm:text-left">
             <div>
               <span className="text-slate-200 font-bold block mb-1">Categorías</span>

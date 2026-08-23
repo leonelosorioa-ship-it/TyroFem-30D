@@ -162,6 +162,114 @@ export const ColshopiCorporateBanner: React.FC<ColshopiCorporateBannerProps> = (
           </div>
         </div>
 
+        {/* Historias de Éxito & Citas Inspiradoras (Reto 30D Completado) */}
+        <div className="pt-2 border-t border-cyan-500/20 space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded-lg bg-amber-400/20 text-amber-300">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider font-serif-luxury">
+                  Historias de Éxito • Reto 30 Días
+                </h3>
+                <span className="text-[10px] text-cyan-300">
+                  Citas y experiencias de clientas que completaron su guía y transformaron sus hábitos
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/30 w-fit">
+              ✓ Compradoras Reales Tyruss Full
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Cita 1 */}
+            <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-cyan-500/30 hover:border-cyan-400/60 transition-all flex flex-col justify-between space-y-2.5">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-amber-300 text-xs">
+                  <div className="flex items-center gap-0.5">
+                    {'★★★★★'.split('').map((star, i) => (
+                      <span key={i}>{star}</span>
+                    ))}
+                  </div>
+                  <span className="text-[9px] font-semibold text-cyan-300 bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-500/30">
+                    Día 30 Completado
+                  </span>
+                </div>
+                <blockquote className="text-xs text-slate-200 italic font-serif leading-relaxed">
+                  “Por fin sentí que mi cuerpo despertó. En el día 12 la pesadez y la fatiga desaparecieron. Cumplí mis 30 días y mi digestión está como hace 10 años.”
+                </blockquote>
+              </div>
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-800 text-[11px]">
+                <div className="w-7 h-7 rounded-full bg-emerald-700 text-white font-bold text-[10px] flex items-center justify-center shrink-0 ring-1 ring-emerald-400">
+                  MR
+                </div>
+                <div className="leading-tight">
+                  <span className="font-bold text-white block">Martha Cecilia Restrepo</span>
+                  <span className="text-[10px] text-slate-400">52 años • Medellín</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Cita 2 */}
+            <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-cyan-500/30 hover:border-cyan-400/60 transition-all flex flex-col justify-between space-y-2.5">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-amber-300 text-xs">
+                  <div className="flex items-center gap-0.5">
+                    {'★★★★★'.split('').map((star, i) => (
+                      <span key={i}>{star}</span>
+                    ))}
+                  </div>
+                  <span className="text-[9px] font-semibold text-rose-300 bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-500/30">
+                    Día 30 Completado
+                  </span>
+                </div>
+                <blockquote className="text-xs text-slate-200 italic font-serif leading-relaxed">
+                  “Dormir 7 horas seguidas sin despertarme con bochornos ni sofocos fue el mayor regalo. Los hábitos diarios y Tyruss me cambiaron la vida.”
+                </blockquote>
+              </div>
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-800 text-[11px]">
+                <div className="w-7 h-7 rounded-full bg-rose-700 text-white font-bold text-[10px] flex items-center justify-center shrink-0 ring-1 ring-rose-400">
+                  CG
+                </div>
+                <div className="leading-tight">
+                  <span className="font-bold text-white block">Claudia Patricia Gómez</span>
+                  <span className="text-[10px] text-slate-400">49 años • Bogotá D.C.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Cita 3 */}
+            <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-cyan-500/30 hover:border-cyan-400/60 transition-all flex flex-col justify-between space-y-2.5">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-amber-300 text-xs">
+                  <div className="flex items-center gap-0.5">
+                    {'★★★★★'.split('').map((star, i) => (
+                      <span key={i}>{star}</span>
+                    ))}
+                  </div>
+                  <span className="text-[9px] font-semibold text-teal-300 bg-teal-950/80 px-1.5 py-0.5 rounded border border-teal-500/30">
+                    Día 30 Completado
+                  </span>
+                </div>
+                <blockquote className="text-xs text-slate-200 italic font-serif leading-relaxed">
+                  “Cerrar el botón del pantalón en las tardes sin hinchazón ni dolor abdominal fue mi gran victoria. El recetario y Marié hacen todo muy sencillo.”
+                </blockquote>
+              </div>
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-800 text-[11px]">
+                <div className="w-7 h-7 rounded-full bg-teal-700 text-white font-bold text-[10px] flex items-center justify-center shrink-0 ring-1 ring-teal-400">
+                  YC
+                </div>
+                <div className="leading-tight">
+                  <span className="font-bold text-white block">Yolanda Mercedes Cuéllar</span>
+                  <span className="text-[10px] text-slate-400">44 años • Cali</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Interactive CTA */}
         {onOpenOrder && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1 border-t border-cyan-500/20">
