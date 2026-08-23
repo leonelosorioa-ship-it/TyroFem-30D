@@ -174,8 +174,8 @@ export const FAQ_KNOWLEDGE_BASE: FaqTopic[] = [
     }
   },
   {
-    triggers: ['informe', 'reporte', 'correo', 'resultado', '30 dias', 'evaluacion', 'pdf', 'descargar'],
-    response: '📋 **Informe de Progreso y Hábitos 30D (PDF Descargable):**\n\nPuedes generar y descargar tu informe en formato PDF directamente desde la pestaña **"Mi Registro Diario"**.\n\nTu informe consolida:\n✔ Registro de adherencia al reto y cumplimiento de tomas de Tyruss Full.\n✔ Curva y evolución de tus niveles de energía (Día 1 al 30).\n✔ Registro de confort y bienestar digestivo.\n✔ Resumen de hábitos saludables y sello de ColShopi Tienda By Leps Digital.\n\nPuedes descargarlo con el botón **"Descargar PDF"** o revisarlo en pantalla con **"Ver Informe Completo"**.',
+    triggers: ['informe', 'reporte', 'bitacora', 'correo', 'resultado', '30 dias', 'evaluacion', 'pdf', 'descargar'],
+    response: '📋 **Bitácora de Bienestar y Hábitos 30D (PDF Descargable):**\n\nPuedes generar y descargar tu bitácora en formato PDF directamente desde la pestaña **"Mi Registro Diario"**.\n\nTu bitácora consolida:\n✔ Registro de adherencia al reto y cumplimiento de tomas de Tyruss Full.\n✔ Curva y evolución de tus niveles de energía (Día 1 al 30).\n✔ Registro de confort y bienestar digestivo.\n✔ Resumen de hábitos saludables generado por Marié como tu guía de bienestar (no médico) y sello de ColShopi Tienda By Leps Digital.\n\nPuedes descargarlo con el botón **"Descargar Bitácora (PDF)"** o revisarlo en pantalla con **"Ver Bitácora Completa"**.',
     quickReplies: [
       '¿Cómo ver mi código registrado?',
       'Pautas de bienestar diario',

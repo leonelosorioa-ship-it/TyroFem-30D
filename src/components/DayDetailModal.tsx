@@ -261,7 +261,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-emerald-100/90 leading-relaxed">
-                  Los datos de este día ya fueron guardados exitosamente y están integrados en tu <strong>Informe de Bienestar y Hábitos (PDF)</strong> y en tus reportes. Para evitar reprocesos o alteraciones, este día se mantiene asegurado.
+                  Los datos de este día ya fueron guardados exitosamente y están integrados en tu <strong>Bitácora de Bienestar y Hábitos (PDF)</strong> y en tus reportes. Para evitar reprocesos o alteraciones, este día se mantiene asegurado.
                 </p>
                 <div className="flex items-center gap-2 pt-1 flex-wrap">
                   {dayPlan.dayNumber === 15 && (
@@ -293,7 +293,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                     className="text-[11px] font-bold text-amber-300 hover:text-amber-200 bg-amber-950/60 border border-amber-400/40 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <FileText className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Consultar en Informe PDF</span>
+                    <span>Consultar en Bitácora PDF</span>
                   </button>
                   <button
                     type="button"

@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={onOpenUserProfile}
                 className="flex items-center gap-1.5 text-[10px] bg-gradient-to-r from-cyan-950 via-slate-900 to-cyan-950 border border-cyan-400/60 text-cyan-200 px-2.5 py-0.5 rounded-full hover:border-cyan-300 transition-all cursor-pointer shadow-xs"
-                title="Ver mi perfil VIP e Informe de Bienestar"
+                title="Ver mi perfil VIP y Bitácora de Bienestar y Hábitos"
               >
                 <span className="font-black text-amber-300 bg-amber-950/80 px-1 rounded border border-amber-400/40 text-[9px]">
                   VIP {userProfile.accessCode ? `#${userProfile.accessCode}` : 'PRO'}

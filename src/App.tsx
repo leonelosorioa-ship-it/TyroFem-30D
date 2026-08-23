@@ -357,7 +357,7 @@ export default function App() {
             <button
               onClick={() => setIsUserProfileModalOpen(true)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-emerald-900 transition-colors cursor-pointer"
-              title="Ver mi credencial VIP e Informe de Hábitos"
+              title="Ver mi credencial VIP y Bitácora de Bienestar y Hábitos"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Alumna: <strong className="text-slate-900">{userProfile.name}</strong></span>

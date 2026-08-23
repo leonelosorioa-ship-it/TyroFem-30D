@@ -445,19 +445,19 @@ export const Day30CelebrationModal: React.FC<Day30CelebrationModalProps> = ({
             </div>
           </div>
 
-          {/* BOTÓN 1: DESCARGA DE INFORME DE BIENESTAR EN PDF (AVALADO POR MARIÉ Y COLSHOPI) */}
+          {/* BOTÓN 1: DESCARGA DE BITÁCORA DE BIENESTAR Y HÁBITOS EN PDF */}
           <div className="bg-gradient-to-r from-slate-900 to-emerald-950 text-white rounded-2xl p-4 sm:p-4.5 border border-cyan-400/40 shadow-md space-y-2.5">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-1.5 text-[10px] font-black text-cyan-300 uppercase bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-400/30">
                   <FileText className="w-3 h-3 text-cyan-300" />
-                  <span>Informe de Progreso & Certificado Oficial 30D</span>
+                  <span>Bitácora de Bienestar y Hábitos 30D</span>
                 </div>
                 <h4 className="text-xs sm:text-sm font-bold text-white leading-tight">
-                  Informe de Resultados, Hábitos y Transformación
+                  Bitácora de Hábitos, Constancia y Bienestar TyroFem
                 </h4>
                 <p className="text-[11px] text-slate-300 leading-snug">
-                  Descarga tu informe en PDF con el balance completo de tus 30 días, métricas de bienestar y pautas de mantenimiento, emitido por <strong>Marié y ColShopi Tienda</strong>.
+                  Descarga tu bitácora en PDF con el resumen de tus 30 días, métricas de hábitos saludables y pautas de continuidad, elaborada por <strong>Marié (Guía de Bienestar) y ColShopi Tienda</strong> (resumen de orientación de hábitos, no médico).
                 </p>
               </div>
             </div>
@@ -473,17 +473,17 @@ export const Day30CelebrationModal: React.FC<Day30CelebrationModalProps> = ({
                 {pdfDownloaded ? (
                   <>
                     <Check className="w-4 h-4 text-emerald-950" />
-                    <span>¡Informe Descargado en PDF con Éxito!</span>
+                    <span>¡Bitácora Descargada en PDF con Éxito!</span>
                   </>
                 ) : isGeneratingPDF ? (
                   <>
                     <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                    <span>Generando Informe de Bienestar PDF...</span>
+                    <span>Generando Bitácora de Bienestar PDF...</span>
                   </>
                 ) : (
                   <>
                     <Download className="w-4 h-4 text-slate-950" />
-                    <span>Descargar Informe de Bienestar en PDF</span>
+                    <span>Descargar Bitácora de Bienestar y Hábitos (PDF)</span>
                   </>
                 )}
               </button>

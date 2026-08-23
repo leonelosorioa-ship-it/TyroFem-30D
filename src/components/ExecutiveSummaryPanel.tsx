@@ -318,7 +318,7 @@ export const ExecutiveSummaryPanel: React.FC<ExecutiveSummaryPanelProps> = ({
             if (onOpenReport) onOpenReport();
           }}
           className="group relative bg-white hover:bg-emerald-50/30 rounded-2xl p-4.5 border border-emerald-200/90 hover:border-emerald-400 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden flex flex-col justify-between"
-          title="Haz clic para abrir tu Informe de Transformación 30D y medallas"
+          title="Haz clic para abrir tu Bitácora de Bienestar y Hábitos 30D y medallas"
         >
           {/* Subtle ColShopi Green/Gold decorative glow */}
           <div className="absolute -top-6 -right-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:scale-125 transition-transform pointer-events-none" />
@@ -352,10 +352,10 @@ export const ExecutiveSummaryPanel: React.FC<ExecutiveSummaryPanelProps> = ({
           <div className="mt-3.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
             <span className="text-emerald-800 font-semibold flex items-center gap-1">
               <Trophy className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{isAllCompleted ? 'Certificado 30D' : `Objetivo Día ${nextMilestone.day}`}</span>
+              <span>{isAllCompleted ? 'Bitácora 30D' : `Objetivo Día ${nextMilestone.day}`}</span>
             </span>
             <span className="text-emerald-700 font-bold flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-              <span>Informe</span>
+              <span>Bitácora</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </span>
           </div>

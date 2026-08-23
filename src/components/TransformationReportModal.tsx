@@ -83,7 +83,7 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
     }
   };
 
-  const shareText = `¡Hola Marié! 💚 Acabo de descargar mi Informe de Transformación de 30 Días de TyroFem con Tyruss Full de ColShopi Tienda.\n\n📊 Resumen de mi evolución:\n• Alumna: ${userProfile.name}\n• Código VIP: #${userProfile.accessCode || '849201'}\n• Adherencia al Reto: ${adherencePercent}% (${completedDaysCount}/30 días)\n• Nivel de Energía Promedio: ${avgEnergy}/5.0\n• Desinflamación Digestiva: ${digestionSuccessRate}%\n\n¡Gracias por tu acompañamiento! ✨`;
+  const shareText = `¡Hola Marié! 💚 Acabo de descargar mi Bitácora de Bienestar y Hábitos de 30 Días de TyroFem con Tyruss Full de ColShopi Tienda.\n\n📊 Resumen de mi evolución:\n• Alumna: ${userProfile.name}\n• Código VIP: #${userProfile.accessCode || '849201'}\n• Adherencia al Reto: ${adherencePercent}% (${completedDaysCount}/30 días)\n• Nivel de Energía Promedio: ${avgEnergy}/5.0\n• Desinflamación Digestiva: ${digestionSuccessRate}%\n\n¡Gracias por tu acompañamiento de hábitos! ✨`;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn overflow-y-auto pt-3 sm:pt-6 pb-12">
@@ -97,14 +97,14 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[9px] sm:text-[10px] font-black text-cyan-300 uppercase tracking-wider bg-cyan-950 px-2 py-0.5 rounded border border-cyan-400/40">
-                    Documento Oficial TyroFem
+                    Bitácora Oficial TyroFem
                   </span>
                   <span className="text-[9px] sm:text-[10px] font-bold text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded border border-amber-400/40">
                     VIP #{userProfile.accessCode || '849201'}
                   </span>
                 </div>
                 <h3 className="text-sm sm:text-lg font-bold text-white font-serif-luxury mt-0.5">
-                  Informe de Transformación de 30 Días
+                  Bitácora de Bienestar y Hábitos 30D
                 </h3>
               </div>
             </div>
@@ -245,7 +245,7 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
               <strong className="text-emerald-950 font-serif-luxury">Resumen de Bienestar & Hábitos de Marié:</strong>
             </div>
             <p className="text-emerald-900 leading-relaxed text-[11px]">
-              El aporte diario de <strong>Tyruss Full (500g)</strong> junto con tus pautas de hidratación y hábitos saludables ha generado una optimización progresiva en tu bienestar diario y confort digestivo. Te animamos a mantener estos hábitos y tu constancia diaria para consolidar tu energía.
+              El aporte diario de <strong>Tyruss Full (500g)</strong> junto con tus pautas de hidratación y hábitos saludables ha generado una optimización progresiva en tu bienestar diario y confort digestivo. Este resumen es una guía de hábitos de bienestar cotidiano formulada por Marié (no constituye diagnóstico ni informe médico). Te animamos a mantener estos hábitos y tu constancia diaria para consolidar tu energía.
             </p>
           </div>
 
@@ -254,7 +254,7 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
         {/* Footer Actions */}
         <div className="p-4 sm:p-5 bg-slate-900 border-t border-slate-800 text-white shrink-0 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-left text-[11px] text-slate-400">
-            📄 Formato PDF oficial con sello de validez ColShopi Tienda.
+            📄 Formato PDF oficial de Bitácora con sello de validez ColShopi Tienda.
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -281,17 +281,17 @@ export const TransformationReportModal: React.FC<TransformationReportModalProps>
               {downloadSuccess ? (
                 <>
                   <Check className="w-4 h-4 text-white" />
-                  <span>¡PDF Descargado con Éxito!</span>
+                  <span>¡Bitácora PDF Descargada!</span>
                 </>
               ) : isGenerating ? (
                 <>
                   <span className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
-                  <span>Generando PDF...</span>
+                  <span>Generando Bitácora PDF...</span>
                 </>
               ) : (
                 <>
                   <Download className="w-4 h-4" />
-                  <span>Descargar Informe PDF 30D</span>
+                  <span>Descargar Bitácora PDF 30D</span>
                 </>
               )}
             </button>

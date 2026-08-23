@@ -509,7 +509,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   </div>
                 </div>
 
-                {/* 3. Correo Electrónico Principal + Explicación del Informe Clínico */}
+                {/* 3. Correo Electrónico Principal + Explicación de la Bitácora de Bienestar y Hábitos */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center gap-1.5">
                     <Mail className="w-3.5 h-3.5 text-emerald-700" />
@@ -528,7 +528,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-slate-900 text-sm font-medium"
                   />
                   
-                  {/* Explicit Explanation of the 30-Day Wellness Report */}
+                  {/* Explicit Explanation of the 30-Day Wellness & Habits Log */}
                   <div className="mt-2.5 p-3 rounded-xl bg-cyan-50/80 border border-cyan-200/80 text-cyan-950 text-xs space-y-1">
                     <div className="flex items-center gap-1.5 font-bold text-cyan-900">
                       <FileCheck2 className="w-4 h-4 text-cyan-700" />
@@ -537,8 +537,8 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                     <p className="text-[11px] leading-relaxed text-cyan-950">
                       Al finalizar tus 30 días con Tyruss Full, Marié generará tu{' '}
                       <strong className="text-cyan-900 font-extrabold underline decoration-cyan-400">
-                        "Informe de Bienestar & Hábitos Saludables TyroFem 30D"
-                      </strong>, con el balance de tus niveles de energía, digestión, hábitos saludables y tu plan de mantenimiento.
+                        "Bitácora de Bienestar y Hábitos TyroFem 30D"
+                      </strong>, un resumen elaborado como guía de hábitos saludables (no médico) con el balance de tu constancia, hidratación, bienestar diario y pautas de continuidad.
                     </p>
                   </div>
                 </div>
@@ -705,7 +705,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   ¿Cuáles de estos síntomas has experimentado últimamente?
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Marca todos los que apliquen. Estos datos se registrarán en tu <strong>Informe de Bienestar TyroFem 30D</strong>:
+                  Marca todos los que apliquen. Estos datos se registrarán en tu <strong>Bitácora de Bienestar y Hábitos TyroFem 30D</strong> (guía de hábitos, no médico):
                 </p>
               </div>
 
@@ -806,14 +806,14 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                     </div>
                   </div>
 
-                  {/* Registered Email & Clinical Report Confirmation Card */}
+                  {/* Registered Email & Wellness Log Confirmation Card */}
                   <div className="p-4 rounded-2xl bg-cyan-50/90 border border-cyan-200 space-y-2 text-xs text-cyan-950">
                     <div className="flex items-center gap-2 font-bold text-cyan-900">
                       <Mail className="w-4 h-4 text-cyan-700 shrink-0" />
-                      <span>Destino del Informe de Bienestar (Día 30):</span>
+                      <span>Destino de tu Bitácora de Bienestar y Hábitos (Día 30):</span>
                     </div>
                     <p className="text-[11px] leading-relaxed">
-                      Al completar tus 30 días, podrás descargar tu <strong>"Informe de Transformación & Hábitos TyroFem 30D"</strong> o recibirlo en: <strong className="text-cyan-950 underline">{email}</strong>.
+                      Al completar tus 30 días, podrás descargar tu <strong>"Bitácora de Bienestar y Hábitos TyroFem 30D"</strong> (resumen de guía y hábitos generado por Marié, no médico) o recibirlo en: <strong className="text-cyan-950 underline">{email}</strong>.
                     </p>
                   </div>
 

@@ -317,17 +317,17 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
             <button
               onClick={() => setIsReportModalOpen(true)}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
-              title="Generar y previsualizar tu Informe de Transformación de 30 Días en PDF"
+              title="Generar y previsualizar tu Bitácora de Bienestar y Hábitos de 30 Días en PDF"
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>Informe de Transformación 30D</span>
+              <span>Bitácora de Bienestar 30D</span>
             </button>
 
             <button
               onClick={handleDirectDownloadPDF}
               disabled={isQuickDownloading}
               className="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded-xl text-xs font-bold transition-colors border border-emerald-300 cursor-pointer"
-              title="Descarga directa del archivo PDF"
+              title="Descarga directa del archivo PDF de la Bitácora"
             >
               {isQuickDownloading ? (
                 <>
@@ -337,7 +337,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
               ) : (
                 <>
                   <Download className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Descargar PDF</span>
+                  <span>Descargar Bitácora (PDF)</span>
                 </>
               )}
             </button>
@@ -409,7 +409,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
             }`}
           >
             <FileText className="w-4 h-4" />
-            <span>3. Informe de Bienestar & Hábitos (PDF)</span>
+            <span>3. Bitácora de Bienestar & Hábitos (PDF)</span>
           </button>
         </div>
       </div>
@@ -486,7 +486,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                       </span>
                     </div>
                     <h4 className="text-base sm:text-lg font-bold text-white font-serif-luxury mt-1">
-                      Tus datos del Día {selectedDay} están listos en tu Informe de Bienestar 📄
+                      Tus datos del Día {selectedDay} están listos en tu Bitácora de Bienestar 📄
                     </h4>
                   </div>
                 </div>
@@ -498,7 +498,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                     className="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
                   >
                     <FileText className="w-4 h-4" />
-                    <span>Ver en Informe PDF</span>
+                    <span>Ver en Bitácora PDF</span>
                   </button>
                   <button
                     type="button"
@@ -605,10 +605,10 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   <h4 className="text-sm font-bold text-slate-900 leading-snug">
                     {isSelectedDayAlreadyLocked
                       ? '¡Felicidades por culminar tus 30 días de transformación y hábitos saludables!'
-                      : '¡Al registrar tu día 30 se activará automáticamente tu graduación, audio oficial y descarga del informe de bienestar avalado!'}
+                      : '¡Al registrar tu día 30 se activará automáticamente tu graduación, audio oficial y descarga de tu bitácora de bienestar y hábitos!'}
                   </h4>
                   <p className="text-xs text-slate-600">
-                    Escucha el audio de cierre de Marié, descarga tu informe en PDF y activa tu recompra con beneficio VIP.
+                    Escucha el audio de cierre de Marié, descarga tu bitácora en PDF y activa tu recompra con beneficio VIP.
                   </p>
                 </div>
               </div>
@@ -821,7 +821,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   ¿Lista para registrar tus datos de hoy, {userProfile.name}? 🌿
                 </h4>
                 <p className="text-xs text-emerald-100/90 max-w-xl">
-                  Al confirmar, este día se guardará de forma blindada en tu <strong>Informe de Bienestar Oficial</strong> y se bloqueará para evitar reprocesos. Podrás consultarlo siempre que desees.
+                  Al confirmar, este día se guardará de forma blindada en tu <strong>Bitácora de Bienestar y Hábitos</strong> y se bloqueará para evitar reprocesos. Podrás consultarlo siempre que desees.
                 </p>
               </div>
 
@@ -872,7 +872,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         </div>
       )}
 
-      {/* SUB-TAB 3: Informe de Bienestar PDF & Logros */}
+      {/* SUB-TAB 3: Bitácora de Bienestar PDF & Logros */}
       {activeSubTab === 'informe' && (
         <div className="space-y-6">
           {/* Official 30-Day Transformation Report (PDF Card Banner) */}
@@ -881,17 +881,17 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-400/40">
-                    Documento Oficial TyroFem
+                    Bitácora Oficial TyroFem
                   </span>
                   <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-400/40">
                     VIP #{userProfile.accessCode || '849201'}
                   </span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-white font-serif-luxury">
-                  Informe de Transformación de 30 Días (PDF) 📄
+                  Bitácora de Bienestar y Hábitos 30D (PDF) 📄
                 </h3>
                 <p className="text-xs text-slate-300 max-w-xl">
-                  Genera tu informe descargable que consolida tu adherencia al reto, evolución de niveles de energía, confort digestivo y resumen avalado por <strong>Marié y ColShopi Tienda</strong>.
+                  Genera tu bitácora descargable que consolida tu adherencia al reto, evolución de niveles de energía, confort digestivo y resumen elaborado por <strong>Marié (Guía de Bienestar) y ColShopi Tienda</strong> (guía de hábitos, no médico).
                 </p>
               </div>
 
@@ -901,7 +901,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold transition-colors border border-cyan-500/40 flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <FileText className="w-4 h-4 text-cyan-400" />
-                  <span>Ver Informe Completo</span>
+                  <span>Ver Bitácora Completa</span>
                 </button>
 
                 <button

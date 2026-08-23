@@ -141,8 +141,8 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
                   <FileText className="w-4 h-4 text-emerald-700" />
                   <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-700 group-hover:translate-x-0.5 transition-all" />
                 </div>
-                <strong className="text-xs text-slate-900 block font-bold">Informe de Bienestar PDF</strong>
-                <span className="text-[10px] text-slate-500">Incluido en tu reporte oficial 30D</span>
+                <strong className="text-xs text-slate-900 block font-bold">Bitácora de Bienestar (PDF)</strong>
+                <span className="text-[10px] text-slate-500">Integrado en tu bitácora de 30D</span>
               </button>
 
               <button

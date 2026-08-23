@@ -75,7 +75,7 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(255, 255, 255);
-  doc.text('INFORME DE BIENESTAR 30D', pageWidth - margin, 12, { align: 'right' });
+  doc.text('BITACORA DE BIENESTAR 30D', pageWidth - margin, 12, { align: 'right' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
@@ -94,13 +94,13 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12.5);
   doc.setTextColor(6, 78, 59); // Emerald Dark
-  doc.text('INFORME DE BIENESTAR & HABITOS SALUDABLES TYROFEM 30D', margin, y);
+  doc.text('BITACORA DE BIENESTAR & HABITOS SALUDABLES TYROFEM 30D', margin, y);
   
   y += 5;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Reto 30 Días: Guía de Bienestar TyroFem • Guía de Hábitos y Alimentación Consciente', margin, y);
+  doc.text('Resumen de Hábitos y Acompañamiento elaborado por Marié (Guía de Bienestar, no médico)', margin, y);
 
   y += 6;
 
@@ -392,7 +392,7 @@ export function generateTransformationReportPDF({
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6);
   doc.setTextColor(71, 85, 105);
-  doc.text(`Informe de Bienestar Nro: TYR-${userProfile.accessCode || '849201'}`, pageWidth - margin - 65, y + 11);
+  doc.text(`Bitácora de Bienestar Nro: TYR-${userProfile.accessCode || '849201'}`, pageWidth - margin - 65, y + 11);
   doc.text('Producto Original INVIMA RSA-0021928-2022', pageWidth - margin - 65, y + 14.5);
   doc.setTextColor(0, 150, 180);
   doc.text('ColShopi Tienda • Atención VIP: +57 310 400 7428', pageWidth - margin - 65, y + 18);
@@ -405,13 +405,13 @@ export function generateTransformationReportPDF({
   doc.setFontSize(6);
   doc.setTextColor(200, 215, 230);
   doc.text(
-    'Marié es una IA de orientación de hábitos desarrollada para la comunidad ColShopi. Los productos comercializados cuentan con registro INVIMA. No constituye prescripción médica.',
+    'Marié es una Guía y Asistente Virtual de hábitos saludables de ColShopi Tienda. Esta bitácora es informativa y de bienestar cotidiano, no constituye prescripción ni diagnóstico médico.',
     pageWidth / 2,
     pageHeight - 3,
     { align: 'center' }
   );
 
   // Save the PDF file
-  const fileName = `Informe_Bienestar_30D_${userProfile.name.replace(/\s+/g, '_')}_TyroFem.pdf`;
+  const fileName = `Bitacora_Bienestar_30D_${userProfile.name.replace(/\s+/g, '_')}_TyroFem.pdf`;
   doc.save(fileName);
 }

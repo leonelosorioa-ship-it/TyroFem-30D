@@ -158,15 +158,15 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           <div className="rounded-2xl p-4 bg-cyan-50/80 border border-cyan-200 space-y-2 text-xs text-cyan-950">
             <div className="flex items-center gap-2 font-bold text-cyan-900">
               <FileCheck2 className="w-4 h-4 text-cyan-700 shrink-0" />
-              <span>Informe de Bienestar al Finalizar tus 30 Días:</span>
+              <span>Bitácora de Bienestar y Hábitos al Finalizar tus 30 Días:</span>
             </div>
             
             <p className="text-[11px] leading-relaxed text-slate-700">
-              Tu informe de avance{' '}
+              Tu resumen de avance{' '}
               <strong className="text-cyan-950 font-bold">
-                "Informe de Bienestar & Hábitos Saludables TyroFem 30D"
+                "Bitácora de Bienestar y Hábitos TyroFem 30D"
               </strong>{' '}
-              se generará y podrás descargarlo o recibirlo al completar el Día 30 a tu correo:
+              es generado por Marié como tu guía de hábitos saludables y bienestar diario (no constituye un informe ni diagnóstico médico). Podrás descargarlo o recibirlo al completar el Día 30 en tu correo:
             </p>
 
             <div className="p-2.5 rounded-xl bg-white border border-cyan-200/80 flex items-center gap-2">
@@ -177,7 +177,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
             </div>
 
             <div className="flex items-center justify-between text-[11px] text-cyan-900 pt-1">
-              <span>Progreso hacia tu informe:</span>
+              <span>Progreso hacia tu bitácora:</span>
               <strong className="font-bold">{completedDays} de 30 Días ({Math.round((completedDays / 30) * 100)}%)</strong>
             </div>
           </div>
@@ -229,17 +229,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               {downloadSuccess ? (
                 <>
                   <Check className="w-4 h-4 text-white" />
-                  <span>¡Informe PDF Descargado!</span>
+                  <span>¡Bitácora PDF Descargada!</span>
                 </>
               ) : isDownloading ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Generando PDF...</span>
+                  <span>Generando Bitácora PDF...</span>
                 </>
               ) : (
                 <>
                   <Download className="w-4 h-4" />
-                  <span>Descargar Informe de Transformación 30D (PDF)</span>
+                  <span>Descargar Bitácora de Bienestar y Hábitos 30D (PDF)</span>
                 </>
               )}
             </button>
