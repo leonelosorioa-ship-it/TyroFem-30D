@@ -37,6 +37,10 @@ export interface MasterUserData {
   progressMap?: Record<number, any>;
   notes?: string;
   accessCode?: string; // alias for vipCode
+  pushSubscription?: any;
+  pushEnabled?: boolean;
+  lastTokenUpdate?: number;
+  pushPermissionStatus?: 'granted' | 'denied' | 'default';
 }
 
 export type RegisteredUser = MasterUserData;
@@ -127,7 +131,11 @@ export function getRegisteredUsers(): MasterUserData[] {
       adherencePercentage: Number(u.adherencePercentage ?? u.adherencePercent ?? 0),
       adherencePercent: Number(u.adherencePercentage ?? u.adherencePercent ?? 0),
       historyLog: Array.isArray(u.historyLog) ? u.historyLog : [],
-      status: normalizeUserStatus(u.status)
+      status: normalizeUserStatus(u.status),
+      pushSubscription: u.pushSubscription || null,
+      pushEnabled: Boolean(u.pushEnabled || (u.pushSubscription && u.pushSubscription.endpoint)),
+      lastTokenUpdate: u.lastTokenUpdate,
+      pushPermissionStatus: u.pushPermissionStatus || (u.pushEnabled ? 'granted' : 'default')
     }));
   } catch (error) {
     console.error('Error fetching registered users from storage', error);
@@ -159,7 +167,11 @@ export async function fetchRegisteredUsersFromServer(): Promise<MasterUserData[]
         adherencePercentage: Number(u.adherencePercentage ?? u.adherencePercent ?? 0),
         adherencePercent: Number(u.adherencePercentage ?? u.adherencePercent ?? 0),
         historyLog: Array.isArray(u.historyLog) ? u.historyLog : [],
-        status: normalizeUserStatus(u.status)
+        status: normalizeUserStatus(u.status),
+        pushSubscription: u.pushSubscription || null,
+        pushEnabled: Boolean(u.pushEnabled || (u.pushSubscription && u.pushSubscription.endpoint)),
+        lastTokenUpdate: u.lastTokenUpdate,
+        pushPermissionStatus: u.pushPermissionStatus || (u.pushEnabled ? 'granted' : 'default')
       }));
       localStorage.setItem(STORAGE_KEY_USERS_DB, JSON.stringify(normalizedUsers));
       return normalizedUsers;
@@ -227,7 +239,11 @@ export function saveRegisteredUser(user: Partial<MasterUserData>): void {
       lastAction: user.lastAction || `Registro completado (${healthGoal})`,
       historyLog: existingIndex >= 0 ? (users[existingIndex].historyLog || historyLog) : historyLog,
       progressMap: user.progressMap || {},
-      notes: user.notes || 'Registro oficial en ColShopi Tienda TyroFem 30D'
+      notes: user.notes || 'Registro oficial en ColShopi Tienda TyroFem 30D',
+      pushSubscription: user.pushSubscription !== undefined ? user.pushSubscription : (existingIndex >= 0 ? users[existingIndex].pushSubscription : null),
+      pushEnabled: user.pushEnabled !== undefined ? user.pushEnabled : (existingIndex >= 0 ? users[existingIndex].pushEnabled : false),
+      lastTokenUpdate: user.lastTokenUpdate || (existingIndex >= 0 ? users[existingIndex].lastTokenUpdate : undefined),
+      pushPermissionStatus: user.pushPermissionStatus || (existingIndex >= 0 ? users[existingIndex].pushPermissionStatus : undefined)
     };
 
     if (existingIndex >= 0) {

@@ -11,6 +11,7 @@ export interface UserProfile {
   phone?: string;
   email?: string;
   accessCode?: string;
+  vipCode?: string;
   ageGroup?: string;
   primaryAngle: HealthAngle;
   symptoms: string[];
@@ -22,6 +23,10 @@ export interface UserProfile {
   status?: UserStatus;
   statusReason?: string;
   isAdmin?: boolean;
+  pushSubscription?: any;
+  pushEnabled?: boolean;
+  lastTokenUpdate?: number;
+  pushPermissionStatus?: 'granted' | 'denied' | 'default';
 }
 
 export interface DayTask {

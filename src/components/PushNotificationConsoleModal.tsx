@@ -11,6 +11,7 @@ import {
   Link as LinkIcon, 
   Image as ImageIcon, 
   AlertTriangle, 
+  AlertCircle,
   CheckCircle2, 
   X, 
   RefreshCw, 
@@ -536,6 +537,7 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                       <div className="max-h-36 overflow-y-auto divide-y divide-slate-800/80 rounded-lg border border-slate-800 bg-slate-900/50">
                         {selectableUsers.map((u) => {
                           const isSelected = targetUserId === u.id;
+                          const hasPush = Boolean(u.pushEnabled && u.pushSubscription);
                           return (
                             <div
                               key={u.id}
@@ -545,7 +547,18 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                               }`}
                             >
                               <div className="space-y-0.5">
-                                <span className="block font-semibold">{u.fullName || u.name}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="block font-semibold">{u.fullName || u.name}</span>
+                                  {hasPush ? (
+                                    <span className="text-[9px] px-1.5 py-0.2 bg-emerald-950 text-emerald-300 border border-emerald-500/40 rounded-full font-bold">
+                                      🟢 Push Activo
+                                    </span>
+                                  ) : (
+                                    <span className="text-[9px] px-1.5 py-0.2 bg-slate-800 text-slate-400 border border-slate-700 rounded-full">
+                                      ⚪ Push Pendiente
+                                    </span>
+                                  )}
+                                </div>
                                 <span className="text-[10px] text-slate-400 block">
                                   VIP #{u.vipCode || u.accessCode} • WA: {u.phone} • Día {u.currentDay || 1}/30
                                 </span>
@@ -555,6 +568,34 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                           );
                         })}
                       </div>
+
+                      {/* Targeted User Push Subscription Status Card */}
+                      {targetUserId && (() => {
+                        const targetUserObj = users.find(u => u.id === targetUserId);
+                        if (!targetUserObj) return null;
+                        const isPushReady = Boolean(targetUserObj.pushEnabled && targetUserObj.pushSubscription);
+                        
+                        return isPushReady ? (
+                          <div className="p-2.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl flex items-center gap-2 text-xs text-emerald-200">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                            <span>
+                              🟢 <strong>Push Activo:</strong> Dispositivo sincronizado y listo para recibir alertas Web Push.
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="p-2.5 bg-amber-950/50 border border-amber-500/40 rounded-xl flex items-start gap-2 text-xs text-amber-200">
+                            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                            <div className="space-y-0.5">
+                              <span className="font-bold text-amber-300 block">
+                                ⚠️ La usuaria tiene permisos pendientes o no ha abierto la App en este dispositivo.
+                              </span>
+                              <p className="text-[11px] text-amber-200/80">
+                                El mensaje quedará registrado en su expediente, pero la alerta emergente física requerirá que abra la PWA y acepte notificaciones.
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 

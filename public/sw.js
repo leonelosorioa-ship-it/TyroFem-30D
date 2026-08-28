@@ -1,5 +1,5 @@
-// Service Worker Oficial - TyroFem 30D PWA
-const CACHE_NAME = 'tyrofem-v4';
+// Service Worker Oficial - TyroFem 30D PWA (ColShopi)
+const CACHE_NAME = 'tyrofem-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -15,7 +15,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('Algunos recursos no pudieron cachearse:', err);
+        console.warn('Algunos recursos estáticos no pudieron cachearse:', err);
       });
     })
   );
@@ -69,56 +69,66 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// ESCUCHA DE NOTIFICACIONES PUSH (Sintaxis nativa estándar)
+// =========================================================================
+// ESCUCHA ROBUSTA DE NOTIFICACIONES PUSH (Estándar WebPush W3C)
+// =========================================================================
 self.addEventListener('push', (event) => {
-  let data = {};
+  let payload = {
+    title: 'TyroFem 30D • ColShopi',
+    body: 'Tienes un nuevo mensaje de bienestar y hábitos con Marié ✨',
+    icon: '/circulo-marie.png',
+    badge: '/colshopi-logo.png',
+    tag: `tyrofem-push-${Date.now()}`,
+    data: { url: '#calendario' }
+  };
+
   if (event.data) {
     try {
-      data = event.data.json();
+      const dataJson = event.data.json();
+      payload = { ...payload, ...dataJson };
     } catch (e) {
-      data = {
-        title: 'TyroFem 30D • ColShopi',
-        body: event.data.text() || 'Tienes un nuevo mensaje de bienestar.'
-      };
+      payload.body = event.data.text() || payload.body;
     }
-  } else {
-    data = {
-      title: 'TyroFem 30D con Tyruss Full',
-      body: '¡Marié tiene un recordatorio para tu bienestar de hoy! 🌿'
-    };
   }
 
-  const title = data.title || 'TyroFem 30D';
-  const options = {
-    body: data.body || data.message || 'Consulta tu guía diaria en la App.',
-    icon: data.icon || '/circulo-marie.png',
-    badge: data.badge || '/colshopi-logo.png',
-    vibrate: [100, 50, 100],
+  const notificationOptions = {
+    body: payload.body || payload.message || 'Consulta tu guía diaria en la App.',
+    icon: payload.icon || '/circulo-marie.png',
+    badge: payload.badge || '/colshopi-logo.png',
+    vibrate: [200, 100, 200],
+    tag: payload.tag || `tyrofem-push-${Date.now()}`,
+    renotify: true,
+    requireInteraction: false,
     data: {
-      url: data.url || '/'
+      url: payload.url || (payload.data && payload.data.url) || '#calendario',
+      timestamp: Date.now()
     }
   };
 
   event.waitUntil(
-    self.registration.showNotification(title, options)
+    self.registration.showNotification(payload.title || 'TyroFem 30D', notificationOptions)
   );
 });
 
-// CLIC EN LA NOTIFICACIÓN
+// =========================================================================
+// CLIC EN LA NOTIFICACIÓN (Apertura o Enfoque de la PWA)
+// =========================================================================
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
+  const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Si la ventana ya está abierta, enfocarla y navegar
       for (const client of clientList) {
         if (client.url && 'focus' in client) {
-          if (targetUrl && targetUrl !== '/' && 'navigate' in client) {
+          if (targetUrl && 'navigate' in client && !targetUrl.startsWith('http')) {
             client.navigate(targetUrl);
           }
           return client.focus();
         }
       }
+      // Si la PWA está cerrada, abrir nueva ventana
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
@@ -126,10 +136,20 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// ESCUCHA DE MENSAJES PARA DISPARO LOCAL DESDE LA APP
+// =========================================================================
+// MENSAJES LOCALES DIRECTOS (Trigger Local Push desde UI)
+// =========================================================================
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'TRIGGER_LOCAL_PUSH') {
     const { title, options } = event.data;
-    self.registration.showNotification(title || 'TyroFem 30D', options || {});
+    self.registration.showNotification(title || 'TyroFem 30D', {
+      body: options?.body || 'Tienes un nuevo mensaje de bienestar.',
+      icon: options?.icon || '/circulo-marie.png',
+      badge: options?.badge || '/colshopi-logo.png',
+      vibrate: [200, 100, 200],
+      tag: options?.tag || `local-push-${Date.now()}`,
+      renotify: true,
+      data: options?.data || { url: '#calendario' }
+    });
   }
 });

@@ -52,7 +52,7 @@ import {
   recordDayCompletionTimestamp 
 } from './utils/timeLock';
 import { PushNotificationConsentModal } from './components/PushNotificationConsentModal';
-import { hasBeenPromptedForPush, isPushSupported } from './utils/pushNotificationService';
+import { hasBeenPromptedForPush, isPushSupported, autoSyncPushSubscriptionIfGranted } from './utils/pushNotificationService';
 import { Bell } from 'lucide-react';
 
 export default function App() {
@@ -272,13 +272,18 @@ export default function App() {
 
   // Automatic timer trigger for Friendly Push Consent Modal on established users
   useEffect(() => {
-    if (userProfile && !userProfile.isAdmin && !hasBeenPromptedForPush() && isPushSupported()) {
-      const timer = setTimeout(() => {
-        if (!isWelcomeAudioModalOpen && !isPwaInstallModalOpen) {
-          setIsPushConsentModalOpen(true);
-        }
-      }, 4000);
-      return () => clearTimeout(timer);
+    if (userProfile && !userProfile.isAdmin) {
+      // Auto-sync token if permission was already granted previously
+      autoSyncPushSubscriptionIfGranted(userProfile.vipCode || userProfile.accessCode, userProfile.email);
+
+      if (!hasBeenPromptedForPush() && isPushSupported()) {
+        const timer = setTimeout(() => {
+          if (!isWelcomeAudioModalOpen && !isPwaInstallModalOpen) {
+            setIsPushConsentModalOpen(true);
+          }
+        }, 4000);
+        return () => clearTimeout(timer);
+      }
     }
   }, [userProfile, isWelcomeAudioModalOpen, isPwaInstallModalOpen]);
 
@@ -946,7 +951,7 @@ export default function App() {
       <PushNotificationConsentModal
         isOpen={isPushConsentModalOpen}
         onClose={() => setIsPushConsentModalOpen(false)}
-        userVipCode={userProfile?.vipCode || localStorage.getItem('tyrofem_vip_code') || ''}
+        userVipCode={userProfile?.vipCode || userProfile?.accessCode || localStorage.getItem('tyrofem_vip_code') || ''}
         userEmail={userProfile?.email}
       />
 

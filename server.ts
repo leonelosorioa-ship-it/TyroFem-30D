@@ -2,6 +2,23 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
+import webPush from 'web-push';
+
+// Configuration VAPID for Web Push Notifications
+const VAPID_KEYS = {
+  publicKey: process.env.VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U',
+  privateKey: process.env.VAPID_PRIVATE_KEY || 'UUxI4O8M4bhWW3Ub_9V5X1c9kX8tDqA5Nn9iK2J7V5Y'
+};
+
+try {
+  webPush.setVapidDetails(
+    'mailto:contacto@colshopi.com',
+    VAPID_KEYS.publicKey,
+    VAPID_KEYS.privateKey
+  );
+} catch (vapidErr) {
+  console.warn('VAPID setup warning:', vapidErr);
+}
 
 async function startServer() {
   const app = express();
@@ -638,6 +655,13 @@ async function startServer() {
   // PUSH NOTIFICATIONS API ENDPOINTS
   // =========================================================================
 
+  // GET VAPID Public Key for client PushManager subscription
+  app.get('/api/push/vapid-public-key', (req, res) => {
+    res.json({
+      publicKey: VAPID_KEYS.publicKey
+    });
+  });
+
   // GET Push notifications history
   app.get('/api/push/history', (req, res) => {
     res.json({
@@ -666,13 +690,14 @@ async function startServer() {
       if (subscription) {
         usersCache[userIndex].pushSubscription = subscription;
       }
+      usersCache[userIndex].lastTokenUpdate = Date.now();
       usersCache[userIndex].lastActivityTimestamp = Date.now();
       usersCache[userIndex].lastActivityAt = nowIso;
       
       const historyLog = Array.isArray(usersCache[userIndex].historyLog) ? [...usersCache[userIndex].historyLog] : [];
       historyLog.push({
         timestamp: formatLogTime(),
-        event: '🔔 Permiso de Notificaciones Push PWA activado con éxito'
+        event: '🔔 Permiso & Suscripción de Notificaciones Push PWA activados con éxito'
       });
       usersCache[userIndex].historyLog = historyLog;
       persistUsers();
@@ -680,13 +705,13 @@ async function startServer() {
 
     res.json({ 
       success: true, 
-      message: 'Suscripción de notificaciones push registrada con éxito',
+      message: 'Suscripción de notificaciones push registrada y persistida con éxito',
       userFound: userIndex >= 0 
     });
   });
 
   // POST Send or schedule push notification
-  app.post('/api/push/send', (req, res) => {
+  app.post('/api/push/send', async (req, res) => {
     const {
       title,
       message,
@@ -778,13 +803,44 @@ async function startServer() {
     pushNotificationsCache.unshift(newPushNotification);
     persistPushNotifications();
 
-    // If sent instantly, record event in each target user's historyLog with individual {nombre} personalization
+    // If sent instantly, execute Web Push dispatch + log event in each target user's historyLog
     if (sendMode === 'instant') {
-      recipients.forEach((u: any) => {
+      const pushPromises = recipients.map(async (u: any) => {
+        const userFirstName = (u.fullName || u.name || '').trim().split(' ')[0] || 'Hermosa';
+        const personalizedTitle = title.replace(/\{nombre\}/gi, userFirstName);
+        const personalizedBody = message.replace(/\{nombre\}/gi, userFirstName);
+
+        // 1. If user has a real PushSubscription object, trigger native Web Push via VAPID
+        if (u.pushSubscription && u.pushSubscription.endpoint && u.pushSubscription.keys) {
+          const pushPayload = JSON.stringify({
+            title: personalizedTitle,
+            body: personalizedBody,
+            message: personalizedBody,
+            icon: icon || '/circulo-marie.png',
+            badge: badge || '/colshopi-logo.png',
+            tag: `tyrofem-push-${Date.now()}`,
+            data: { url: url || '#calendario' }
+          });
+
+          try {
+            await webPush.sendNotification(u.pushSubscription, pushPayload);
+            console.log(`[WebPush] ✅ Entregado a ${u.fullName || u.name} (${u.vipCode})`);
+          } catch (pushErr: any) {
+            console.warn(`[WebPush] ⚠️ Aviso de entrega para ${u.fullName || u.name}:`, pushErr?.message || pushErr);
+            // If subscription expired / unregistered (410 Gone / 404 Not Found), clean invalid subscription
+            if (pushErr?.statusCode === 410 || pushErr?.statusCode === 404) {
+              const uIdx = usersCache.findIndex((usr: any) => usr.id === u.id);
+              if (uIdx >= 0) {
+                usersCache[uIdx].pushSubscription = null;
+                usersCache[uIdx].pushEnabled = false;
+              }
+            }
+          }
+        }
+
+        // 2. Record log in user's profile
         const userIndex = usersCache.findIndex((usr: any) => usr.id === u.id);
         if (userIndex >= 0) {
-          const userFirstName = (u.fullName || u.name || '').trim().split(' ')[0] || 'Hermosa';
-          const personalizedTitle = title.replace(/\{nombre\}/gi, userFirstName);
           const historyLog = Array.isArray(usersCache[userIndex].historyLog) ? [...usersCache[userIndex].historyLog] : [];
           historyLog.push({
             timestamp: nowLog,
@@ -796,6 +852,8 @@ async function startServer() {
           usersCache[userIndex].lastAction = `Push: ${personalizedTitle.slice(0, 30)}`;
         }
       });
+
+      await Promise.allSettled(pushPromises);
       persistUsers();
     }
 
