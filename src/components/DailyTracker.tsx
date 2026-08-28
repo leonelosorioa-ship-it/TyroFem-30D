@@ -22,7 +22,10 @@ import {
   ShieldCheck,
   AlertCircle,
   Eye,
-  Headphones
+  Headphones,
+  Calendar,
+  BookOpen,
+  MessageCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { triggerDayCompletionConfetti } from '../utils/confettiCelebration';
@@ -49,6 +52,8 @@ interface DailyTrackerProps {
   onSaveProgress: (dayNumber: number, progress: DayProgress) => void;
   onOpenOrder: () => void;
   onOpenChat: () => void;
+  onNavigateToCalendar?: () => void;
+  onOpenRecipes?: () => void;
 }
 
 export const DailyTracker: React.FC<DailyTrackerProps> = ({
@@ -57,7 +62,9 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   currentDay,
   onSaveProgress,
   onOpenOrder,
-  onOpenChat
+  onOpenChat,
+  onNavigateToCalendar,
+  onOpenRecipes
 }) => {
   const [, setTick] = useState<number>(Date.now());
 
@@ -179,7 +186,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   const handleSaveAndLockDay = () => {
     if (!isSelectedDayUnlocked || isSelectedDayAlreadyLocked) return;
 
-    recordDayCompletionTimestamp();
+    recordDayCompletionTimestamp(selectedDay);
 
     const finalProgress: DayProgress = {
       ...currentDayData,
@@ -536,6 +543,34 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
               <p className="text-xs text-emerald-100/90 leading-relaxed border-t border-emerald-900/60 pt-2.5">
                 Para proteger la fidelidad de tu historial de bienestar, este día ha sido <strong>sellado</strong>. Todos los parámetros se encuentran almacenados y disponibles para consulta y guía de <strong>Marié (Guía de Bienestar)</strong>.
               </p>
+
+              {/* Quick Navigation Action Row */}
+              <div className="pt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onNavigateToCalendar?.()}
+                  className="px-4 py-2 bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-xs border border-emerald-500/40"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Volver al Calendario</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenRecipes?.()}
+                  className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-emerald-100 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer border border-white/20"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Recetas</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenChat()}
+                  className="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-emerald-100 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer border border-white/20"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-teal-300" />
+                  <span>Preguntar a Marié</span>
+                </button>
+              </div>
             </div>
           ) : selectedDayStatus.status === 'COUNTDOWN' ? (
             /* If the selected day is in 24H COUNTDOWN */
@@ -1050,6 +1085,14 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
         dayNumber={selectedDay}
         completedDaysCount={completedDays}
         userProfile={userProfile}
+        onNavigateToCalendar={() => {
+          setShowConfirmationModal(false);
+          onNavigateToCalendar?.();
+        }}
+        onOpenRecipes={() => {
+          setShowConfirmationModal(false);
+          onOpenRecipes?.();
+        }}
         onOpenReport={() => {
           setShowConfirmationModal(false);
           setIsReportModalOpen(true);

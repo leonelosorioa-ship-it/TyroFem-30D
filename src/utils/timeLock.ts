@@ -50,18 +50,46 @@ export interface DayStatusInfo {
  * Returns array of strictly consecutive completed days [1, 2, ..., N].
  * Prevents non-sequential skips.
  */
-export function getConsecutiveCompletedDays(progressMap?: Record<number, DayProgress> | null): number[] {
-  if (!progressMap || typeof progressMap !== 'object') return [];
+export function getConsecutiveCompletedDays(
+  progressMapOrArray?: Record<number, DayProgress> | number[] | null
+): number[] {
+  if (Array.isArray(progressMapOrArray)) {
+    // Validate strict sequential [1, 2, ..., k]
+    const sorted = [...progressMapOrArray].sort((a, b) => a - b);
+    const valid: number[] = [];
+    for (let i = 0; i < sorted.length; i++) {
+      if (sorted[i] === i + 1) {
+        valid.push(sorted[i]);
+      } else {
+        break;
+      }
+    }
+    return valid;
+  }
+
+  let effectiveMap = progressMapOrArray;
+  if (!effectiveMap || typeof effectiveMap !== 'object' || Object.keys(effectiveMap).length === 0) {
+    try {
+      const saved = localStorage.getItem('tyrofem_progress_map');
+      if (saved) {
+        effectiveMap = JSON.parse(saved);
+      }
+    } catch (e) {
+      // silent
+    }
+  }
   
   const completed: number[] = [];
-  for (let d = 1; d <= 30; d++) {
-    const p = progressMap[d];
-    const isDone = Boolean(p && (p.completedAt || (p.tyrussTaken && p.water2L) || p.isLockedAfterSubmit));
-    if (isDone) {
-      completed.push(d);
-    } else {
-      // Linear rule: Stop at the first uncompleted day
-      break;
+  if (effectiveMap && typeof effectiveMap === 'object') {
+    for (let d = 1; d <= 30; d++) {
+      const p = (effectiveMap as Record<number, DayProgress>)[d];
+      const isDone = Boolean(p && (p.completedAt || (p.tyrussTaken && p.water2L) || p.isLockedAfterSubmit));
+      if (isDone) {
+        completed.push(d);
+      } else {
+        // Strict linear rule: Stop at the first uncompleted day in sequence
+        break;
+      }
     }
   }
   return completed;
@@ -71,9 +99,13 @@ export function getConsecutiveCompletedDays(progressMap?: Record<number, DayProg
  * Get the timestamp (in ms) when the latest day in sequence was completed.
  */
 export function getLastCompletedTimestamp(
-  progressMap?: Record<number, DayProgress> | null, 
+  progressMapOrTimestamp?: Record<number, DayProgress> | number | null, 
   userProfile?: UserProfile | null
 ): number {
+  if (typeof progressMapOrTimestamp === 'number' && progressMapOrTimestamp > 0) {
+    return progressMapOrTimestamp;
+  }
+
   // Check localStorage first
   try {
     const stored = localStorage.getItem('tyrofem_last_completed_timestamp');
@@ -93,6 +125,7 @@ export function getLastCompletedTimestamp(
   }
 
   // Fallback: check progressMap for the latest completed day's completedAt string
+  const progressMap = typeof progressMapOrTimestamp === 'object' ? progressMapOrTimestamp : null;
   const completedDays = getConsecutiveCompletedDays(progressMap);
   if (completedDays.length > 0) {
     const lastDay = completedDays[completedDays.length - 1];
@@ -111,10 +144,19 @@ export function getLastCompletedTimestamp(
 /**
  * Save completion timestamp in localStorage and return the timestamp
  */
-export function recordDayCompletionTimestamp(): number {
+export function recordDayCompletionTimestamp(dayNumber?: number): number {
   const timestamp = Date.now();
   try {
     localStorage.setItem('tyrofem_last_completed_timestamp', timestamp.toString());
+    if (dayNumber) {
+      const storedDays = localStorage.getItem('tyrofem_completed_days');
+      const list: number[] = storedDays ? JSON.parse(storedDays) : [];
+      if (!list.includes(dayNumber)) {
+        list.push(dayNumber);
+        list.sort((a, b) => a - b);
+        localStorage.setItem('tyrofem_completed_days', JSON.stringify(list));
+      }
+    }
   } catch (e) {
     // silent
   }
@@ -158,13 +200,37 @@ export function formatMsToHHMMSS(diffMs: number): {
 /**
  * Central State Calculation for any Day (1..30)
  * Evaluates whether a day is COMPLETED, ACTIVE, COUNTDOWN (24h timer), or LOCKED.
+ * 
+ * Reglas de oro:
+ * 1. Días 1..N completados -> status: 'COMPLETED'
+ * 2. Día N+1:
+ *    - Si N === 0: status: 'ACTIVE' (Día 1 activo al inicio)
+ *    - Si transcurrieron las 24h (remainingMs <= 0): status: 'ACTIVE'
+ *    - Si aún no transcurren 24h: status: 'COUNTDOWN' (reloj 24h activo)
+ * 3. Días N+2..30: status: 'LOCKED' (candado gris sin timer)
  */
 export function getDayStatus(
   dayNumber: number,
-  progressMap?: Record<number, DayProgress> | null,
-  userProfile?: UserProfile | null
+  progressMapOrCompletedDays?: Record<number, DayProgress> | number[] | null,
+  userProfileOrTimestamp?: UserProfile | number | null
 ): DayStatusInfo {
-  const completedDays = getConsecutiveCompletedDays(progressMap);
+  let completedDays: number[] = [];
+  let lastCompletedTimestamp = 0;
+
+  if (Array.isArray(progressMapOrCompletedDays)) {
+    completedDays = getConsecutiveCompletedDays(progressMapOrCompletedDays);
+    lastCompletedTimestamp = typeof userProfileOrTimestamp === 'number' 
+      ? userProfileOrTimestamp 
+      : getLastCompletedTimestamp();
+  } else {
+    const progressMap = progressMapOrCompletedDays;
+    const userProfile = typeof userProfileOrTimestamp === 'object' ? userProfileOrTimestamp : null;
+    completedDays = getConsecutiveCompletedDays(progressMap);
+    lastCompletedTimestamp = typeof userProfileOrTimestamp === 'number' 
+      ? userProfileOrTimestamp 
+      : getLastCompletedTimestamp(progressMap, userProfile);
+  }
+
   const isCompleted = completedDays.includes(dayNumber);
   const currentTargetDay = Math.min(30, completedDays.length + 1);
 
@@ -172,7 +238,7 @@ export function getDayStatus(
   if (isCompleted) {
     return {
       status: 'COMPLETED',
-      canInteract: false, // Read-only viewing
+      canInteract: false, // Read-only viewing / protected
       isCompleted: true,
       isActive: false,
       isCountdown: false,
@@ -227,7 +293,6 @@ export function getDayStatus(
       };
     }
 
-    const lastCompletedTimestamp = getLastCompletedTimestamp(progressMap, userProfile);
     const now = Date.now();
     const unlockTime = (lastCompletedTimestamp || now) + COOLDOWN_MS;
     const remainingMs = unlockTime - now;

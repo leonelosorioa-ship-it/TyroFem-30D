@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Calendar as CalendarIcon, 
   Activity, 
@@ -91,25 +91,6 @@ export default function App() {
     pedidos: { label: 'Promociones & Pedidos', icon: ShoppingBag }
   };
 
-  const handleNavigateTab = (newTab: 'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos') => {
-    if (newTab === activeTab) return;
-    setNavigationHistory(prev => [...prev.filter(t => t !== newTab), activeTab]);
-    setActiveTab(newTab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleGoBack = () => {
-    if (navigationHistory.length > 0) {
-      const prevTab = navigationHistory[navigationHistory.length - 1];
-      setNavigationHistory(prev => prev.slice(0, -1));
-      setActiveTab(prevTab);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      setActiveTab('calendario');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
   // Modals state
   const [selectedDayPlan, setSelectedDayPlan] = useState<DayPlan | null>(null);
   const [targetRecipeId, setTargetRecipeId] = useState<string | undefined>(undefined);
@@ -125,6 +106,153 @@ export default function App() {
   const [isAdminViewOpen, setIsAdminViewOpen] = useState<boolean>(() => {
     return userProfile?.isAdmin === true;
   });
+
+  // Reference to current active modals & tabs for popstate handling
+  const activeStateRef = useRef({
+    selectedDayPlan: null as DayPlan | null,
+    isOrderModalOpen: false,
+    isNutritionalModalOpen: false,
+    isBrandModalOpen: false,
+    isUserProfileModalOpen: false,
+    isVipPerksModalOpen: false,
+    isPwaInstallModalOpen: false,
+    isWelcomeAudioModalOpen: false,
+    isAdminViewOpen: false,
+    activeTab: 'calendario' as 'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos'
+  });
+
+  // Keep ref synchronized
+  useEffect(() => {
+    activeStateRef.current = {
+      selectedDayPlan,
+      isOrderModalOpen,
+      isNutritionalModalOpen,
+      isBrandModalOpen,
+      isUserProfileModalOpen,
+      isVipPerksModalOpen,
+      isPwaInstallModalOpen,
+      isWelcomeAudioModalOpen,
+      isAdminViewOpen,
+      activeTab
+    };
+  }, [
+    selectedDayPlan,
+    isOrderModalOpen,
+    isNutritionalModalOpen,
+    isBrandModalOpen,
+    isUserProfileModalOpen,
+    isVipPerksModalOpen,
+    isPwaInstallModalOpen,
+    isWelcomeAudioModalOpen,
+    isAdminViewOpen,
+    activeTab
+  ]);
+
+  // Global Navigation function for SPA/PWA with Browser History push
+  const navigateToSection = (newTab: 'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos', pushHistory = true) => {
+    // Close any open modals
+    setSelectedDayPlan(null);
+    setIsOrderModalOpen(false);
+    setIsNutritionalModalOpen(false);
+    setIsBrandModalOpen(false);
+    setIsUserProfileModalOpen(false);
+    setIsVipPerksModalOpen(false);
+    setIsPwaInstallModalOpen(false);
+    setIsWelcomeAudioModalOpen(false);
+    setIsAdminViewOpen(false);
+
+    if (newTab !== activeTab) {
+      setNavigationHistory(prev => [...prev.filter(t => t !== newTab), activeTab]);
+      setActiveTab(newTab);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (pushHistory) {
+      window.history.pushState({ section: newTab }, '', `#${newTab}`);
+    }
+  };
+
+  const handleNavigateTab = (newTab: 'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos') => {
+    navigateToSection(newTab, true);
+  };
+
+  const handleGoBack = () => {
+    if (navigationHistory.length > 0) {
+      const prevTab = navigationHistory[navigationHistory.length - 1];
+      setNavigationHistory(prev => prev.slice(0, -1));
+      setActiveTab(prevTab);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.history.pushState({ section: prevTab }, '', `#${prevTab}`);
+    } else {
+      navigateToSection('calendario', true);
+    }
+  };
+
+  // Intercept Device Hardware "Back" Button via popstate event
+  useEffect(() => {
+    // Initialize base history state on load
+    if (!window.history.state || !window.history.state.section) {
+      window.history.replaceState({ section: 'calendario' }, '', '#calendario');
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      const { 
+        selectedDayPlan: dayModal,
+        isOrderModalOpen: orderModal,
+        isNutritionalModalOpen: nutModal,
+        isBrandModalOpen: brandModal,
+        isUserProfileModalOpen: userModal,
+        isVipPerksModalOpen: vipModal,
+        isPwaInstallModalOpen: pwaModal,
+        isWelcomeAudioModalOpen: audioModal,
+        isAdminViewOpen: adminModal,
+        activeTab: currentTab
+      } = activeStateRef.current;
+
+      const hasAnyModalOpen = Boolean(
+        dayModal || 
+        orderModal || 
+        nutModal || 
+        brandModal || 
+        userModal || 
+        vipModal || 
+        pwaModal || 
+        audioModal || 
+        adminModal
+      );
+
+      // If user pressed Back while any modal was open, safely close the modal and stay inside the app
+      if (hasAnyModalOpen) {
+        setSelectedDayPlan(null);
+        setIsOrderModalOpen(false);
+        setIsNutritionalModalOpen(false);
+        setIsBrandModalOpen(false);
+        setIsUserProfileModalOpen(false);
+        setIsVipPerksModalOpen(false);
+        setIsPwaInstallModalOpen(false);
+        setIsWelcomeAudioModalOpen(false);
+        setIsAdminViewOpen(false);
+        return;
+      }
+
+      // If no modal was open, navigate within the app history
+      if (event.state && event.state.section) {
+        setActiveTab(event.state.section);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (currentTab !== 'calendario') {
+        // Return to main calendar safely without closing PWA
+        setActiveTab('calendario');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.history.replaceState({ section: 'calendario' }, '', '#calendario');
+      } else {
+        // Already on calendar, keep user protected
+        window.history.replaceState({ section: 'calendario' }, '', '#calendario');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Direct PWA Install trigger (triggers native Chrome prompt or opens instructions modal)
   const handleTriggerPWAInstall = async () => {
@@ -193,7 +321,7 @@ export default function App() {
   // Handle saving day progress
   const handleSaveDayProgress = (dayNumber: number, progress: DayProgress) => {
     const timestamp = Date.now();
-    recordDayCompletionTimestamp();
+    recordDayCompletionTimestamp(dayNumber);
 
     setProgressMap(prev => {
       const updated = { 
@@ -444,7 +572,9 @@ export default function App() {
             currentDay={currentDay}
             onSaveProgress={handleSaveDayProgress}
             onOpenOrder={() => handleOpenOrder(currentDay >= 22)}
-            onOpenChat={() => handleNavigateTab('chat')}
+            onOpenChat={() => navigateToSection('chat')}
+            onNavigateToCalendar={() => navigateToSection('calendario')}
+            onOpenRecipes={() => navigateToSection('recetas')}
           />
         )}
 
@@ -597,8 +727,8 @@ export default function App() {
         )}
       </main>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav aria-label="Navegación principal móvil" className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex items-center justify-around shadow-lg">
+      {/* Mobile Bottom Navigation Bar - Fixed with high z-index & smooth scroll */}
+      <nav aria-label="Navegación principal móvil" className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex items-center justify-around shadow-2xl">
         {[
           { id: 'calendario', label: '30 Días', icon: CalendarIcon },
           { id: 'tracker', label: 'Registro', icon: Activity },
@@ -615,11 +745,11 @@ export default function App() {
                 if (tab.id === 'pedidos') {
                   handleOpenOrder(currentDay >= 22);
                 } else {
-                  setActiveTab(tab.id as any);
+                  navigateToSection(tab.id as any);
                 }
               }}
               className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all cursor-pointer relative ${
-                isActive ? 'text-emerald-700 font-bold' : 'text-slate-500'
+                isActive ? 'text-emerald-700 font-bold' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : ''}`} />
@@ -645,7 +775,15 @@ export default function App() {
         onOpenRecipe={handleOpenRecipe}
         onOpenChat={() => {
           setSelectedDayPlan(null);
-          setActiveTab('chat');
+          navigateToSection('chat');
+        }}
+        onNavigateToCalendar={() => {
+          setSelectedDayPlan(null);
+          navigateToSection('calendario');
+        }}
+        onOpenRecipes={() => {
+          setSelectedDayPlan(null);
+          navigateToSection('recetas');
         }}
       />
 

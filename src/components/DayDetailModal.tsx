@@ -48,6 +48,8 @@ interface DayDetailModalProps {
   onOpenChat: () => void;
   onOpenReport?: () => void;
   onOpenTrend?: () => void;
+  onNavigateToCalendar?: () => void;
+  onOpenRecipes?: () => void;
 }
 
 export const DayDetailModal: React.FC<DayDetailModalProps> = ({
@@ -60,7 +62,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   onOpenRecipe,
   onOpenChat,
   onOpenReport,
-  onOpenTrend
+  onOpenTrend,
+  onNavigateToCalendar,
+  onOpenRecipes
 }) => {
   if (!dayPlan) return null;
 
@@ -151,7 +155,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
       return;
     }
 
-    recordDayCompletionTimestamp();
+    recordDayCompletionTimestamp(dayPlan.dayNumber);
 
     const allChecked = tyrussTaken && water2L && antiinflammatoryMeal;
     const finalData: DayProgress = {
@@ -736,7 +740,18 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
           onClose();
         }}
         dayNumber={dayPlan.dayNumber}
+        completedDaysCount={getConsecutiveCompletedDays(progressMap).length}
         userProfile={userProfile}
+        onNavigateToCalendar={() => {
+          setShowConfirmationModal(false);
+          onClose();
+          onNavigateToCalendar?.();
+        }}
+        onOpenRecipes={() => {
+          setShowConfirmationModal(false);
+          onClose();
+          onOpenRecipes?.();
+        }}
         onOpenReport={() => {
           setShowConfirmationModal(false);
           onOpenReport?.();

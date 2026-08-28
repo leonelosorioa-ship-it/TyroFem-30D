@@ -11,7 +11,12 @@ import {
   Filter,
   Lock,
   Clock,
-  ShieldCheck
+  ShieldCheck,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  Award,
+  Check
 } from 'lucide-react';
 import { DayPlan, DayProgress, UserProfile } from '../types';
 import { CALENDAR_DAYS } from '../data/calendarData';
@@ -39,6 +44,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onOpenChat
 }) => {
   const [selectedPhase, setSelectedPhase] = useState<number | 'all'>('all');
+  const [isGuideExpanded, setIsGuideExpanded] = useState<boolean>(true);
   const [, setTick] = useState<number>(Date.now());
 
   // Live timer tick every 1000ms to update all countdowns in real-time
@@ -75,6 +81,72 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   return (
     <div className="space-y-6 pb-20">
+      {/* Educational Mini-Tour Banner: ¿Cómo funciona tu reto de 30 días? */}
+      <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/70 border border-emerald-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-emerald-950 shadow-xs">
+        <div className="flex items-center justify-between gap-3 cursor-pointer" onClick={() => setIsGuideExpanded(prev => !prev)}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold shrink-0 shadow-xs">
+              💡
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-bold font-serif-luxury text-emerald-950">
+                ¿Cómo funciona tu reto de 30 días?
+              </h3>
+              <p className="text-[11px] text-emerald-800">
+                Aprende la dinámica de desbloqueo diario y registro para completar con éxito tu reto.
+              </p>
+            </div>
+          </div>
+          <button 
+            type="button"
+            className="p-1.5 rounded-lg bg-emerald-200/60 hover:bg-emerald-300/60 text-emerald-900 transition-colors"
+            aria-label="Alternar guía"
+          >
+            {isGuideExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {isGuideExpanded && (
+          <div className="mt-3.5 pt-3.5 border-t border-emerald-200/80 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs animate-fadeIn">
+            <div className="bg-white/80 rounded-xl p-3 border border-emerald-100 flex items-start gap-2.5 shadow-2xs">
+              <span className="w-6 h-6 rounded-full bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
+                1
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-bold text-xs">Paso 1: Revisa tu pauta</strong>
+                <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
+                  Abre el día activo para consultar tu dosis de <strong>Tyruss Full</strong>, pautas alimentarias y meta de hidratación.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white/80 rounded-xl p-3 border border-emerald-100 flex items-start gap-2.5 shadow-2xs">
+              <span className="w-6 h-6 rounded-full bg-teal-700 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
+                2
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-bold text-xs">Paso 2: Registra tu progreso</strong>
+                <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
+                  Al final del día completa tu test somático. Tu día quedará <strong>sellado</strong> y el siguiente se activará en 24h.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white/80 rounded-xl p-3 border border-emerald-100 flex items-start gap-2.5 shadow-2xs">
+              <span className="w-6 h-6 rounded-full bg-amber-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
+                3
+              </span>
+              <div>
+                <strong className="text-slate-900 block font-bold text-xs">Paso 3: Aprovecha los módulos</strong>
+                <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
+                  Explora recetas antiinflamatorias, monitorea tus gráficos de energía y resuelve dudas en vivo con <strong>Marié IA</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Hero Welcome & Phase Overview */}
       <div className="bg-gradient-to-br from-emerald-800 via-teal-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl relative overflow-hidden">
         {/* Subtle decorative background circles */}

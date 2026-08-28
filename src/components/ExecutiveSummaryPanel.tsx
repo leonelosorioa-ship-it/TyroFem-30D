@@ -17,6 +17,7 @@ import {
   Info
 } from 'lucide-react';
 import { DayProgress, UserProfile } from '../types';
+import { getConsecutiveCompletedDays } from '../utils/timeLock';
 
 interface ExecutiveSummaryPanelProps {
   userProfile: UserProfile;
@@ -39,28 +40,14 @@ export const ExecutiveSummaryPanel: React.FC<ExecutiveSummaryPanelProps> = ({
 }) => {
   const [activeCardTooltip, setActiveCardTooltip] = useState<string | null>(null);
 
-  // 1. Calculate Completed Days
-  const completedDaysList = (Object.values(progressMap) as DayProgress[]).filter(
-    p => p.completedAt || (p.tyrussTaken && p.water2L) || p.isLockedAfterSubmit
-  );
-  const completedDaysCount = completedDaysList.length;
+  // 1. Calculate strictly consecutive Completed Days
+  const completedDayNumbers = getConsecutiveCompletedDays(progressMap);
+  const completedDaysCount = completedDayNumbers.length;
+  const completedDaysList = completedDayNumbers.map(d => progressMap[d]).filter(Boolean);
   const progressPercent = Math.min(100, Math.round((completedDaysCount / 30) * 100));
 
   // 2. Calculate Success Streak (Racha de Éxito)
-  let currentStreak = 0;
-  for (let d = unlockedMaxDay; d >= 1; d--) {
-    const dayData = progressMap[d];
-    const isDayDone = dayData && (dayData.completedAt || (dayData.tyrussTaken && dayData.water2L) || dayData.isLockedAfterSubmit);
-    if (isDayDone) {
-      currentStreak++;
-    } else {
-      if (d === unlockedMaxDay && currentStreak === 0) {
-        // Current day is still in progress, check previous
-        continue;
-      }
-      break;
-    }
-  }
+  const currentStreak = completedDaysCount;
 
   // 3. Calculate Metabolic Health Status
   let metabolicStatusText = 'En Calibración';
