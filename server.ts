@@ -14,6 +14,7 @@ async function startServer() {
   const DATA_DIR = path.join(process.cwd(), 'data');
   const USERS_FILE = path.join(DATA_DIR, 'registered_users.json');
   const CODES_FILE = path.join(DATA_DIR, 'redeemed_codes.json');
+  const PUSH_FILE = path.join(DATA_DIR, 'push_notifications.json');
 
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -49,6 +50,57 @@ async function startServer() {
     redeemedCodesCache = {};
   }
 
+  // Load or initialize push notifications history
+  let pushNotificationsCache: any[] = [];
+  try {
+    if (fs.existsSync(PUSH_FILE)) {
+      const raw = fs.readFileSync(PUSH_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        pushNotificationsCache = parsed;
+      }
+    }
+  } catch (err) {
+    console.error('Error reading push notifications file:', err);
+    pushNotificationsCache = [];
+  }
+
+  // Seed default push notifications history if empty
+  if (pushNotificationsCache.length === 0) {
+    pushNotificationsCache = [
+      {
+        id: 'PUSH-INIT-001',
+        title: '¡Bienvenida a tu Reto TyroFem 30D! 🌿',
+        message: 'Tu cuerpo inicia un proceso de transformación. No olvides tu primera dosis de Tyruss Full.',
+        type: 'recordatorio',
+        url: '#calendario',
+        icon: '/circulo-marie.png',
+        badge: '/colshopi-logo.png',
+        audienceType: 'all',
+        sendMode: 'instant',
+        sentAt: '2026-08-27T14:30:00.000Z',
+        status: 'sent',
+        recipientCount: 3,
+        deliveredCount: 3
+      },
+      {
+        id: 'PUSH-INIT-002',
+        title: 'Consejo de Marié: Hidratación Antiinflamatoria 🥑',
+        message: 'Asegúrate de llegar a tus 2L de agua hoy para potenciar la asimilación del magnesio y zinc.',
+        type: 'tip_nutricional',
+        url: '#recetas',
+        icon: '/circulo-marie.png',
+        badge: '/colshopi-logo.png',
+        audienceType: 'all',
+        sendMode: 'instant',
+        sentAt: '2026-08-27T17:00:00.000Z',
+        status: 'sent',
+        recipientCount: 3,
+        deliveredCount: 3
+      }
+    ];
+  }
+
   function persistUsers() {
     try {
       fs.writeFileSync(USERS_FILE, JSON.stringify(usersCache, null, 2), 'utf-8');
@@ -64,6 +116,15 @@ async function startServer() {
       console.error('Error persisting codes file:', err);
     }
   }
+
+  function persistPushNotifications() {
+    try {
+      fs.writeFileSync(PUSH_FILE, JSON.stringify(pushNotificationsCache, null, 2), 'utf-8');
+    } catch (err) {
+      console.error('Error persisting push file:', err);
+    }
+  }
+  persistPushNotifications();
 
   // Auto-sync codes from users cache if any user has an access code
   usersCache.forEach((u: any) => {
@@ -571,6 +632,181 @@ async function startServer() {
     };
     persistCodes();
     res.json({ success: true, code: redeemedCodesCache[cleanCode] });
+  });
+
+  // =========================================================================
+  // PUSH NOTIFICATIONS API ENDPOINTS
+  // =========================================================================
+
+  // GET Push notifications history
+  app.get('/api/push/history', (req, res) => {
+    res.json({
+      success: true,
+      count: pushNotificationsCache.length,
+      notifications: pushNotificationsCache
+    });
+  });
+
+  // POST Subscribe user to push notifications
+  app.post('/api/push/subscribe', (req, res) => {
+    const { userVipCode, userEmail, subscription, permission } = req.body;
+    const cleanCode = (userVipCode || '').toString().replace(/\D/g, '').trim();
+    const cleanEmail = (userEmail || '').trim().toLowerCase();
+    const nowIso = new Date().toISOString();
+
+    const userIndex = usersCache.findIndex(
+      (u: any) =>
+        (cleanCode && (u.vipCode === cleanCode || u.accessCode === cleanCode)) ||
+        (cleanEmail && u.email && u.email.toLowerCase() === cleanEmail)
+    );
+
+    if (userIndex >= 0) {
+      usersCache[userIndex].pushEnabled = true;
+      usersCache[userIndex].pushPermissionStatus = permission || 'granted';
+      if (subscription) {
+        usersCache[userIndex].pushSubscription = subscription;
+      }
+      usersCache[userIndex].lastActivityTimestamp = Date.now();
+      usersCache[userIndex].lastActivityAt = nowIso;
+      
+      const historyLog = Array.isArray(usersCache[userIndex].historyLog) ? [...usersCache[userIndex].historyLog] : [];
+      historyLog.push({
+        timestamp: formatLogTime(),
+        event: '🔔 Permiso de Notificaciones Push PWA activado con éxito'
+      });
+      usersCache[userIndex].historyLog = historyLog;
+      persistUsers();
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Suscripción de notificaciones push registrada con éxito',
+      userFound: userIndex >= 0 
+    });
+  });
+
+  // POST Send or schedule push notification
+  app.post('/api/push/send', (req, res) => {
+    const {
+      title,
+      message,
+      type = 'recordatorio',
+      url = '#calendario',
+      icon = '/circulo-marie.png',
+      badge = '/colshopi-logo.png',
+      audienceType = 'all',
+      targetUserId,
+      targetUserName,
+      targetStage,
+      sendMode = 'instant',
+      scheduledAt
+    } = req.body;
+
+    if (!title || !message) {
+      return res.status(400).json({ error: 'Título y Mensaje son obligatorios' });
+    }
+
+    const nowIso = new Date().toISOString();
+    const nowLog = formatLogTime();
+
+    // Determine target users based on audience criteria
+    let recipients: any[] = [];
+
+    if (audienceType === 'all') {
+      recipients = usersCache.filter((u: any) => u.status === 'active' || u.status === 'activa');
+    } else if (audienceType === 'individual' && targetUserId) {
+      const cleanTarget = targetUserId.toString().trim().toLowerCase();
+      const cleanTargetCode = targetUserId.toString().replace(/\D/g, '').trim();
+      recipients = usersCache.filter(
+        (u: any) =>
+          u.id === targetUserId ||
+          (u.email && u.email.toLowerCase() === cleanTarget) ||
+          (cleanTargetCode && (u.vipCode === cleanTargetCode || u.accessCode === cleanTargetCode))
+      );
+    } else if (audienceType === 'stage' && targetStage) {
+      recipients = usersCache.filter((u: any) => {
+        const day = Number(u.currentDay || 1);
+        if (targetStage === 'fase_1') return day >= 1 && day <= 7;
+        if (targetStage === 'fase_2') return day >= 8 && day <= 14;
+        if (targetStage === 'fase_3') return day >= 15 && day <= 20;
+        if (targetStage === 'fase_4') return day >= 21 && day <= 30;
+        return true;
+      });
+    } else if (audienceType === 'low_adherence') {
+      const twoDaysAgo = Date.now() - 48 * 3600 * 1000;
+      recipients = usersCache.filter((u: any) => {
+        const adherence = Number(u.adherencePercentage ?? u.adherencePercent ?? 0);
+        const lastAct = u.lastActivityTimestamp || (u.lastActivityAt ? new Date(u.lastActivityAt).getTime() : 0);
+        return adherence < 50 || (lastAct > 0 && lastAct < twoDaysAgo);
+      });
+    } else {
+      recipients = usersCache.filter((u: any) => u.status === 'active' || u.status === 'activa');
+    }
+
+    const recipientCount = Math.max(recipients.length, audienceType === 'individual' ? 1 : usersCache.length);
+
+    // Create Push Notification record
+    const newPushNotification = {
+      id: `PUSH-${Date.now()}`,
+      title: title.slice(0, 50),
+      message: message.slice(0, 140),
+      type,
+      url,
+      icon,
+      badge,
+      audienceType,
+      targetUserId,
+      targetUserName: targetUserName || (recipients.length === 1 ? (recipients[0].fullName || recipients[0].name) : undefined),
+      targetStage,
+      sendMode,
+      scheduledAt: sendMode === 'scheduled' ? scheduledAt : undefined,
+      sentAt: nowIso,
+      status: sendMode === 'scheduled' ? 'scheduled' : 'sent',
+      recipientCount,
+      deliveredCount: sendMode === 'instant' ? recipientCount : 0
+    };
+
+    pushNotificationsCache.unshift(newPushNotification);
+    persistPushNotifications();
+
+    // If sent instantly, record event in each target user's historyLog
+    if (sendMode === 'instant') {
+      recipients.forEach((u: any) => {
+        const userIndex = usersCache.findIndex((usr: any) => usr.id === u.id);
+        if (userIndex >= 0) {
+          const historyLog = Array.isArray(usersCache[userIndex].historyLog) ? [...usersCache[userIndex].historyLog] : [];
+          historyLog.push({
+            timestamp: nowLog,
+            event: `🔔 Notificación Push recibida: "${title.slice(0, 35)}..."`
+          });
+          usersCache[userIndex].historyLog = historyLog;
+          usersCache[userIndex].lastActivityTimestamp = Date.now();
+          usersCache[userIndex].lastActivityAt = nowIso;
+          usersCache[userIndex].lastAction = `Push: ${title.slice(0, 30)}`;
+        }
+      });
+      persistUsers();
+    }
+
+    res.json({
+      success: true,
+      notification: newPushNotification,
+      recipientCount,
+      targetUserNames: recipients.map((r: any) => r.fullName || r.name)
+    });
+  });
+
+  // DELETE push notification from history
+  app.delete('/api/push/history/:id', (req, res) => {
+    const { id } = req.params;
+    const initialLen = pushNotificationsCache.length;
+    pushNotificationsCache = pushNotificationsCache.filter((p: any) => p.id !== id);
+    persistPushNotifications();
+    res.json({
+      success: true,
+      deleted: initialLen !== pushNotificationsCache.length,
+      count: pushNotificationsCache.length
+    });
   });
 
   // Vite middleware for development

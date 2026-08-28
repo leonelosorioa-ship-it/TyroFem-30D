@@ -51,6 +51,9 @@ import {
   getConsecutiveCompletedDays, 
   recordDayCompletionTimestamp 
 } from './utils/timeLock';
+import { PushNotificationConsentModal } from './components/PushNotificationConsentModal';
+import { hasBeenPromptedForPush, isPushSupported } from './utils/pushNotificationService';
+import { Bell } from 'lucide-react';
 
 export default function App() {
   // Load or initialize user profile from localStorage
@@ -101,6 +104,13 @@ export default function App() {
   const [isVipPerksModalOpen, setIsVipPerksModalOpen] = useState(false);
   const [isPwaInstallModalOpen, setIsPwaInstallModalOpen] = useState(false);
   const [isWelcomeAudioModalOpen, setIsWelcomeAudioModalOpen] = useState(false);
+  const [isPushConsentModalOpen, setIsPushConsentModalOpen] = useState(false);
+  const [inAppPushToast, setInAppPushToast] = useState<{
+    title: string;
+    message: string;
+    url?: string;
+    icon?: string;
+  } | null>(null);
   const [isReorderTrigger, setIsReorderTrigger] = useState(false);
   const [motivationalNotification, setMotivationalNotification] = useState<LocalNotification | null>(null);
   const [isAdminViewOpen, setIsAdminViewOpen] = useState<boolean>(() => {
@@ -117,6 +127,7 @@ export default function App() {
     isVipPerksModalOpen: false,
     isPwaInstallModalOpen: false,
     isWelcomeAudioModalOpen: false,
+    isPushConsentModalOpen: false,
     isAdminViewOpen: false,
     activeTab: 'calendario' as 'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos'
   });
@@ -132,6 +143,7 @@ export default function App() {
       isVipPerksModalOpen,
       isPwaInstallModalOpen,
       isWelcomeAudioModalOpen,
+      isPushConsentModalOpen,
       isAdminViewOpen,
       activeTab
     };
@@ -144,6 +156,7 @@ export default function App() {
     isVipPerksModalOpen,
     isPwaInstallModalOpen,
     isWelcomeAudioModalOpen,
+    isPushConsentModalOpen,
     isAdminViewOpen,
     activeTab
   ]);
@@ -205,6 +218,7 @@ export default function App() {
         isVipPerksModalOpen: vipModal,
         isPwaInstallModalOpen: pwaModal,
         isWelcomeAudioModalOpen: audioModal,
+        isPushConsentModalOpen: pushModal,
         isAdminViewOpen: adminModal,
         activeTab: currentTab
       } = activeStateRef.current;
@@ -218,6 +232,7 @@ export default function App() {
         vipModal || 
         pwaModal || 
         audioModal || 
+        pushModal ||
         adminModal
       );
 
@@ -231,6 +246,7 @@ export default function App() {
         setIsVipPerksModalOpen(false);
         setIsPwaInstallModalOpen(false);
         setIsWelcomeAudioModalOpen(false);
+        setIsPushConsentModalOpen(false);
         setIsAdminViewOpen(false);
         return;
       }
@@ -252,6 +268,32 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Automatic timer trigger for Friendly Push Consent Modal on established users
+  useEffect(() => {
+    if (userProfile && !userProfile.isAdmin && !hasBeenPromptedForPush() && isPushSupported()) {
+      const timer = setTimeout(() => {
+        if (!isWelcomeAudioModalOpen && !isPwaInstallModalOpen) {
+          setIsPushConsentModalOpen(true);
+        }
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [userProfile, isWelcomeAudioModalOpen, isPwaInstallModalOpen]);
+
+  // Listener for in-app push notification events
+  useEffect(() => {
+    const handlePushReceived = (e: any) => {
+      if (e?.detail) {
+        setInAppPushToast(e.detail);
+        setTimeout(() => {
+          setInAppPushToast(null);
+        }, 8000);
+      }
+    };
+    window.addEventListener('tyrofem_push_received', handlePushReceived);
+    return () => window.removeEventListener('tyrofem_push_received', handlePushReceived);
   }, []);
 
   // Direct PWA Install trigger (triggers native Chrome prompt or opens instructions modal)
@@ -879,13 +921,85 @@ export default function App() {
       {/* Marie Official Welcome Audio Popup Modal */}
       <MarieWelcomeAudioModal
         isOpen={isWelcomeAudioModalOpen}
-        onClose={() => setIsWelcomeAudioModalOpen(false)}
+        onClose={() => {
+          setIsWelcomeAudioModalOpen(false);
+          // Suggest push notifications 1.5s after welcome audio modal is dismissed
+          if (!hasBeenPromptedForPush() && isPushSupported() && !userProfile?.isAdmin) {
+            setTimeout(() => {
+              setIsPushConsentModalOpen(true);
+            }, 1500);
+          }
+        }}
         userProfile={userProfile}
         onContinueToPlan={() => {
           setIsWelcomeAudioModalOpen(false);
           setActiveTab('calendario');
+          if (!hasBeenPromptedForPush() && isPushSupported() && !userProfile?.isAdmin) {
+            setTimeout(() => {
+              setIsPushConsentModalOpen(true);
+            }, 1500);
+          }
         }}
       />
+
+      {/* Push Notification Friendly Consent Modal for PWA & Mobile users */}
+      <PushNotificationConsentModal
+        isOpen={isPushConsentModalOpen}
+        onClose={() => setIsPushConsentModalOpen(false)}
+        userVipCode={userProfile?.vipCode || localStorage.getItem('tyrofem_vip_code') || ''}
+        userEmail={userProfile?.email}
+      />
+
+      {/* In-App Floating Push Notification Toast */}
+      {inAppPushToast && (
+        <div 
+          onClick={() => {
+            if (inAppPushToast.url) {
+              const u = inAppPushToast.url;
+              if (u.startsWith('http')) {
+                window.open(u, '_blank');
+              } else if (u.includes('calendario')) {
+                handleNavigateTab('calendario');
+              } else if (u.includes('recetas')) {
+                handleNavigateTab('recetas');
+              } else if (u.includes('chat')) {
+                handleNavigateTab('chat');
+              } else if (u.includes('pedidos')) {
+                handleNavigateTab('pedidos');
+              }
+            }
+            setInAppPushToast(null);
+          }}
+          className="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 bg-slate-900/95 border-2 border-amber-400/80 rounded-2xl p-3.5 shadow-2xl text-white backdrop-blur-md cursor-pointer animate-slideDown hover:bg-slate-800 transition-all flex items-start gap-3"
+        >
+          <img
+            src={inAppPushToast.icon || '/circulo-marie.png'}
+            alt="Notificación"
+            className="w-10 h-10 rounded-xl object-cover border border-amber-400 shrink-0 mt-0.5"
+            onError={(e) => {
+              (e.target as HTMLElement).style.display = 'none';
+            }}
+          />
+          <div className="flex-1 space-y-0.5 min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                <Bell className="w-3 h-3 fill-current" />
+                <span>ColShopi • TyroFem 30D</span>
+              </span>
+              <span className="text-[10px] text-slate-400">Ahora</span>
+            </div>
+            <h5 className="text-xs font-bold text-white truncate">{inAppPushToast.title}</h5>
+            <p className="text-[11px] text-slate-300 line-clamp-2 leading-snug">{inAppPushToast.message}</p>
+          </div>
+          <button 
+            type="button" 
+            onClick={(e) => { e.stopPropagation(); setInAppPushToast(null); }}
+            className="text-slate-400 hover:text-white text-xs p-1"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Motivational Local Toast Notification for Daily Tracker Registration */}
       <MotivationalToast

@@ -32,7 +32,8 @@ import {
   Clock,
   Layers,
   History,
-  Check
+  Check,
+  Bell
 } from 'lucide-react';
 import { 
   MasterUserData,
@@ -50,6 +51,7 @@ import {
 } from '../data/usersDatabase';
 import { getCodesStatusSummary } from '../data/authorizedCodes';
 import { ColshopiLogo } from './ColshopiLogo';
+import { PushNotificationConsoleModal } from './PushNotificationConsoleModal';
 import { HealthAngle } from '../types';
 
 interface AdminPanelProps {
@@ -72,6 +74,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
 
   const [selectedUserForDetail, setSelectedUserForDetail] = useState<MasterUserData | null>(null);
   const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
+  const [isPushConsoleOpen, setIsPushConsoleOpen] = useState(false);
+  const [pushConsolePreSelectedUser, setPushConsolePreSelectedUser] = useState<MasterUserData | null>(null);
   const [exportFeedback, setExportFeedback] = useState<string | null>(null);
 
   // New user form state
@@ -315,6 +319,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                 Código Admin: 250816
               </span>
             </div>
+
+            {/* Push Notification Dispatcher Modal Trigger */}
+            <button
+              type="button"
+              onClick={() => {
+                setPushConsolePreSelectedUser(null);
+                setIsPushConsoleOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-3.5 py-2 rounded-xl transition-all shadow-lg hover:shadow-amber-400/20 cursor-pointer active:scale-95 border border-amber-200"
+              title="Abrir consola de emisión de notificaciones push PWA"
+            >
+              <Bell className="w-4 h-4 fill-current" />
+              <span>Enviar Notificación Push</span>
+            </button>
 
             <button
               type="button"
@@ -773,6 +791,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             
+                            {/* Quick Push Notification Trigger to this user */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPushConsolePreSelectedUser(user);
+                                setIsPushConsoleOpen(true);
+                              }}
+                              className="p-1.5 bg-slate-800 hover:bg-amber-950 text-amber-400 hover:text-amber-200 border border-slate-700 hover:border-amber-500/50 rounded-lg transition-colors cursor-pointer"
+                              title={`Enviar Notificación Push directa a ${userName}`}
+                            >
+                              <Bell className="w-3.5 h-3.5" />
+                            </button>
+
                             {/* Ver Detalle / Historial */}
                             <button
                               type="button"
@@ -1335,6 +1366,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 4: PUSH NOTIFICATION CONSOLE MODAL */}
+      {/* ========================================================================= */}
+      <PushNotificationConsoleModal
+        isOpen={isPushConsoleOpen}
+        onClose={() => {
+          setIsPushConsoleOpen(false);
+          setPushConsolePreSelectedUser(null);
+        }}
+        users={users}
+        preSelectedUser={pushConsolePreSelectedUser}
+        onPushSent={() => {
+          reloadUsers(false);
+        }}
+      />
 
     </div>
   );
