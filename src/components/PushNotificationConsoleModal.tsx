@@ -34,7 +34,9 @@ import {
   PushNotificationPayload, 
   fetchPushNotificationsHistory, 
   sendPushNotificationFromAdmin, 
-  deletePushNotificationFromHistory 
+  deletePushNotificationFromHistory,
+  personalizeNotificationText,
+  preparePersonalizedPayload
 } from '../utils/pushNotificationService';
 import { ColshopiLogo } from './ColshopiLogo';
 
@@ -55,9 +57,9 @@ const TEMPLATES: Array<{
   icon: string;
 }> = [
   {
-    label: '🌿 Recordatorio de Toma Tyruss Full',
+    label: '🌿 Recordatorio Personalizado',
     type: 'recordatorio',
-    title: '¡Hora de tu Tyruss Full! 🌿',
+    title: '¡{nombre}, hora de tu Tyruss Full! 🌿',
     message: 'Toma tu dosis diaria de Tyruss Full con agua tibia o infusión para potenciar tu metabolismo y tiroides.',
     url: '#calendario',
     icon: '/circulo-marie.png'
@@ -65,15 +67,15 @@ const TEMPLATES: Array<{
   {
     label: '🥑 Tip Digestivo de Marié',
     type: 'tip_nutricional',
-    title: '¡Marié tiene un consejo para tu digestión! 🥑',
-    message: 'Hoy tu cuerpo necesita hidratación extra con tu Tyruss Full. Toca aquí para ver tu receta del día.',
+    title: '¡{nombre}, Marié tiene un consejo para ti! 🥑',
+    message: 'Hoy tu cuerpo necesita hidratación extra con tu Tyruss Full. Toca aquí para ver tu receta antiinflamatoria.',
     url: '#recetas',
     icon: '/circulo-marie.png'
   },
   {
     label: '🎁 Oferta Recompra VIP ColShopi',
     type: 'oferta_vip',
-    title: '🎁 Beneficio VIP Exclusivo en ColShopi',
+    title: '🎁 {nombre}, tienes beneficio VIP en ColShopi',
     message: 'Tu siguiente frasco de Tyruss Full tiene 20% OFF + Envío Gratis por ser parte del Reto 30D.',
     url: 'https://wa.me/573197036711?text=Hola%20ColShopi,%20quiero%20aprovechar%20mi%20descuento%20VIP%20de%20recompra%20Tyruss%20Full',
     icon: '/colshopi-logo.png'
@@ -81,8 +83,8 @@ const TEMPLATES: Array<{
   {
     label: '⭐ Testimonio Inspirador',
     type: 'testimonio',
-    title: '⭐ ¡Sandra redujo su fatiga en 7 días!',
-    message: 'La constancia diaria transforma tu energía. Toca aquí para registrar tu día de hoy con Marié.',
+    title: '⭐ ¡{nombre}, tu constancia transforma tu energía!',
+    message: 'Cada día con Tyruss Full cuenta. Toca aquí para registrar tu avance de hoy con la Nutricionista Marié.',
     url: '#calendario',
     icon: '/circulo-marie.png'
   }
@@ -588,6 +590,19 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                     </span>
                   </div>
 
+                  {/* Dynamic Name Tag Info Tip */}
+                  <div className="p-3 bg-cyan-950/40 border border-cyan-500/30 rounded-xl flex items-start gap-2.5 text-xs text-cyan-200">
+                    <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="font-semibold leading-relaxed">
+                        💡 Tip: Usa <button type="button" onClick={() => setTitle(t => t.includes('{nombre}') ? t : `${t} {nombre}`)} className="bg-cyan-900/90 border border-cyan-400/50 px-1.5 py-0.5 rounded text-amber-300 font-mono font-bold cursor-pointer hover:bg-cyan-800 transition-colors inline-block">{'{nombre}'}</button> en el título o mensaje para que el sistema inserte automáticamente el primer nombre de cada usuaria.
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        Ejemplo: <em>"¡Hola {'{nombre}'}, Marié tiene un consejo para ti! 🌿"</em>
+                      </p>
+                    </div>
+                  </div>
+
                   {/* Categoría / Badge selector */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-300 block">Tipo / Categoría de Mensaje:</label>
@@ -617,9 +632,23 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                   {/* Notification Title */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <label className="font-bold text-slate-200">
-                        Título de la Notificación: <span className="text-rose-400">*</span>
-                      </label>
+                      <div className="flex items-center gap-2">
+                        <label className="font-bold text-slate-200">
+                          Título de la Notificación: <span className="text-rose-400">*</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!title.includes('{nombre}')) {
+                              setTitle(prev => `¡{nombre}, ${prev.replace(/^¡/, '')}`);
+                            }
+                          }}
+                          className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-900 transition-colors font-mono cursor-pointer"
+                          title="Insertar etiqueta {nombre} en el título"
+                        >
+                          + {'{nombre}'}
+                        </button>
+                      </div>
                       <span className={`font-mono text-[11px] ${title.length > 45 ? 'text-amber-400' : 'text-slate-400'}`}>
                         {title.length}/50 caracteres
                       </span>
@@ -629,7 +658,7 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                       maxLength={50}
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Ej: ¡Marié tiene un consejo para tu digestión! 🌿"
+                      placeholder="Ej: ¡{nombre}, Marié tiene un consejo para ti! 🌿"
                       className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:border-cyan-400 font-medium"
                       required
                     />
@@ -638,9 +667,21 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                   {/* Notification Body / Message */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <label className="font-bold text-slate-200">
-                        Mensaje / Cuerpo: <span className="text-rose-400">*</span>
-                      </label>
+                      <div className="flex items-center gap-2">
+                        <label className="font-bold text-slate-200">
+                          Mensaje / Cuerpo: <span className="text-rose-400">*</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMessage(prev => `${prev} {nombre}`);
+                          }}
+                          className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-900 transition-colors font-mono cursor-pointer"
+                          title="Insertar etiqueta {nombre} en el cuerpo"
+                        >
+                          + {'{nombre}'}
+                        </button>
+                      </div>
                       <span className={`font-mono text-[11px] ${message.length > 130 ? 'text-amber-400' : 'text-slate-400'}`}>
                         {message.length}/140 caracteres
                       </span>
@@ -650,7 +691,7 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                       maxLength={140}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Ej: Hoy tu cuerpo necesita hidratación extra con tu Tyruss Full. Toca aquí para ver tu receta del día."
+                      placeholder="Ej: {nombre}, hoy tu cuerpo necesita hidratación extra con tu Tyruss Full. Toca aquí para ver tu receta."
                       className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs sm:text-sm text-white focus:outline-hidden focus:border-cyan-400 font-medium resize-none leading-relaxed"
                       required
                     />
@@ -776,62 +817,79 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                   </div>
 
                   {/* Realistic Smartphone Mockup Box */}
-                  <div className="relative bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-slate-800 rounded-3xl p-4 shadow-2xl space-y-4">
-                    
-                    {/* Top phone bar */}
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-                      <span>9:41</span>
-                      <div className="flex items-center gap-1.5 text-[10px]">
-                        <span>5G</span>
-                        <div className="w-4 h-2 border border-slate-400 rounded-xs relative">
-                          <div className="h-full bg-emerald-400 w-3/4" />
+                  {(() => {
+                    const sampleUser = audienceType === 'individual' && targetUserId 
+                      ? users.find(u => u.id === targetUserId)
+                      : users.find(u => u.status === 'active' || u.status === 'activa') || { fullName: 'Penélope Cruz' };
+                    const sampleFirstName = sampleUser?.fullName ? sampleUser.fullName.trim().split(' ')[0] : 'Penélope';
+                    const previewTitle = title ? title.replace(/\{nombre\}/gi, sampleFirstName) : 'Título de la notificación...';
+                    const previewMessage = message ? message.replace(/\{nombre\}/gi, sampleFirstName) : 'Cuerpo del mensaje que la usuaria verá en su pantalla de bloqueo...';
+
+                    return (
+                      <div className="relative bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-slate-800 rounded-3xl p-4 shadow-2xl space-y-4">
+                        
+                        {/* Top phone bar */}
+                        <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                          <span>9:41</span>
+                          <div className="flex items-center gap-1.5 text-[10px]">
+                            <span>5G</span>
+                            <div className="w-4 h-2 border border-slate-400 rounded-xs relative">
+                              <div className="h-full bg-emerald-400 w-3/4" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Lock screen Push Notification Card */}
+                        <div className="bg-slate-800/95 border border-slate-700/80 rounded-2xl p-3.5 shadow-xl backdrop-blur-md space-y-2 animate-fadeIn transition-all">
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={iconChoice}
+                                alt="Icon"
+                                className="w-5 h-5 rounded-md object-cover border border-amber-400/60"
+                              />
+                              <span className="text-[11px] font-bold text-slate-300">
+                                TyroFem 30D • ColShopi
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-slate-400">Ahora</span>
+                          </div>
+
+                          <div className="space-y-1 pl-7">
+                            <h5 className="text-xs font-extrabold text-white leading-tight">
+                              {previewTitle}
+                            </h5>
+                            <p className="text-[11px] text-slate-300 leading-snug">
+                              {previewMessage}
+                            </p>
+                          </div>
+
+                          {/* Pill Badge */}
+                          <div className="pl-7 pt-0.5 flex items-center justify-between">
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-900/90 text-cyan-300 rounded-full border border-slate-700">
+                              {messageType === 'recordatorio' && '🌿 Recordatorio Diario'}
+                              {messageType === 'oferta_vip' && '🎁 Oferta VIP'}
+                              {messageType === 'tip_nutricional' && '🥗 Tip Nutricional'}
+                              {messageType === 'testimonio' && '⭐ Testimonio'}
+                            </span>
+                            <span className="text-[9px] text-slate-500 font-mono">Tocar para abrir</span>
+                          </div>
+
+                        </div>
+
+                        <div className="text-center pt-2 text-[10px] text-slate-500">
+                          {title.includes('{nombre}') || message.includes('{nombre}') ? (
+                            <span className="text-amber-400 font-semibold">
+                              ✨ Renderizando con nombre dinámico: "{sampleFirstName}"
+                            </span>
+                          ) : (
+                            <span>Simulación en tiempo real del banner nativo de Android / iOS</span>
+                          )}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Lock screen Push Notification Card */}
-                    <div className="bg-slate-800/95 border border-slate-700/80 rounded-2xl p-3.5 shadow-xl backdrop-blur-md space-y-2 animate-fadeIn transition-all">
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={iconChoice}
-                            alt="Icon"
-                            className="w-5 h-5 rounded-md object-cover border border-amber-400/60"
-                          />
-                          <span className="text-[11px] font-bold text-slate-300">
-                            TyroFem 30D • ColShopi
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-400">Ahora</span>
-                      </div>
-
-                      <div className="space-y-1 pl-7">
-                        <h5 className="text-xs font-extrabold text-white leading-tight">
-                          {title || 'Título de la notificación...'}
-                        </h5>
-                        <p className="text-[11px] text-slate-300 leading-snug">
-                          {message || 'Cuerpo del mensaje que la usuaria verá en su pantalla de bloqueo...'}
-                        </p>
-                      </div>
-
-                      {/* Pill Badge */}
-                      <div className="pl-7 pt-0.5 flex items-center justify-between">
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-900/90 text-cyan-300 rounded-full border border-slate-700">
-                          {messageType === 'recordatorio' && '🌿 Recordatorio Diario'}
-                          {messageType === 'oferta_vip' && '🎁 Oferta VIP'}
-                          {messageType === 'tip_nutricional' && '🥗 Tip Nutricional'}
-                          {messageType === 'testimonio' && '⭐ Testimonio'}
-                        </span>
-                        <span className="text-[9px] text-slate-500 font-mono">Tocar para abrir</span>
-                      </div>
-
-                    </div>
-
-                    <div className="text-center pt-2 text-[10px] text-slate-500">
-                      Simulación en tiempo real del banner nativo de Android / iOS
-                    </div>
-                  </div>
+                    );
+                  })()}
                 </div>
 
                 {/* 4. MODO DE ENVÍO & BOTÓN PRINCIPAL */}

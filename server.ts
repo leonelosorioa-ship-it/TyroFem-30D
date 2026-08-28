@@ -745,11 +745,20 @@ async function startServer() {
 
     const recipientCount = Math.max(recipients.length, audienceType === 'individual' ? 1 : usersCache.length);
 
+    // Resolve display title and message for the master record
+    let displayTitle = title.slice(0, 50);
+    let displayMessage = message.slice(0, 140);
+    if (audienceType === 'individual' && recipients.length === 1) {
+      const singleName = (recipients[0].fullName || recipients[0].name || '').trim().split(' ')[0] || 'Hermosa';
+      displayTitle = title.replace(/\{nombre\}/gi, singleName).slice(0, 50);
+      displayMessage = message.replace(/\{nombre\}/gi, singleName).slice(0, 140);
+    }
+
     // Create Push Notification record
     const newPushNotification = {
       id: `PUSH-${Date.now()}`,
-      title: title.slice(0, 50),
-      message: message.slice(0, 140),
+      title: displayTitle,
+      message: displayMessage,
       type,
       url,
       icon,
@@ -769,20 +778,22 @@ async function startServer() {
     pushNotificationsCache.unshift(newPushNotification);
     persistPushNotifications();
 
-    // If sent instantly, record event in each target user's historyLog
+    // If sent instantly, record event in each target user's historyLog with individual {nombre} personalization
     if (sendMode === 'instant') {
       recipients.forEach((u: any) => {
         const userIndex = usersCache.findIndex((usr: any) => usr.id === u.id);
         if (userIndex >= 0) {
+          const userFirstName = (u.fullName || u.name || '').trim().split(' ')[0] || 'Hermosa';
+          const personalizedTitle = title.replace(/\{nombre\}/gi, userFirstName);
           const historyLog = Array.isArray(usersCache[userIndex].historyLog) ? [...usersCache[userIndex].historyLog] : [];
           historyLog.push({
             timestamp: nowLog,
-            event: `🔔 Notificación Push recibida: "${title.slice(0, 35)}..."`
+            event: `🔔 Notificación Push recibida: "${personalizedTitle.slice(0, 35)}..."`
           });
           usersCache[userIndex].historyLog = historyLog;
           usersCache[userIndex].lastActivityTimestamp = Date.now();
           usersCache[userIndex].lastActivityAt = nowIso;
-          usersCache[userIndex].lastAction = `Push: ${title.slice(0, 30)}`;
+          usersCache[userIndex].lastAction = `Push: ${personalizedTitle.slice(0, 30)}`;
         }
       });
       persistUsers();

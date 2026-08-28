@@ -37,6 +37,42 @@ export interface PushNotificationPayload {
   scheduledAt?: string;
 }
 
+/**
+ * Personalizes text by replacing the {nombre} tag with the user's first name
+ */
+export function personalizeNotificationText(templateText: string, fullName?: string): string {
+  if (!templateText) return '';
+  const firstName = fullName && fullName.trim().length > 0 
+    ? fullName.trim().split(' ')[0] 
+    : 'Hermosa';
+  return templateText.replace(/\{nombre\}/gi, firstName);
+}
+
+/**
+ * Prepares personalized title, body and metadata payload for a given user
+ */
+export function preparePersonalizedPayload(
+  templateTitle: string,
+  templateBody: string,
+  user: { fullName?: string; name?: string },
+  selectedRouteUrl: string = '#calendario',
+  icon: string = '/circulo-marie.png'
+) {
+  const name = user.fullName || user.name || '';
+  const firstName = name.trim().length > 0 ? name.trim().split(' ')[0] : 'Hermosa';
+
+  const personalizedTitle = templateTitle.replace(/\{nombre\}/gi, firstName);
+  const personalizedBody = templateBody.replace(/\{nombre\}/gi, firstName);
+
+  return {
+    title: personalizedTitle,
+    body: personalizedBody,
+    icon: icon || '/circulo-marie.png',
+    badge: '/colshopi-logo.png',
+    url: selectedRouteUrl
+  };
+}
+
 const STORAGE_KEY_PUSH_PROMPTED = 'tyrofem_push_permission_prompted';
 const STORAGE_KEY_PUSH_ENABLED = 'tyrofem_push_enabled';
 

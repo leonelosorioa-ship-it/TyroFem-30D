@@ -1,27 +1,28 @@
-// Service Worker for TyroFem 30D PWA
-const CACHE_NAME = 'tyrofem-v3';
+// Service Worker Oficial - TyroFem 30D PWA
+const CACHE_NAME = 'tyrofem-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
   '/circulo-marie.png',
   '/colshopi-logo.png',
-  '/favicon.svg'
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
+// Instalación
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('PWA: Some static assets failed to cache', err);
+        console.warn('Algunos recursos no pudieron cachearse:', err);
       });
     })
   );
   self.skipWaiting();
 });
 
+// Activación y limpieza de caches antiguos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -37,10 +38,11 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Fetch con estrategia Stale-While-Revalidate
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  
-  // For navigation requests, try network first then cache
+
+  // Para navegaciones (HTML), intentar red primero
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -50,37 +52,33 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first / stale-while-revalidate for static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Fetch in background to update cache
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse.clone());
-            });
-          }
-        }).catch(() => {});
-        return cachedResponse;
-      }
-      return fetch(event.request);
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => cachedResponse);
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
 
-// =========================================================================
-// PUSH NOTIFICATIONS EVENT LISTENER (ColShopi TyroFem 30D)
-// =========================================================================
-self.addEventListener('push', function(event) {
+// ESCUCHA DE NOTIFICACIONES PUSH (Sintaxis nativa estándar)
+self.addEventListener('push', (event) => {
   let data = {};
   if (event.data) {
     try {
       data = event.data.json();
     } catch (e) {
-      data = { 
-        title: 'TyroFem 30D • ColShopi', 
-        body: event.data.text() || 'Recordatorio de tu Reto TyroFem 30D' 
+      data = {
+        title: 'TyroFem 30D • ColShopi',
+        body: event.data.text() || 'Tienes un nuevo mensaje de bienestar.'
       };
     }
   } else {
@@ -90,22 +88,15 @@ self.addEventListener('push', function(event) {
     };
   }
 
-  const title = data.title || 'TyroFem 30D con Tyruss Full';
+  const title = data.title || 'TyroFem 30D';
   const options = {
-    body: data.body || data.message || 'Recordatorio de tu Reto TyroFem 30D',
+    body: data.body || data.message || 'Consulta tu guía diaria en la App.',
     icon: data.icon || '/circulo-marie.png',
     badge: data.badge || '/colshopi-logo.png',
-    image: data.image || undefined,
     vibrate: [100, 50, 100],
-    data: { 
-      url: data.url || '/',
-      timestamp: Date.now(),
-      id: data.id || `push-${Date.now()}`
-    },
-    actions: [
-      { action: 'open', title: 'Abrir App 🌿' },
-      { action: 'close', title: 'Cerrar' }
-    ]
+    data: {
+      url: data.url || '/'
+    }
   };
 
   event.waitUntil(
@@ -113,31 +104,21 @@ self.addEventListener('push', function(event) {
   );
 });
 
-// =========================================================================
-// NOTIFICATION CLICK EVENT LISTENER
-// =========================================================================
-self.addEventListener('notificationclick', function(event) {
+// CLIC EN LA NOTIFICACIÓN
+self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
-  if (event.action === 'close') {
-    return;
-  }
-
-  const notificationData = event.notification.data || {};
-  const targetUrl = notificationData.url || '/';
+  const targetUrl = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Check if there is already a window open with this app
       for (const client of clientList) {
         if (client.url && 'focus' in client) {
-          if (targetUrl && targetUrl !== '/') {
+          if (targetUrl && targetUrl !== '/' && 'navigate' in client) {
             client.navigate(targetUrl);
           }
           return client.focus();
         }
       }
-      // If no window is open, open a new one
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
@@ -145,11 +126,10 @@ self.addEventListener('notificationclick', function(event) {
   );
 });
 
-// Message listener from web app to display notification via Service Worker
-self.addEventListener('message', function(event) {
+// ESCUCHA DE MENSAJES PARA DISPARO LOCAL DESDE LA APP
+self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'TRIGGER_LOCAL_PUSH') {
     const { title, options } = event.data;
     self.registration.showNotification(title || 'TyroFem 30D', options || {});
   }
 });
-
