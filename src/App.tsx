@@ -47,6 +47,10 @@ import { promptPWAInstall } from './utils/pwaManager';
 import { findUserByCodeOrEmail, syncUserSessionToServer } from './data/usersDatabase';
 import { CALENDAR_DAYS } from './data/calendarData';
 import { RECIPES_DATA } from './data/recipesData';
+import { 
+  getConsecutiveCompletedDays, 
+  recordDayCompletionTimestamp 
+} from './utils/timeLock';
 
 export default function App() {
   // Load or initialize user profile from localStorage
@@ -188,13 +192,21 @@ export default function App() {
 
   // Handle saving day progress
   const handleSaveDayProgress = (dayNumber: number, progress: DayProgress) => {
+    const timestamp = Date.now();
+    recordDayCompletionTimestamp();
+
     setProgressMap(prev => {
-      const updated = { ...prev, [dayNumber]: progress };
+      const updated = { 
+        ...prev, 
+        [dayNumber]: {
+          ...progress,
+          completedAt: progress.completedAt || new Date(timestamp).toISOString(),
+          isLockedAfterSubmit: true
+        }
+      };
       
-      // Calculate updated completed days
-      const totalCompleted = (Object.values(updated) as DayProgress[]).filter(
-        p => p.completedAt || (p.tyrussTaken && p.water2L) || p.isLockedAfterSubmit
-      ).length;
+      const consecutiveCompleted = getConsecutiveCompletedDays(updated);
+      const totalCompleted = consecutiveCompleted.length;
 
       // Generate local motivational notification from Marie
       const notif = getMotivationalNotification(dayNumber, totalCompleted);
@@ -203,11 +215,12 @@ export default function App() {
       // Attempt native browser notification if allowed
       sendBrowserNotification(notif.title, notif.message, notif.icon);
 
-      // Update currentDay if progressing
-      if (userProfile && dayNumber >= userProfile.currentDay && progress.completedAt) {
-        const nextDay = Math.min(30, dayNumber + 1);
-        setUserProfile(curr => curr ? { ...curr, currentDay: nextDay } : null);
-      }
+      // Update currentDay and lastCompletedTimestamp
+      setUserProfile(curr => curr ? { 
+        ...curr, 
+        lastCompletedTimestamp: timestamp,
+        currentDay: Math.min(30, dayNumber + 1) 
+      } : null);
       
       return updated;
     });
@@ -225,7 +238,7 @@ export default function App() {
     setIsOrderModalOpen(true);
   };
 
-  const completedDaysCount = (Object.values(progressMap) as DayProgress[]).filter(p => p.completedAt || (p.tyrussTaken && p.water2L)).length;
+  const completedDaysCount = getConsecutiveCompletedDays(progressMap).length;
   const currentDay = userProfile?.currentDay || 1;
 
   // Check if user is suspended or disabled in centralized database
@@ -625,6 +638,7 @@ export default function App() {
       <DayDetailModal
         dayPlan={selectedDayPlan}
         userProfile={userProfile}
+        progressMap={progressMap}
         currentProgress={selectedDayPlan ? progressMap[selectedDayPlan.dayNumber] : undefined}
         onClose={() => setSelectedDayPlan(null)}
         onSaveProgress={handleSaveDayProgress}

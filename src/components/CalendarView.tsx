@@ -3,14 +3,11 @@ import {
   CheckCircle2, 
   Calendar as CalendarIcon, 
   Sparkles, 
-  ChevronRight, 
   Flame, 
   AlertCircle,
   ShoppingBag,
-  Heart,
   Droplet,
   Utensils,
-  Award,
   Filter,
   Lock,
   Clock,
@@ -18,7 +15,11 @@ import {
 } from 'lucide-react';
 import { DayPlan, DayProgress, UserProfile } from '../types';
 import { CALENDAR_DAYS } from '../data/calendarData';
-import { getMaxUnlockedDay, getTimeRemainingForNextDay } from '../utils/timeLock';
+import { 
+  getDayStatus, 
+  getConsecutiveCompletedDays, 
+  TimeRemaining 
+} from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { SuccessStoriesCarousel } from './SuccessStoriesCarousel';
 
@@ -38,20 +39,26 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onOpenChat
 }) => {
   const [selectedPhase, setSelectedPhase] = useState<number | 'all'>('all');
-  const [unlockedDay, setUnlockedDay] = useState<number>(() => getMaxUnlockedDay(userProfile?.startDate));
+  const [, setTick] = useState<number>(Date.now());
 
-  // Periodically verify unlock status
+  // Live timer tick every 1000ms to update all countdowns in real-time
   useEffect(() => {
-    const updateUnlocked = () => {
-      setUnlockedDay(getMaxUnlockedDay(userProfile?.startDate));
-    };
-    updateUnlocked();
-    const interval = setInterval(updateUnlocked, 1000);
+    const interval = setInterval(() => {
+      setTick(Date.now());
+    }, 1000);
     return () => clearInterval(interval);
-  }, [userProfile?.startDate]);
+  }, []);
 
-  const completedCount = (Object.values(progressMap) as DayProgress[]).filter(p => p.completedAt || (p.tyrussTaken && p.water2L)).length;
-  const currentDay = unlockedDay;
+  const completedDays = getConsecutiveCompletedDays(progressMap);
+  const completedCount = completedDays.length;
+  const targetDay = Math.min(30, completedCount + 1);
+  const targetStatus = getDayStatus(targetDay, progressMap, userProfile);
+  const isTargetActive = targetStatus.status === 'ACTIVE';
+  const isTargetCountdown = targetStatus.status === 'COUNTDOWN';
+  const isAllProgramCompleted = completedCount >= 30;
+
+  // Active display day
+  const displayCurrentDay = isTargetActive ? targetDay : (completedCount > 0 ? completedDays[completedCount - 1] : 1);
 
   const phases = [
     { id: 1, name: 'Semana 1', label: 'Limpieza & Desinflamación', range: 'Días 1-7', icon: '🌿', color: 'from-emerald-600 to-teal-700' },
@@ -64,9 +71,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     ? CALENDAR_DAYS 
     : CALENDAR_DAYS.filter(d => d.phaseNumber === selectedPhase);
 
-  const isReorderActive = currentDay >= 22;
-  const nextDayNumber = Math.min(30, unlockedDay + 1);
-  const isAllProgramUnlocked = unlockedDay >= 30;
+  const isReorderActive = displayCurrentDay >= 22;
 
   return (
     <div className="space-y-6 pb-20">
@@ -86,15 +91,19 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               Tu Viaje de 30 Días, {userProfile.name} 🌿
             </h2>
             <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl leading-relaxed">
-              Cada día se desbloquea cada <strong>24 horas</strong> para garantizar la asimilación biológica de tu porción de <strong>Tyruss Full</strong> y asegurar el éxito de tu transformación.
+              Cada día se desbloquea secuencialmente cada <strong>24 horas exactas</strong> para garantizar la asimilación biológica de tu porción de <strong>Tyruss Full</strong> y asegurar el éxito de tu transformación.
             </p>
           </div>
 
           {/* Progress Card */}
           <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 flex items-center gap-3 sm:gap-4 shrink-0 min-w-full sm:min-w-[240px]">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-400 to-amber-500 flex flex-col items-center justify-center text-slate-900 shadow-md font-bold shrink-0">
-              <span className="text-[10px] sm:text-xs uppercase leading-none font-semibold">Día</span>
-              <span className="text-lg sm:text-xl leading-tight">{unlockedDay}</span>
+              <span className="text-[10px] sm:text-xs uppercase leading-none font-semibold">
+                {isAllProgramCompleted ? 'Fin' : isTargetActive ? 'Hoy' : 'Día'}
+              </span>
+              <span className="text-lg sm:text-xl leading-tight">
+                {isAllProgramCompleted ? '30' : targetDay}
+              </span>
             </div>
             <div className="flex-1">
               <div className="flex justify-between items-baseline mb-1">
@@ -107,45 +116,79 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   style={{ width: `${(completedCount / 30) * 100}%` }}
                 />
               </div>
-              <span className="text-[10px] text-emerald-200/80 mt-1 block">
-                {completedCount >= 30 ? '🎉 ¡Felicidades! Reto Completado' : `Día ${unlockedDay} habilitado • ${30 - completedCount} restantes`}
+              <span className="text-[10px] text-emerald-200/80 mt-1 block font-medium">
+                {isAllProgramCompleted 
+                  ? '🎉 ¡Felicidades! Reto 100% Completado' 
+                  : isTargetActive
+                  ? `Día ${targetDay} activo para registro • ${30 - completedCount} restantes`
+                  : `Día ${targetDay} desbloquea en ${targetStatus.formattedCountdown} • ${30 - completedCount} restantes`}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 24-HOUR TIME LOCK LIVE COUNTDOWN BANNER (WHEN NEXT DAY IS PENDING) */}
-      {!isAllProgramUnlocked && (
-        <div className="bg-gradient-to-r from-[#09121d] via-slate-900 to-[#070e17] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-cyan-500/40 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-cyan-950 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0 shadow-inner">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse text-cyan-400" />
-            </div>
-            <div className="space-y-0.5 flex-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-400/40">
-                  ⏳ Desbloqueo Regresivo 24H
-                </span>
-                <span className="text-[10px] sm:text-[11px] text-emerald-300 font-medium">
-                  Día {unlockedDay} en curso
-                </span>
+      {/* 24-HOUR TIME LOCK LIVE BANNER */}
+      {!isAllProgramCompleted && (
+        isTargetCountdown ? (
+          <div className="bg-gradient-to-r from-[#09121d] via-slate-900 to-[#070e17] rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-cyan-500/40 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-cyan-950 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0 shadow-inner">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse text-cyan-400" />
               </div>
-              <h4 className="text-[11px] sm:text-sm font-bold text-white font-serif-luxury">
-                Próximo Test & Guía del Día {nextDayNumber} se habilita en:
-              </h4>
+              <div className="space-y-0.5 flex-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-400/40">
+                    ⏳ Desbloqueo Regresivo 24H
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] text-emerald-300 font-medium">
+                    Día {targetDay - 1} Completado con Éxito
+                  </span>
+                </div>
+                <h4 className="text-[11px] sm:text-sm font-bold text-white font-serif-luxury">
+                  Próximo Test & Guía del Día {targetDay} se habilita en:
+                </h4>
+              </div>
+            </div>
+
+            <div className="w-full md:w-auto flex items-center justify-center md:justify-end shrink-0">
+              <DayCountdownClock
+                dayNumber={targetDay}
+                progressMap={progressMap}
+                userProfile={userProfile}
+                variant="card"
+                showExplanation={false}
+              />
             </div>
           </div>
-
-          <div className="w-full md:w-auto flex items-center justify-center md:justify-end shrink-0">
-            <DayCountdownClock
-              dayNumber={nextDayNumber}
-              startDate={userProfile.startDate}
-              variant="card"
-              showExplanation={false}
-            />
+        ) : isTargetActive ? (
+          <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-emerald-400/40 text-white shadow-md flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 shrink-0 shadow-inner">
+                <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded border border-emerald-400/40">
+                    ✨ Día {targetDay} Habilitado
+                  </span>
+                </div>
+                <h4 className="text-xs sm:text-sm font-bold text-white mt-0.5">
+                  ¡Tu guía diaria y test somático del Día {targetDay} están listos para registrar!
+                </h4>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                const dayPlan = CALENDAR_DAYS.find(d => d.dayNumber === targetDay) || CALENDAR_DAYS[0];
+                onSelectDay(dayPlan);
+              }}
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-bold rounded-xl shadow-md transition-all shrink-0 cursor-pointer"
+            >
+              Abrir Día {targetDay}
+            </button>
           </div>
-        </div>
+        ) : null
       )}
 
       {/* DAY 22+ RE-ORDER TRIGGER NOTIFICATION BANNER */}
@@ -240,11 +283,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredDays.map((day) => {
             const progress = progressMap[day.dayNumber];
-            const isCompleted = progress?.completedAt || (progress?.tyrussTaken && progress?.water2L);
-            const isUnlocked = day.dayNumber <= unlockedDay;
-            const isCurrent = day.dayNumber === unlockedDay;
-            const isNextUpcoming = day.dayNumber === unlockedDay + 1;
-            const isLocked = day.dayNumber > unlockedDay;
+            const dayStatus = getDayStatus(day.dayNumber, progressMap, userProfile);
+            const isCompleted = dayStatus.status === 'COMPLETED';
+            const isCurrent = dayStatus.status === 'ACTIVE';
+            const isCountdown = dayStatus.status === 'COUNTDOWN';
+            const isLocked = dayStatus.status === 'LOCKED';
 
             return (
               <div
@@ -255,11 +298,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     ? 'border-emerald-300 bg-emerald-50/30' 
                     : isCurrent 
                     ? 'border-amber-400 ring-2 ring-amber-400/30 bg-amber-50/20 shadow-xs' 
-                    : isNextUpcoming
+                    : isCountdown
                     ? 'border-cyan-400 ring-1 ring-cyan-400/40 bg-cyan-50/15'
-                    : isLocked
-                    ? 'border-slate-200/80 bg-slate-50/60 opacity-90'
-                    : 'border-slate-200 hover:border-emerald-300'
+                    : 'border-slate-200/80 bg-slate-50/60 opacity-80'
                 }`}
               >
                 {/* Top card bar: Day pill & status */}
@@ -271,14 +312,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                           ? 'bg-emerald-600 text-white'
                           : isCurrent
                           ? 'bg-amber-500 text-white animate-pulse-subtle'
-                          : isNextUpcoming
-                          ? 'bg-cyan-800 text-cyan-100'
-                          : isLocked
-                          ? 'bg-slate-200 text-slate-600'
-                          : 'bg-slate-100 text-slate-700'
+                          : isCountdown
+                          ? 'bg-cyan-900 text-cyan-200 border border-cyan-500/40'
+                          : 'bg-slate-200 text-slate-600'
                       }`}>
                         Día {day.dayNumber}
                         {isCurrent && <Flame className="w-3 h-3 fill-white" />}
+                        {isCountdown && <Lock className="w-3 h-3 text-cyan-300" />}
                         {isLocked && <Lock className="w-3 h-3 text-slate-500" />}
                       </span>
                       <span className="text-[10px] text-slate-500 font-medium truncate max-w-[120px]">
@@ -296,13 +336,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         <Sparkles className="w-3 h-3 text-amber-600" />
                         Hoy Activo
                       </span>
-                    ) : isNextUpcoming ? (
-                      <DayCountdownClock
-                        dayNumber={day.dayNumber}
-                        startDate={userProfile.startDate}
-                        variant="compact"
-                        showExplanation={false}
-                      />
+                    ) : isCountdown ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-cyan-300 bg-slate-950 px-2 py-0.5 rounded-full border border-cyan-500/40 shadow-xs">
+                        <Clock className="w-3 h-3 text-cyan-400 animate-pulse" />
+                        {dayStatus.formattedCountdown}
+                      </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
                         <Lock className="w-3 h-3 text-slate-400" />
@@ -312,7 +350,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   </div>
 
                   <h4 className={`text-sm font-bold transition-colors line-clamp-1 ${
-                    isLocked ? 'text-slate-700' : 'text-slate-900 group-hover:text-emerald-800'
+                    isLocked ? 'text-slate-600' : 'text-slate-900 group-hover:text-emerald-800'
                   }`}>
                     {day.title}
                   </h4>
@@ -328,19 +366,29 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     <span>{day.tyrussDose}</span>
                   </div>
 
-                  {isLocked ? (
-                    <div className="flex items-center gap-1 text-slate-400 text-[10px] font-semibold">
-                      <Lock className="w-3 h-3 text-amber-500/80" />
-                      <span>Habilita a las 24h</span>
-                    </div>
-                  ) : (
+                  {isCompleted ? (
                     <div className="flex items-center gap-1.5 text-slate-400">
                       <span title="Dosis Tyruss">
-                        <Utensils className={`w-3.5 h-3.5 ${progress?.tyrussTaken ? 'text-emerald-600 font-bold' : ''}`} />
+                        <Utensils className="w-3.5 h-3.5 text-emerald-600 font-bold" />
                       </span>
                       <span title="2L de Agua">
-                        <Droplet className={`w-3.5 h-3.5 ${progress?.water2L ? 'text-teal-600 font-bold' : ''}`} />
+                        <Droplet className="w-3.5 h-3.5 text-teal-600 font-bold" />
                       </span>
+                    </div>
+                  ) : isCurrent ? (
+                    <div className="flex items-center gap-1 text-amber-700 text-[10px] font-bold">
+                      <Sparkles className="w-3 h-3 text-amber-500" />
+                      <span>Listo para test</span>
+                    </div>
+                  ) : isCountdown ? (
+                    <div className="flex items-center gap-1 text-cyan-800 text-[10px] font-semibold">
+                      <Clock className="w-3 h-3 text-cyan-600" />
+                      <span>Desbloqueo a las 24h</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-slate-400 text-[10px] font-semibold">
+                      <Lock className="w-3 h-3 text-slate-400" />
+                      <span>Bloqueado</span>
                     </div>
                   )}
                 </div>
@@ -354,7 +402,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       <SuccessStoriesCarousel
         userProfile={userProfile}
         onOpenDayPlan={() => {
-          const currentPlan = CALENDAR_DAYS.find(d => d.dayNumber === currentDay) || CALENDAR_DAYS[0];
+          const currentPlan = CALENDAR_DAYS.find(d => d.dayNumber === displayCurrentDay) || CALENDAR_DAYS[0];
           onSelectDay(currentPlan);
         }}
         onOpenChat={onOpenChat}
@@ -363,4 +411,3 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     </div>
   );
 };
-

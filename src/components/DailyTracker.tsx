@@ -30,7 +30,11 @@ import { DayProgress, UserProfile } from '../types';
 import { EnergyTrendChart } from './EnergyTrendChart';
 import { TransformationReportModal } from './TransformationReportModal';
 import { generateTransformationReportPDF } from '../utils/pdfGenerator';
-import { getMaxUnlockedDay } from '../utils/timeLock';
+import { 
+  getDayStatus, 
+  getConsecutiveCompletedDays, 
+  recordDayCompletionTimestamp 
+} from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
 import { Day15CelebrationModal } from './Day15CelebrationModal';
@@ -55,29 +59,34 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   onOpenOrder,
   onOpenChat
 }) => {
-  const [unlockedMaxDay, setUnlockedMaxDay] = useState<number>(() => 
-    getMaxUnlockedDay(userProfile?.startDate)
-  );
+  const [, setTick] = useState<number>(Date.now());
 
+  // Real-time tick every 1000ms
   useEffect(() => {
-    const updateUnlocked = () => {
-      setUnlockedMaxDay(getMaxUnlockedDay(userProfile?.startDate));
-    };
-    updateUnlocked();
-    const interval = setInterval(updateUnlocked, 1000);
+    const interval = setInterval(() => {
+      setTick(Date.now());
+    }, 1000);
     return () => clearInterval(interval);
-  }, [userProfile?.startDate]);
+  }, []);
 
-  const [selectedDay, setSelectedDay] = useState<number>(() => currentDay || unlockedMaxDay);
+  const completedDaysList = getConsecutiveCompletedDays(progressMap);
+  const targetDay = Math.min(30, completedDaysList.length + 1);
+  const targetStatus = getDayStatus(targetDay, progressMap, userProfile);
+  const activeDayNumber = targetStatus.status === 'ACTIVE' ? targetDay : (completedDaysList.length > 0 ? completedDaysList[completedDaysList.length - 1] : 1);
+  const unlockedMaxDay = targetStatus.status === 'ACTIVE' ? targetDay : Math.max(1, targetDay - 1);
 
-  // Sync selectedDay when unlockedMaxDay changes if it was on currentDay
+  const [selectedDay, setSelectedDay] = useState<number>(() => currentDay || activeDayNumber);
+
   useEffect(() => {
     if (selectedDay > 30) {
       setSelectedDay(30);
     }
-  }, [unlockedMaxDay, selectedDay]);
+  }, [selectedDay]);
 
-  const isSelectedDayUnlocked = selectedDay <= unlockedMaxDay;
+  const selectedDayStatus = getDayStatus(selectedDay, progressMap, userProfile);
+  const isSelectedDayUnlocked = selectedDayStatus.status === 'ACTIVE';
+  const isSelectedDayAlreadyLocked = selectedDayStatus.status === 'COMPLETED';
+  const isSelectedDayCountdown = selectedDayStatus.status === 'COUNTDOWN';
 
   const currentDayData = progressMap[selectedDay] || {
     dayNumber: selectedDay,
@@ -91,12 +100,6 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
     sleepStars: 4,
     notes: ''
   };
-
-  // Day is strictly locked if it has been registered/saved
-  const isSelectedDayAlreadyLocked = Boolean(
-    currentDayData.isLockedAfterSubmit || 
-    (currentDayData.completedAt && currentDayData.tyrussTaken && currentDayData.water2L)
-  );
 
   const [activeSubTab, setActiveSubTab] = useState<'registro' | 'curva' | 'informe'>('registro');
   const [energyLevel, setEnergyLevel] = useState<number>(currentDayData.energyLevel || 4);
@@ -176,6 +179,8 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
   const handleSaveAndLockDay = () => {
     if (!isSelectedDayUnlocked || isSelectedDayAlreadyLocked) return;
 
+    recordDayCompletionTimestamp();
+
     const finalProgress: DayProgress = {
       ...currentDayData,
       dayNumber: selectedDay,
@@ -195,9 +200,7 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
     onSaveProgress(selectedDay, finalProgress);
 
     // Calculate updated total completed days
-    const currentCompleted = (Object.values(progressMap) as DayProgress[]).filter(
-      p => p.dayNumber !== selectedDay && (p.completedAt || (p.tyrussTaken && p.water2L) || p.isLockedAfterSubmit)
-    ).length;
+    const currentCompleted = getConsecutiveCompletedDays(progressMap).length;
     const updatedCompletedDays = currentCompleted + 1;
 
     // Trigger tier-customized confetti animation linked to total progress
@@ -425,19 +428,24 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                   Seleccionar Día del Protocolo:
                 </span>
                 <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  Día {unlockedMaxDay} Habilitado Actualmente
+                  {targetStatus.status === 'ACTIVE'
+                    ? `Día ${targetDay} Habilitado para Registro`
+                    : `Día ${targetDay} Desbloquea en ${targetStatus.formattedCountdown}`}
                 </span>
               </div>
               <span className="text-[11px] text-slate-400">
-                1 día cada 24 horas
+                1 día cada 24 horas exactas
               </span>
             </div>
 
             <div className="flex items-center gap-1.5 overflow-x-auto pb-2 pt-1">
               {Array.from({ length: 30 }, (_, i) => i + 1).map((d) => {
-                const isDUnlocked = d <= unlockedMaxDay;
+                const dStatus = getDayStatus(d, progressMap, userProfile);
                 const isSelected = d === selectedDay;
-                const isDone = progressMap[d]?.completedAt || (progressMap[d]?.tyrussTaken && progressMap[d]?.water2L);
+                const isDone = dStatus.status === 'COMPLETED';
+                const isActive = dStatus.status === 'ACTIVE';
+                const isCountdown = dStatus.status === 'COUNTDOWN';
+                const isLocked = dStatus.status === 'LOCKED';
 
                 return (
                   <button
@@ -449,17 +457,31 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                         ? 'bg-emerald-700 text-white ring-2 ring-emerald-500/30 shadow-xs scale-105'
                         : isDone
                         ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                        : isDUnlocked
-                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        : 'bg-slate-50 text-slate-400 border border-dashed border-slate-200 hover:bg-amber-50 hover:text-amber-900'
+                        : isActive
+                        ? 'bg-amber-100 text-amber-950 border-2 border-amber-400 shadow-xs'
+                        : isCountdown
+                        ? 'bg-cyan-950 text-cyan-200 border border-cyan-500/40'
+                        : 'bg-slate-50 text-slate-400 border border-dashed border-slate-200'
                     }`}
-                    title={isDUnlocked ? `Día ${d}` : `Día ${d} Bloqueado (requiere cumplir 24h)`}
+                    title={
+                      isDone
+                        ? `Día ${d} - Completado`
+                        : isActive
+                        ? `Día ${d} - Activo para registro`
+                        : isCountdown
+                        ? `Día ${d} - Desbloquea en ${dStatus.formattedCountdown}`
+                        : `Día ${d} - Bloqueado`
+                    }
                   >
-                    {!isDUnlocked ? (
-                      <Lock className="w-3 h-3 text-amber-500 shrink-0" />
-                    ) : isDone ? (
+                    {isDone ? (
                       <Check className="w-3 h-3 text-emerald-700 shrink-0" />
-                    ) : null}
+                    ) : isActive ? (
+                      <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
+                    ) : isCountdown ? (
+                      <Clock className="w-3 h-3 text-cyan-300 shrink-0 animate-pulse" />
+                    ) : (
+                      <Lock className="w-3 h-3 text-slate-400 shrink-0" />
+                    )}
                     <span>{d}</span>
                   </button>
                 );
@@ -467,8 +489,8 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
             </div>
           </div>
 
-          {/* If the selected day is LOCKED, show the 24H countdown timer hero and disable inputs */}
-          {isSelectedDayAlreadyLocked ? (
+          {/* If the selected day is COMPLETED */}
+          {selectedDayStatus.status === 'COMPLETED' ? (
             <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 text-white rounded-3xl p-5 sm:p-6 border border-emerald-400/40 shadow-xl space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -480,9 +502,9 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                       <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-400/40">
                         Registro Asegurado & Consolidado
                       </span>
-                      <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-400/40 flex items-center gap-1">
-                        <Lock className="w-3 h-3 text-amber-400" />
-                        Día {selectedDay} Bloqueado para Edición
+                      <span className="text-[10px] font-bold text-emerald-300 bg-emerald-900/80 px-2 py-0.5 rounded border border-emerald-400/40 flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-400" />
+                        Día {selectedDay} Completado
                       </span>
                     </div>
                     <h4 className="text-base sm:text-lg font-bold text-white font-serif-luxury mt-1">
@@ -515,47 +537,44 @@ export const DailyTracker: React.FC<DailyTrackerProps> = ({
                 Para proteger la fidelidad de tu historial de bienestar, este día ha sido <strong>sellado</strong>. Todos los parámetros se encuentran almacenados y disponibles para consulta y guía de <strong>Marié (Guía de Bienestar)</strong>.
               </p>
             </div>
-          ) : !isSelectedDayUnlocked ? (
+          ) : selectedDayStatus.status === 'COUNTDOWN' ? (
+            /* If the selected day is in 24H COUNTDOWN */
             <div className="space-y-4">
               <DayCountdownClock
                 dayNumber={selectedDay}
-                startDate={userProfile.startDate}
+                progressMap={progressMap}
+                userProfile={userProfile}
                 variant="hero"
                 showExplanation={true}
-                onUnlocked={() => setUnlockedMaxDay(getMaxUnlockedDay(userProfile.startDate))}
               />
-              <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs text-amber-900 flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+              <div className="bg-cyan-950/40 border border-cyan-500/40 rounded-2xl p-4 text-xs text-cyan-200 flex items-center gap-3">
+                <Clock className="w-5 h-5 text-cyan-400 shrink-0 animate-pulse" />
                 <p>
-                  <strong>Test del Día {selectedDay} Bloqueado:</strong> Por prescripción nutricional del protocolo TyroFem 30D, los tests somáticos diarios solo pueden registrarse una vez que tu organismo haya completado el ciclo biológico de 24 horas del día anterior.
+                  <strong>Test del Día {selectedDay} en Espera (24 Horas):</strong> El protocolo TyroFem 30D requiere un ciclo metabólico completo de 24 horas tras culminar el Día {selectedDay - 1} para registrar los nuevos biomarcadores.
                 </p>
               </div>
             </div>
-          ) : (
-            unlockedMaxDay < 30 && selectedDay === unlockedMaxDay && (
-              <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-[#070e17] rounded-2xl p-3.5 sm:p-4 border border-cyan-500/40 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-cyan-950 rounded-xl border border-cyan-400/40 text-cyan-300 shrink-0">
-                    <Clock className="w-4 h-4 text-cyan-400 animate-pulse" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">
-                      Ciclo de 24 Horas en Marcha
-                    </span>
-                    <h5 className="text-xs font-bold text-white">
-                      Tu próximo test (Día {unlockedMaxDay + 1}) se habilitará en:
-                    </h5>
-                  </div>
+          ) : selectedDayStatus.status === 'LOCKED' ? (
+            /* If the selected day is subsequent LOCKED (day > targetDay) */
+            <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 text-white space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                  <Lock className="w-5 h-5" />
                 </div>
-                <DayCountdownClock
-                  dayNumber={unlockedMaxDay + 1}
-                  startDate={userProfile.startDate}
-                  variant="compact"
-                  showExplanation={false}
-                />
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">
+                    Bloqueo Secuencial
+                  </span>
+                  <h4 className="text-base font-bold text-white mt-1 font-serif-luxury">
+                    Día {selectedDay} Bloqueado
+                  </h4>
+                </div>
               </div>
-            )
-          )}
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Para desbloquear el Día {selectedDay}, debes completar primero el Día {targetDay} de forma lineal y consecutiva, respetando los ciclos de 24 horas del protocolo.
+              </p>
+            </div>
+          ) : null}
 
           {/* Day 15 Special Celebration Banner */}
           {selectedDay === 15 && (

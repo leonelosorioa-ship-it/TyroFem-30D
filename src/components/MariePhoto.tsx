@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
+import mariePrimaryPhoto from '../assets/images/regenerated_image_1787510857615.jpg';
 
 interface MariePhotoProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'hero';
@@ -8,30 +9,29 @@ interface MariePhotoProps {
   className?: string;
 }
 
-// Cascade list of photo sources to ensure the exact "Circulo Marie" image is loaded seamlessly
+// Cascade list of photo sources prioritizing new regenerated image and high-resolution assets
 const PHOTO_SOURCES = [
-  '/Circulo Marie.jpg',
-  '/circulo-marie.jpg',
-  '/Circulo Marie.png',
+  mariePrimaryPhoto,
   '/circulo-marie.png',
+  '/marie-avatar.png',
   '/circulo-marie.webp',
-  '/Circulo Marie.jpeg',
-  '/circulo-marie.svg',
-  '/Marie JPG App.jpg',
+  '/marie-caricatura-fondo-plano.png',
+  '/marie-caricatura-fondo-plano.webp',
   '/Marie Caricatura App Fondo Plano.jpeg',
   '/Marié Caricatura App Fondo Plano.jpeg',
-  '/marie-caricatura-fondo-plano.webp',
-  '/marie-caricatura-fondo-plano.png',
-  '/Marié Caricatura App.jpeg',
-  '/Marie Caricatura App.jpeg',
-  '/Marié Caricatura App webs.webp',
-  '/Marie Caricatura App webs.webp',
-  '/marie-caricatura.webp',
-  '/marie-avatar.webp',
+  '/circulo-marie.jpg',
+  '/Circulo Marie.png',
+  '/Circulo Marie.jpg',
+  '/Circulo Marie.jpeg',
   '/marie-caricatura.png',
-  '/marie-avatar.png',
+  '/marie-caricatura.webp',
+  '/Marie Caricatura App.jpeg',
+  '/Marié Caricatura App.jpeg',
+  '/Marie JPG App.jpg',
+  '/marie-avatar.webp',
   '/marie-hero.png',
   '/marie-photo.jpg',
+  '/circulo-marie.svg',
   '/marie-avatar.svg',
 ];
 
@@ -82,7 +82,8 @@ export const MariePhoto: React.FC<MariePhotoProps> = ({
         <img
           src={PHOTO_SOURCES[sourceIndex]}
           alt="Marié - Guía de Bienestar ColShopi Tienda"
-          className="w-full h-full object-cover object-center rounded-full"
+          className="w-full h-full object-cover object-center rounded-full transition-transform duration-300 hover:scale-105"
+          style={{ imageRendering: 'auto' }}
           loading="eager"
           referrerPolicy="no-referrer"
           onError={handleImageError}

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Lock, Sparkles, ShieldCheck, Flame } from 'lucide-react';
-import { getTimeRemainingForDay, TimeRemaining } from '../utils/timeLock';
+import { Clock, Lock, Sparkles, ShieldCheck } from 'lucide-react';
+import { getTimeRemainingForDay, TimeRemaining, getDayStatus } from '../utils/timeLock';
+import { DayProgress, UserProfile } from '../types';
 
 interface DayCountdownClockProps {
   dayNumber: number;
   startDate?: string;
+  progressMap?: Record<number, DayProgress> | null;
+  userProfile?: UserProfile | null;
   variant?: 'hero' | 'card' | 'compact' | 'inline';
   showExplanation?: boolean;
   onUnlocked?: () => void;
@@ -13,17 +16,19 @@ interface DayCountdownClockProps {
 export const DayCountdownClock: React.FC<DayCountdownClockProps> = ({
   dayNumber,
   startDate,
+  progressMap,
+  userProfile,
   variant = 'card',
   showExplanation = true,
   onUnlocked
 }) => {
   const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>(() => 
-    getTimeRemainingForDay(dayNumber, startDate)
+    getTimeRemainingForDay(dayNumber, progressMap || startDate, userProfile)
   );
 
   useEffect(() => {
     const updateTimer = () => {
-      const remaining = getTimeRemainingForDay(dayNumber, startDate);
+      const remaining = getTimeRemainingForDay(dayNumber, progressMap || startDate, userProfile);
       setTimeRemaining(remaining);
       if (remaining.isUnlocked && onUnlocked) {
         onUnlocked();
@@ -33,13 +38,13 @@ export const DayCountdownClock: React.FC<DayCountdownClockProps> = ({
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [dayNumber, startDate, onUnlocked]);
+  }, [dayNumber, startDate, progressMap, userProfile, onUnlocked]);
 
   if (timeRemaining.isUnlocked) {
     return (
       <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 rounded-full text-xs font-bold animate-fadeIn">
         <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-        <span>¡Día {dayNumber} Habilitado! Puedes realizar el test hoy.</span>
+        <span>¡Día {dayNumber} Habilitado! Puedes realizar tu registro hoy.</span>
       </div>
     );
   }
@@ -48,8 +53,8 @@ export const DayCountdownClock: React.FC<DayCountdownClockProps> = ({
 
   if (variant === 'compact') {
     return (
-      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/90 text-amber-300 border border-amber-500/40 rounded-full text-[11px] font-mono font-bold shadow-xs">
-        <Lock className="w-3 h-3 text-amber-400 animate-pulse" />
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/90 text-amber-300 border border-amber-500/40 rounded-full text-[11px] font-mono font-bold shadow-xs whitespace-nowrap">
+        <Lock className="w-3 h-3 text-amber-400 animate-pulse shrink-0" />
         <span>Desbloquea en: {timeRemaining.formatted}</span>
       </div>
     );
@@ -57,8 +62,8 @@ export const DayCountdownClock: React.FC<DayCountdownClockProps> = ({
 
   if (variant === 'inline') {
     return (
-      <span className="inline-flex items-center gap-1 text-amber-300 font-mono font-bold text-xs bg-slate-950/80 px-2 py-0.5 rounded border border-amber-500/30">
-        <Clock className="w-3 h-3 text-amber-400" />
+      <span className="inline-flex items-center gap-1 text-amber-300 font-mono font-bold text-xs bg-slate-950/80 px-2 py-0.5 rounded border border-amber-500/30 whitespace-nowrap">
+        <Clock className="w-3 h-3 text-amber-400 shrink-0" />
         {timeRemaining.formatted}
       </span>
     );
@@ -66,7 +71,7 @@ export const DayCountdownClock: React.FC<DayCountdownClockProps> = ({
 
   if (variant === 'hero') {
     return (
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0e1724] via-[#09101a] to-[#04080e] p-6 text-white border border-cyan-500/40 shadow-2xl space-y-4">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0e1724] via-[#09101a] to-[#04080e] p-5 sm:p-6 text-white border border-cyan-500/40 shadow-2xl space-y-4">
         {/* Glow ambient lights */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -78,7 +83,7 @@ export const DayCountdownClock: React.FC<DayCountdownClockProps> = ({
           </div>
 
           <h3 className="text-xl sm:text-2xl font-bold font-serif-luxury text-white">
-            El Test Somático del Día {dayNumber} se Habilitará en:
+            El Registro & Test Somático del Día {dayNumber} se Habilitará en:
           </h3>
 
           {/* Glowing Digital Flip Countdown Clock */}
@@ -147,7 +152,7 @@ export const DayCountdownClock: React.FC<DayCountdownClockProps> = ({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-amber-500/30 text-amber-300 px-1.5 py-0.5 rounded border border-amber-400/30">
-                🔒 Día {dayNumber} Bloqueado
+                🔒 Día {dayNumber} en Espera
               </span>
               <span className="text-[10px] sm:text-[11px] text-slate-400">
                 Ciclo 24h

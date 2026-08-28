@@ -27,7 +27,11 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { DayPlan, DayProgress, UserProfile } from '../types';
-import { getMaxUnlockedDay } from '../utils/timeLock';
+import { 
+  getDayStatus, 
+  getConsecutiveCompletedDays, 
+  recordDayCompletionTimestamp 
+} from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
 import { Day15CelebrationModal } from './Day15CelebrationModal';
@@ -36,6 +40,7 @@ import { Day30CelebrationModal } from './Day30CelebrationModal';
 interface DayDetailModalProps {
   dayPlan: DayPlan | null;
   userProfile: UserProfile;
+  progressMap?: Record<number, DayProgress>;
   currentProgress?: DayProgress;
   onClose: () => void;
   onSaveProgress: (dayNumber: number, progress: DayProgress) => void;
@@ -48,6 +53,7 @@ interface DayDetailModalProps {
 export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   dayPlan,
   userProfile,
+  progressMap = {},
   currentProgress,
   onClose,
   onSaveProgress,
@@ -58,26 +64,20 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
 }) => {
   if (!dayPlan) return null;
 
-  const [unlockedMaxDay, setUnlockedMaxDay] = useState<number>(() => 
-    getMaxUnlockedDay(userProfile?.startDate)
-  );
+  const [, setTick] = useState<number>(Date.now());
 
   useEffect(() => {
-    const updateLock = () => {
-      setUnlockedMaxDay(getMaxUnlockedDay(userProfile?.startDate));
-    };
-    updateLock();
-    const interval = setInterval(updateLock, 1000);
+    const interval = setInterval(() => {
+      setTick(Date.now());
+    }, 1000);
     return () => clearInterval(interval);
-  }, [userProfile?.startDate]);
+  }, []);
 
-  const isDayUnlocked = dayPlan.dayNumber <= unlockedMaxDay;
-  
-  // A day is strictly locked from modification once submitted/completed
-  const isDayAlreadyLocked = Boolean(
-    currentProgress?.isLockedAfterSubmit || 
-    (currentProgress?.completedAt && currentProgress?.tyrussTaken && currentProgress?.water2L)
-  );
+  const dayStatus = getDayStatus(dayPlan.dayNumber, progressMap, userProfile);
+  const isDayUnlocked = dayStatus.status === 'ACTIVE';
+  const isDayAlreadyLocked = dayStatus.status === 'COMPLETED';
+  const isDayCountdown = dayStatus.status === 'COUNTDOWN';
+  const isDaySequenceLocked = dayStatus.status === 'LOCKED';
 
   const [tyrussTaken, setTyrussTaken] = useState(currentProgress?.tyrussTaken || false);
   const [water2L, setWater2L] = useState(currentProgress?.water2L || false);
@@ -150,6 +150,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
       onClose();
       return;
     }
+
+    recordDayCompletionTimestamp();
 
     const allChecked = tyrussTaken && water2L && antiinflammatoryMeal;
     const finalData: DayProgress = {
@@ -312,15 +314,39 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               </div>
             )}
 
-            {/* If Day is Locked due to 24H schedule */}
-            {!isDayUnlocked && (
-              <DayCountdownClock
-                dayNumber={dayPlan.dayNumber}
-                startDate={userProfile.startDate}
-                variant="hero"
-                showExplanation={true}
-                onUnlocked={() => setUnlockedMaxDay(getMaxUnlockedDay(userProfile.startDate))}
-              />
+            {/* If Day is in 24H countdown */}
+            {isDayCountdown && (
+              <div className="space-y-3">
+                <DayCountdownClock
+                  dayNumber={dayPlan.dayNumber}
+                  progressMap={progressMap}
+                  userProfile={userProfile}
+                  variant="hero"
+                  showExplanation={true}
+                />
+              </div>
+            )}
+
+            {/* If Day is Sequence Locked */}
+            {isDaySequenceLocked && (
+              <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 text-white space-y-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-slate-800 rounded-xl border border-slate-700 text-slate-400">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Secuencia Estricta TyroFem 30D
+                    </span>
+                    <h4 className="text-sm font-bold text-white">
+                      Día {dayPlan.dayNumber} Bloqueado
+                    </h4>
+                  </div>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Para acceder a este día, debes completar los días previos de forma consecutiva e ininterrumpida, permitiendo las 24 horas exactas de asimilación metabólica entre cada día.
+                </p>
+              </div>
             )}
 
             {/* Tip de Bienestar de Marié */}

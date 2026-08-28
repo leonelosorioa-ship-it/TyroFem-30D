@@ -18,6 +18,7 @@ export interface UserProfile {
   startDate: string;
   currentDay: number;
   unlockedBadges: string[];
+  lastCompletedTimestamp?: number;
   status?: UserStatus;
   statusReason?: string;
   isAdmin?: boolean;
