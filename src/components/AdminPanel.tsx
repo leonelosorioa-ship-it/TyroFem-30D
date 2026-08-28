@@ -30,9 +30,12 @@ import {
   SlidersHorizontal,
   FileText,
   Clock,
-  Layers
+  Layers,
+  History,
+  Check
 } from 'lucide-react';
 import { 
+  MasterUserData,
   RegisteredUser, 
   UserStatus, 
   getRegisteredUsers, 
@@ -42,6 +45,7 @@ import {
   deleteRegisteredUser, 
   exportUsersToExcelFile, 
   getAngleLabel,
+  formatCurrentTimestamp,
   ADMIN_CREDENTIALS
 } from '../data/usersDatabase';
 import { getCodesStatusSummary } from '../data/authorizedCodes';
@@ -54,19 +58,19 @@ interface AdminPanelProps {
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdmin }) => {
-  const [users, setUsers] = useState<RegisteredUser[]>(() => getRegisteredUsers());
+  const [users, setUsers] = useState<MasterUserData[]>(() => getRegisteredUsers());
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string>(new Date().toLocaleTimeString('es-CO'));
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | UserStatus>('all');
-  const [angleFilter, setAngleFilter] = useState<'all' | HealthAngle>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'completed_30d'>('all');
+  const [angleFilter, setAngleFilter] = useState<'all' | string>('all');
   
   // Selected user for status change modal or details modal
-  const [selectedUserForStatus, setSelectedUserForStatus] = useState<RegisteredUser | null>(null);
-  const [newStatus, setNewStatus] = useState<UserStatus>('activa');
+  const [selectedUserForStatus, setSelectedUserForStatus] = useState<MasterUserData | null>(null);
+  const [newStatus, setNewStatus] = useState<'active' | 'suspended'>('active');
   const [statusReason, setStatusReason] = useState('');
 
-  const [selectedUserForDetail, setSelectedUserForDetail] = useState<RegisteredUser | null>(null);
+  const [selectedUserForDetail, setSelectedUserForDetail] = useState<MasterUserData | null>(null);
   const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
   const [exportFeedback, setExportFeedback] = useState<string | null>(null);
 
@@ -85,6 +89,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
       const serverUsers = await fetchRegisteredUsersFromServer();
       setUsers(serverUsers);
       setLastSyncedAt(new Date().toLocaleTimeString('es-CO'));
+      // Keep selected user detail in sync if open
+      if (selectedUserForDetail) {
+        const updatedSelected = serverUsers.find(u => u.id === selectedUserForDetail.id);
+        if (updatedSelected) {
+          setSelectedUserForDetail(updatedSelected);
+        }
+      }
     } catch (e) {
       setUsers(getRegisteredUsers());
     } finally {
@@ -94,13 +105,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
     }
   };
 
-  // Initial fetch and auto-polling every 8 seconds for real-time registrations
+  // Initial fetch and auto-polling every 6 seconds for real-time registrations & check-ins
   useEffect(() => {
     reloadUsers(true);
 
     const interval = setInterval(() => {
       reloadUsers(false);
-    }, 8000);
+    }, 6000);
 
     const handleCustomUpdate = () => {
       reloadUsers(false);
@@ -118,24 +129,44 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
 
   // Statistics calculation
   const totalUsers = users.length;
-  const activeUsers = users.filter(u => u.status === 'activa').length;
-  const suspendedUsers = users.filter(u => u.status === 'suspendida').length;
-  const disabledUsers = users.filter(u => u.status === 'inhabilitada').length;
+  const activeUsers = users.filter(u => u.status === 'active' || u.status === 'activa').length;
+  const suspendedUsers = users.filter(u => u.status === 'suspended' || u.status === 'suspendida' || u.status === 'inhabilitada').length;
+  const completedUsers = users.filter(u => u.status === 'completed_30d' || (u.completedDaysCount || u.completedDays || 0) >= 30).length;
+  
   const avgAdherence = totalUsers > 0 
-    ? Math.round(users.reduce((acc, u) => acc + (u.adherencePercent || 0), 0) / totalUsers)
+    ? Math.round(users.reduce((acc, u) => acc + (u.adherencePercentage ?? u.adherencePercent ?? 0), 0) / totalUsers)
     : 0;
 
   // Filtered users list
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      const matchSearch = 
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.accessCode.toLowerCase().includes(searchTerm.toLowerCase());
+      const name = (user.fullName || user.name || '').toLowerCase();
+      const email = (user.email || '').toLowerCase();
+      const phone = (user.phone || '').toLowerCase();
+      const code = (user.vipCode || user.accessCode || '').toLowerCase();
+      const goal = (user.healthGoal || '').toLowerCase();
+      const search = searchTerm.toLowerCase().trim();
 
-      const matchStatus = statusFilter === 'all' || user.status === statusFilter;
-      const matchAngle = angleFilter === 'all' || user.primaryAngle === angleFilter;
+      const matchSearch = !search || 
+        name.includes(search) ||
+        email.includes(search) ||
+        phone.includes(search) ||
+        code.includes(search) ||
+        goal.includes(search);
+
+      const isUserActive = user.status === 'active' || user.status === 'activa';
+      const isUserSuspended = user.status === 'suspended' || user.status === 'suspendida' || user.status === 'inhabilitada';
+      const isUserCompleted = user.status === 'completed_30d' || (user.completedDaysCount || user.completedDays || 0) >= 30;
+
+      let matchStatus = true;
+      if (statusFilter === 'active') matchStatus = isUserActive;
+      else if (statusFilter === 'suspended') matchStatus = isUserSuspended;
+      else if (statusFilter === 'completed_30d') matchStatus = isUserCompleted;
+
+      let matchAngle = true;
+      if (angleFilter !== 'all') {
+        matchAngle = user.primaryAngle === angleFilter || (user.healthGoal && user.healthGoal.toLowerCase().includes(angleFilter.toLowerCase()));
+      }
 
       return matchSearch && matchStatus && matchAngle;
     });
@@ -154,58 +185,74 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
   };
 
   // Open status modal
-  const handleOpenStatusModal = (user: RegisteredUser, targetStatus: UserStatus) => {
+  const handleOpenStatusModal = (user: MasterUserData, targetStatus: 'active' | 'suspended') => {
     setSelectedUserForStatus(user);
     setNewStatus(targetStatus);
     setStatusReason(
-      targetStatus === 'suspendida' 
+      targetStatus === 'suspended' 
         ? 'Suspensión preventiva: Revisión de uso indebido de cuenta o accesos simultáneos.' 
-        : targetStatus === 'inhabilitada'
-        ? 'Inhabilitación definitiva: Infracción a los términos de uso y compartición de código VIP.'
         : ''
     );
   };
 
   // Confirm status update
-  const handleConfirmStatusUpdate = (e: React.FormEvent) => {
+  const handleConfirmStatusUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUserForStatus) return;
 
-    updateUserStatus(selectedUserForStatus.id, newStatus, statusReason.trim() || undefined);
-    reloadUsers();
+    await updateUserStatus(selectedUserForStatus.id, newStatus, statusReason.trim() || undefined);
+    await reloadUsers();
     setSelectedUserForStatus(null);
   };
 
-  // Create new user
+  // Create new user manually
   const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUserName.trim() || !newUserEmail.trim() || !newUserPhone.trim() || !newUserCode.trim()) {
+    const cleanCode = newUserCode.replace(/\D/g, '').trim();
+    if (!newUserName.trim() || !newUserEmail.trim() || !newUserPhone.trim() || !cleanCode) {
       alert('Por favor completa los campos requeridos');
       return;
     }
 
-    const newUser: RegisteredUser = {
-      id: `usr_${newUserCode.replace(/\D/g, '') || Date.now()}`,
+    const nowIso = new Date().toISOString();
+    const nowLog = formatCurrentTimestamp();
+    const goal = getAngleLabel(newUserAngle);
+
+    const newUser: MasterUserData = {
+      id: `usr_${cleanCode || Date.now()}`,
+      vipCode: cleanCode,
+      accessCode: cleanCode,
+      fullName: newUserName.trim(),
       name: newUserName.trim(),
       email: newUserEmail.trim(),
       phone: newUserPhone.trim(),
-      accessCode: newUserCode.trim(),
-      ageGroup: newUserAge,
+      registrationDate: nowIso,
+      registeredAt: nowIso,
+      healthGoal: goal,
       primaryAngle: newUserAngle,
-      symptoms: ['Soporte nutricional Tyruss Full', 'Ingreso manual por soporte'],
-      startDate: new Date().toISOString(),
+      ageGroup: newUserAge,
+      symptoms: ['Soporte nutricional Tyruss Full', 'Ingreso manual por soporte ColShopi'],
       currentDay: 1,
+      completedDaysCount: 0,
       completedDays: 0,
+      completedDaysList: [],
+      adherencePercentage: 0,
       adherencePercent: 0,
-      status: 'activa',
-      registeredAt: new Date().toISOString(),
-      lastActivityAt: new Date().toISOString(),
+      status: 'active',
+      lastActivityTimestamp: Date.now(),
+      lastActivityAt: nowIso,
+      lastAction: `Registro manual desde Super Admin (${goal})`,
+      historyLog: [
+        { timestamp: nowLog, event: `Asignación manual de Código VIP #${cleanCode}` },
+        { timestamp: nowLog, event: `Cuenta Habilitada por Super Admin (${goal})` }
+      ],
       notes: newUserNotes.trim() || 'Registrada manualmente desde Panel de Admin ColShopi.'
     };
 
     saveRegisteredUser(newUser);
     reloadUsers();
     setIsNewUserModalOpen(false);
+    
     // Reset form
     setNewUserName('');
     setNewUserEmail('');
@@ -215,10 +262,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
   };
 
   // Delete user
-  const handleDeleteUser = (user: RegisteredUser) => {
-    if (window.confirm(`¿Estás seguro de eliminar el registro de ${user.name}? Esta acción no se puede deshacer.`)) {
-      deleteRegisteredUser(user.id);
-      reloadUsers();
+  const handleDeleteUser = async (user: MasterUserData) => {
+    if (window.confirm(`¿Estás seguro de eliminar el registro de ${user.fullName || user.name}? Esta acción no se puede deshacer.`)) {
+      await deleteRegisteredUser(user.id);
+      await reloadUsers();
       if (selectedUserForDetail?.id === user.id) {
         setSelectedUserForDetail(null);
       }
@@ -305,7 +352,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
             </div>
             <button
               onClick={() => setExportFeedback(null)}
-              className="text-xs text-emerald-300 hover:text-white"
+              className="text-xs text-emerald-300 hover:text-white cursor-pointer"
             >
               ✕
             </button>
@@ -345,19 +392,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
             <p className="text-[11px] text-slate-400">Con acceso pleno a la App</p>
           </div>
 
-          {/* Card 3: Suspended / Disabled */}
-          <div className="bg-slate-900/90 border border-rose-900/50 rounded-2xl p-4 shadow-md space-y-2">
-            <div className="flex items-center justify-between text-rose-400">
-              <span className="text-xs font-semibold uppercase tracking-wider">Suspendidas / Bajas</span>
-              <Ban className="w-4 h-4 text-rose-400" />
+          {/* Card 3: Suspended */}
+          <div className="bg-slate-900/90 border border-amber-900/50 rounded-2xl p-4 shadow-md space-y-2">
+            <div className="flex items-center justify-between text-amber-400">
+              <span className="text-xs font-semibold uppercase tracking-wider">Suspendidas</span>
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-black text-rose-400">{suspendedUsers + disabledUsers}</span>
-              <span className="text-[10px] text-rose-300 font-bold bg-rose-950 px-1.5 py-0.5 rounded border border-rose-800">
-                {suspendedUsers} susp. / {disabledUsers} inact.
+              <span className="text-2xl sm:text-3xl font-black text-amber-400">{suspendedUsers}</span>
+              <span className="text-[10px] text-amber-300 font-bold bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800">
+                {suspendedUsers} en pausa
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">Acceso restringido por admin</p>
+            <p className="text-[11px] text-slate-400">Acceso pausado por admin</p>
           </div>
 
           {/* Card 4: Average Adherence */}
@@ -415,7 +462,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                 <button
                   type="button"
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white cursor-pointer"
                 >
                   ✕
                 </button>
@@ -467,9 +514,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
 
             {[
               { id: 'all', label: `Todas (${totalUsers})` },
-              { id: 'activa', label: `Activas (${activeUsers})`, color: 'text-emerald-400' },
-              { id: 'suspendida', label: `Suspendidas (${suspendedUsers})`, color: 'text-amber-400' },
-              { id: 'inhabilitada', label: `Inhabilitadas (${disabledUsers})`, color: 'text-rose-400' }
+              { id: 'active', label: `Activas (${activeUsers})`, color: 'text-emerald-400' },
+              { id: 'suspended', label: `Suspendidas (${suspendedUsers})`, color: 'text-amber-400' },
+              { id: 'completed_30d', label: `30D Completado (${completedUsers})`, color: 'text-cyan-400' }
             ].map(f => (
               <button
                 key={f.id}
@@ -490,7 +537,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
             <span className="text-slate-400 font-bold hidden sm:inline">Objetivo:</span>
             <select
               value={angleFilter}
-              onChange={e => setAngleFilter(e.target.value as any)}
+              onChange={e => setAngleFilter(e.target.value)}
               className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-300 focus:outline-hidden focus:border-cyan-400"
             >
               <option value="all">Todos los Objetivos de Bienestar</option>
@@ -552,7 +599,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               <button
                 type="button"
                 onClick={() => { setSearchTerm(''); setStatusFilter('all'); setAngleFilter('all'); }}
-                className="text-xs text-cyan-400 underline font-bold"
+                className="text-xs text-cyan-400 underline font-bold cursor-pointer"
               >
                 Limpiar todos los filtros
               </button>
@@ -565,18 +612,34 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                     <th className="py-3 px-4">Usuaria & Contacto</th>
                     <th className="py-3 px-3">Código VIP</th>
                     <th className="py-3 px-3">Objetivo de Bienestar</th>
-                    <th className="py-3 px-3">Progreso 30D</th>
-                    <th className="py-3 px-3">Estado Actual</th>
-                    <th className="py-3 px-3">Fecha Registro</th>
+                    <th className="py-3 px-3">Progreso Reto 30D</th>
+                    <th className="py-3 px-3">Estado Acceso</th>
+                    <th className="py-3 px-3">Última Acción / Actividad</th>
                     <th className="py-3 px-4 text-right">Acciones Admin</th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y divide-slate-800/80 text-slate-300">
                   {filteredUsers.map((user) => {
-                    const waLink = `https://wa.me/${user.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      `Hola ${user.name}, te saludamos desde ColShopi Tienda soporte TyroFem 30D.`
+                    const userName = user.fullName || user.name || 'Usuaria TyroFem';
+                    const vipCode = user.vipCode || user.accessCode || 'N/A';
+                    const adherence = user.adherencePercentage ?? user.adherencePercent ?? 0;
+                    const completedCount = user.completedDaysCount ?? user.completedDays ?? 0;
+                    const cleanPhone = (user.phone || '').replace(/\D/g, '');
+                    const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+                      `Hola ${userName}, te saludamos desde ColShopi Tienda soporte TyroFem 30D.`
                     )}`;
+
+                    const isActive = user.status === 'active' || user.status === 'activa';
+                    const isSuspended = user.status === 'suspended' || user.status === 'suspendida' || user.status === 'inhabilitada';
+                    const isCompleted = user.status === 'completed_30d' || completedCount >= 30;
+
+                    const formattedLastActivity = user.lastActivityAt ? new Date(user.lastActivityAt).toLocaleDateString('es-CO', {
+                      month: 'short',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : 'Reciente';
 
                     return (
                       <tr 
@@ -587,27 +650,37 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold shrink-0">
-                              {user.name.charAt(0)}
+                              {userName.charAt(0)}
                             </div>
                             <div className="space-y-0.5">
-                              <h4 className="font-bold text-white text-xs hover:text-cyan-300 cursor-pointer" onClick={() => setSelectedUserForDetail(user)}>
-                                {user.name}
+                              <h4 
+                                className="font-bold text-white text-xs hover:text-cyan-300 cursor-pointer flex items-center gap-1.5"
+                                onClick={() => setSelectedUserForDetail(user)}
+                              >
+                                <span>{userName}</span>
+                                {Array.isArray(user.historyLog) && user.historyLog.length > 0 && (
+                                  <span className="text-[10px] bg-cyan-950 text-cyan-300 px-1 rounded border border-cyan-800">
+                                    {user.historyLog.length} logs
+                                  </span>
+                                )}
                               </h4>
                               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-[11px] text-slate-400">
                                 <span className="flex items-center gap-1 truncate max-w-[180px]">
                                   <Mail className="w-3 h-3 text-slate-500 shrink-0" />
                                   <span className="truncate">{user.email}</span>
                                 </span>
-                                <a
-                                  href={waLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
-                                  title="Abrir chat de WhatsApp"
-                                >
-                                  <MessageCircle className="w-3 h-3 shrink-0" />
-                                  <span>{user.phone}</span>
-                                </a>
+                                {cleanPhone && (
+                                  <a
+                                    href={waLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors font-medium"
+                                    title="Abrir chat de WhatsApp"
+                                  >
+                                    <MessageCircle className="w-3 h-3 shrink-0" />
+                                    <span>{user.phone}</span>
+                                  </a>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -615,9 +688,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
 
                         {/* Column 2: VIP Code */}
                         <td className="py-3.5 px-3">
-                          <div className="inline-flex items-center gap-1 bg-slate-950 border border-cyan-500/40 text-cyan-300 font-mono font-bold text-xs px-2 py-1 rounded-md">
+                          <div className="inline-flex items-center gap-1 bg-slate-950 border border-cyan-500/40 text-cyan-300 font-mono font-bold text-xs px-2.5 py-1 rounded-md">
                             <KeyRound className="w-3 h-3 text-cyan-400" />
-                            <span>{user.accessCode}</span>
+                            <span>{vipCode}</span>
                           </div>
                         </td>
 
@@ -625,10 +698,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                         <td className="py-3.5 px-3">
                           <div className="space-y-1">
                             <span className="text-xs font-semibold text-slate-200 block">
-                              {getAngleLabel(user.primaryAngle)}
+                              {user.healthGoal || getAngleLabel(user.primaryAngle)}
                             </span>
                             <span className="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">
-                              {user.ageGroup}
+                              {user.ageGroup || '35-44 años'}
                             </span>
                           </div>
                         </td>
@@ -637,31 +710,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                         <td className="py-3.5 px-3">
                           <div className="space-y-1 min-w-[120px]">
                             <div className="flex items-center justify-between text-[11px]">
-                              <span className="font-bold text-white">Día {user.currentDay}/30</span>
-                              <span className="font-bold text-amber-400">{user.adherencePercent}%</span>
+                              <span className="font-bold text-white">Día {user.currentDay || 1}/30</span>
+                              <span className="font-bold text-amber-400">{adherence}%</span>
                             </div>
                             <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                               <div 
                                 className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full"
-                                style={{ width: `${Math.min(100, user.adherencePercent)}%` }}
+                                style={{ width: `${Math.min(100, adherence)}%` }}
                               />
                             </div>
-                            <span className="text-[10px] text-slate-500 block">
-                              {user.completedDays} días completados
+                            <span className="text-[10px] text-slate-400 block">
+                              {completedCount} de 30 días completados
                             </span>
                           </div>
                         </td>
 
                         {/* Column 5: Status */}
                         <td className="py-3.5 px-3">
-                          {user.status === 'activa' && (
+                          {isActive && (
                             <div className="inline-flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold px-2.5 py-1 rounded-full">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                               <span>Activa (Habilitada)</span>
                             </div>
                           )}
 
-                          {user.status === 'suspendida' && (
+                          {isSuspended && (
                             <div className="space-y-1">
                               <div className="inline-flex items-center gap-1.5 bg-amber-950/80 border border-amber-500/40 text-amber-300 text-[11px] font-bold px-2.5 py-1 rounded-full">
                                 <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
@@ -675,50 +748,47 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                             </div>
                           )}
 
-                          {user.status === 'inhabilitada' && (
-                            <div className="space-y-1">
-                              <div className="inline-flex items-center gap-1.5 bg-rose-950/80 border border-rose-500/40 text-rose-300 text-[11px] font-bold px-2.5 py-1 rounded-full">
-                                <Ban className="w-3.5 h-3.5 text-rose-400" />
-                                <span>Inhabilitada</span>
-                              </div>
-                              {user.statusReason && (
-                                <p className="text-[10px] text-rose-300/70 truncate max-w-[140px]" title={user.statusReason}>
-                                  {user.statusReason}
-                                </p>
-                              )}
+                          {isCompleted && !isSuspended && (
+                            <div className="inline-flex items-center gap-1.5 bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                              <span>Reto 30D Completado</span>
                             </div>
                           )}
                         </td>
 
-                        {/* Column 6: Registered At */}
-                        <td className="py-3.5 px-3 text-[11px] text-slate-400 whitespace-nowrap">
-                          {new Date(user.registeredAt).toLocaleDateString('es-CO', {
-                            month: 'short',
-                            day: '2-digit',
-                            year: 'numeric'
-                          })}
+                        {/* Column 6: Last Action & Activity */}
+                        <td className="py-3.5 px-3 text-[11px] text-slate-300">
+                          <div className="space-y-0.5 max-w-[180px]">
+                            <p className="font-semibold text-slate-200 truncate" title={user.lastAction || 'Actividad registrada'}>
+                              {user.lastAction || 'Sincronización activa'}
+                            </p>
+                            <span className="text-[10px] text-slate-400 block flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-slate-500" />
+                              <span>{formattedLastActivity}</span>
+                            </span>
+                          </div>
                         </td>
 
                         {/* Column 7: Actions */}
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             
-                            {/* Ver Detalle */}
+                            {/* Ver Detalle / Historial */}
                             <button
                               type="button"
                               onClick={() => setSelectedUserForDetail(user)}
-                              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
-                              title="Ver expediente completo"
+                              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                              title="Ver expediente e historial completo"
                             >
                               <Eye className="w-3.5 h-3.5" />
                             </button>
 
                             {/* Action: Habilitar (if not active) */}
-                            {user.status !== 'activa' && (
+                            {isSuspended && (
                               <button
                                 type="button"
-                                onClick={() => handleOpenStatusModal(user, 'activa')}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-950 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
+                                onClick={() => handleOpenStatusModal(user, 'active')}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-950 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
                                 title="Habilitar acceso"
                               >
                                 <Unlock className="w-3 h-3" />
@@ -727,28 +797,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                             )}
 
                             {/* Action: Suspender (if active) */}
-                            {user.status === 'activa' && (
+                            {isActive && (
                               <button
                                 type="button"
-                                onClick={() => handleOpenStatusModal(user, 'suspendida')}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-amber-950 hover:bg-amber-900 border border-amber-500/50 text-amber-300 text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
+                                onClick={() => handleOpenStatusModal(user, 'suspended')}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-950 hover:bg-amber-900 border border-amber-500/50 text-amber-300 text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
                                 title="Suspender temporalmente por mal uso"
                               >
                                 <AlertTriangle className="w-3 h-3" />
                                 <span>Suspender</span>
-                              </button>
-                            )}
-
-                            {/* Action: Inhabilitar (if not inhabilitada) */}
-                            {user.status !== 'inhabilitada' && (
-                              <button
-                                type="button"
-                                onClick={() => handleOpenStatusModal(user, 'inhabilitada')}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-rose-950 hover:bg-rose-900 border border-rose-500/50 text-rose-300 text-[10px] font-bold rounded-lg transition-colors cursor-pointer"
-                                title="Inhabilitar permanentemente"
-                              >
-                                <Ban className="w-3 h-3" />
-                                <span>Inhabilitar</span>
                               </button>
                             )}
 
@@ -778,7 +835,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
       </main>
 
       {/* ========================================================================= */}
-      {/* MODAL 1: STATUS CHANGE (HABILITAR / SUSPENDER / INHABILITAR) */}
+      {/* MODAL 1: STATUS CHANGE (HABILITAR / SUSPENDER) */}
       {/* ========================================================================= */}
       {selectedUserForStatus && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-fadeIn">
@@ -787,28 +844,22 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
                 <div className={`p-2 rounded-xl border ${
-                  newStatus === 'activa' 
+                  newStatus === 'active' 
                     ? 'bg-emerald-950 text-emerald-400 border-emerald-500/40' 
-                    : newStatus === 'suspendida'
-                    ? 'bg-amber-950 text-amber-400 border-amber-500/40'
-                    : 'bg-rose-950 text-rose-400 border-rose-500/40'
+                    : 'bg-amber-950 text-amber-400 border-amber-500/40'
                 }`}>
-                  {newStatus === 'activa' && <Unlock className="w-5 h-5" />}
-                  {newStatus === 'suspendida' && <AlertTriangle className="w-5 h-5" />}
-                  {newStatus === 'inhabilitada' && <Ban className="w-5 h-5" />}
+                  {newStatus === 'active' ? <Unlock className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white font-serif-luxury">
-                    {newStatus === 'activa' && 'Habilitar Acceso de Usuaria'}
-                    {newStatus === 'suspendida' && 'Suspender Acceso de Usuaria'}
-                    {newStatus === 'inhabilitada' && 'Inhabilitar Acceso Permanentemente'}
+                    {newStatus === 'active' ? 'Habilitar Acceso de Usuaria' : 'Suspender Acceso de Usuaria'}
                   </h3>
-                  <p className="text-xs text-slate-400">{selectedUserForStatus.name}</p>
+                  <p className="text-xs text-slate-400">{selectedUserForStatus.fullName || selectedUserForStatus.name}</p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedUserForStatus(null)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-slate-400 hover:text-white p-1 cursor-pointer"
               >
                 ✕
               </button>
@@ -819,36 +870,41 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               {/* Select Status */}
               <div className="space-y-1.5">
                 <label className="text-slate-300 font-bold block">Acción de Estado:</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: 'activa', label: 'Habilitar', color: 'border-emerald-500 text-emerald-300 bg-emerald-950/50' },
-                    { id: 'suspendida', label: 'Suspender', color: 'border-amber-500 text-amber-300 bg-amber-950/50' },
-                    { id: 'inhabilitada', label: 'Inhabilitar', color: 'border-rose-500 text-rose-300 bg-rose-950/50' }
-                  ].map(s => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      onClick={() => {
-                        setNewStatus(s.id as UserStatus);
-                        if (s.id === 'activa') setStatusReason('');
-                      }}
-                      className={`py-2 px-1.5 rounded-xl border text-center font-bold transition-all cursor-pointer ${
-                        newStatus === s.id
-                          ? `${s.color} ring-2 ring-cyan-400`
-                          : 'border-slate-800 bg-slate-950 text-slate-500 hover:text-slate-300'
-                      }`}
-                    >
-                      {s.label}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewStatus('active');
+                      setStatusReason('');
+                    }}
+                    className={`py-2.5 px-2 rounded-xl border text-center font-bold transition-all cursor-pointer ${
+                      newStatus === 'active'
+                        ? 'border-emerald-500 text-emerald-300 bg-emerald-950/60 ring-2 ring-emerald-400'
+                        : 'border-slate-800 bg-slate-950 text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    Habilitar Acceso
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setNewStatus('suspended')}
+                    className={`py-2.5 px-2 rounded-xl border text-center font-bold transition-all cursor-pointer ${
+                      newStatus === 'suspended'
+                        ? 'border-amber-500 text-amber-300 bg-amber-950/60 ring-2 ring-amber-400'
+                        : 'border-slate-800 bg-slate-950 text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    Suspender Acceso
+                  </button>
                 </div>
               </div>
 
               {/* Status Reason Input */}
-              {newStatus !== 'activa' && (
+              {newStatus === 'suspended' && (
                 <div className="space-y-1.5">
                   <label className="text-slate-300 font-bold flex items-center justify-between">
-                    <span>Motivo de Suspensión / Inhabilitación:</span>
+                    <span>Motivo de Suspensión:</span>
                     <span className="text-[10px] text-slate-400">(Visible en expediente)</span>
                   </label>
                   <textarea
@@ -857,7 +913,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                     onChange={e => setStatusReason(e.target.value)}
                     placeholder="Ej. Compartición de cuenta con terceros no autorizados, anomalía en el código VIP..."
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-cyan-400"
-                    required={newStatus !== 'activa'}
+                    required
                   />
                 </div>
               )}
@@ -866,7 +922,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
                 <span className="font-bold text-cyan-300 block">Efecto inmediato:</span>
                 <p>
-                  {newStatus === 'activa' 
+                  {newStatus === 'active' 
                     ? 'La usuaria podrá ingresar normalmente con su código VIP de 6 dígitos.'
                     : 'Si la usuaria intenta ingresar o navegar en la App, su acceso será bloqueado inmediatamente y se le remitirá a soporte ColShopi.'}
                 </p>
@@ -884,11 +940,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                 <button
                   type="submit"
                   className={`px-5 py-2 rounded-xl font-bold text-white shadow-md cursor-pointer transition-all ${
-                    newStatus === 'activa'
+                    newStatus === 'active'
                       ? 'bg-emerald-600 hover:bg-emerald-500'
-                      : newStatus === 'suspendida'
-                      ? 'bg-amber-600 hover:bg-amber-500'
-                      : 'bg-rose-600 hover:bg-rose-500'
+                      : 'bg-amber-600 hover:bg-amber-500'
                   }`}
                 >
                   Confirmar Cambio
@@ -902,33 +956,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 2: USER FULL DETAIL CARD */}
+      {/* MODAL 2: USER FULL DETAIL CARD & CHRONOLOGICAL HISTORY LOG */}
       {/* ========================================================================= */}
       {selectedUserForDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto animate-scaleUp">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-5 sm:p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto animate-scaleUp">
             
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-cyan-950 border border-cyan-400/40 flex items-center justify-center text-cyan-300 font-bold">
-                  {selectedUserForDetail.name.charAt(0)}
+                  {(selectedUserForDetail.fullName || selectedUserForDetail.name || 'U').charAt(0)}
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white font-serif-luxury">
-                    {selectedUserForDetail.name}
+                    {selectedUserForDetail.fullName || selectedUserForDetail.name}
                   </h3>
                   <span className="text-xs text-cyan-300 font-mono">ID: {selectedUserForDetail.id}</span>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedUserForDetail(null)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-slate-400 hover:text-white p-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            <div className="space-y-4 text-xs">
               
               {/* Status Badge & Code */}
               <div className="grid grid-cols-2 gap-2">
@@ -936,20 +990,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                   <span className="text-[10px] text-slate-400 uppercase font-bold block">Código VIP Asignado</span>
                   <div className="flex items-center gap-1.5 text-cyan-300 font-mono font-bold text-sm">
                     <KeyRound className="w-4 h-4 text-cyan-400" />
-                    <span>{selectedUserForDetail.accessCode}</span>
+                    <span>{selectedUserForDetail.vipCode || selectedUserForDetail.accessCode}</span>
                   </div>
                 </div>
 
                 <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Estado Actual</span>
-                  <span className={`inline-block font-bold text-xs px-2 py-0.5 rounded-full ${
-                    selectedUserForDetail.status === 'activa'
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Estado de Acceso</span>
+                  <span className={`inline-block font-bold text-xs px-2.5 py-0.5 rounded-full ${
+                    selectedUserForDetail.status === 'active' || selectedUserForDetail.status === 'activa'
                       ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
-                      : selectedUserForDetail.status === 'suspendida'
+                      : selectedUserForDetail.status === 'suspended' || selectedUserForDetail.status === 'suspendida'
                       ? 'bg-amber-950 text-amber-300 border border-amber-500/40'
-                      : 'bg-rose-950 text-rose-300 border border-rose-500/40'
+                      : 'bg-cyan-950 text-cyan-300 border border-cyan-500/40'
                   }`}>
-                    {selectedUserForDetail.status.toUpperCase()}
+                    {selectedUserForDetail.status === 'active' || selectedUserForDetail.status === 'activa' ? 'HABILITADA (ACTIVA)' :
+                     selectedUserForDetail.status === 'suspended' || selectedUserForDetail.status === 'suspendida' ? 'SUSPENDIDA' : 'RETO 30D COMPLETADO'}
                   </span>
                 </div>
               </div>
@@ -965,7 +1020,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">WhatsApp:</span>
                     <a
-                      href={`https://wa.me/${selectedUserForDetail.phone.replace(/\D/g, '')}`}
+                      href={`https://wa.me/${(selectedUserForDetail.phone || '').replace(/\D/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-bold text-emerald-400 hover:underline flex items-center gap-1"
@@ -976,7 +1031,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Rango de Edad:</span>
-                    <span className="text-slate-200">{selectedUserForDetail.ageGroup}</span>
+                    <span className="text-slate-200">{selectedUserForDetail.ageGroup || '35-44 años'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">Fecha de Registro:</span>
+                    <span className="text-slate-200">
+                      {new Date(selectedUserForDetail.registrationDate || selectedUserForDetail.registeredAt || Date.now()).toLocaleDateString('es-CO', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -985,8 +1052,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
                 <span className="text-[10px] text-slate-400 uppercase font-bold block">Enfoque de Hábitos</span>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">Objetivo de Bienestar:</span>
-                  <span className="font-bold text-amber-300">{getAngleLabel(selectedUserForDetail.primaryAngle)}</span>
+                  <span className="text-slate-400">Objetivo Principal:</span>
+                  <span className="font-bold text-amber-300">{selectedUserForDetail.healthGoal || getAngleLabel(selectedUserForDetail.primaryAngle)}</span>
                 </div>
                 {selectedUserForDetail.symptoms && selectedUserForDetail.symptoms.length > 0 && (
                   <div className="space-y-1 pt-1">
@@ -1002,23 +1069,75 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                 )}
               </div>
 
-              {/* Progress 30D Details */}
-              <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Progreso en el Reto 30D</span>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block">Día Actual</span>
-                    <span className="text-sm font-bold text-white">Día {selectedUserForDetail.currentDay}</span>
-                  </div>
-                  <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block">Completados</span>
-                    <span className="text-sm font-bold text-emerald-400">{selectedUserForDetail.completedDays}</span>
-                  </div>
-                  <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block">Adherencia</span>
-                    <span className="text-sm font-bold text-amber-400">{selectedUserForDetail.adherencePercent}%</span>
-                  </div>
+              {/* 30-Day Grid Visualizer */}
+              <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold">
+                    Cuadrícula de Progresión 30 Días
+                  </span>
+                  <span className="text-[11px] font-bold text-amber-400">
+                    Adherencia: {selectedUserForDetail.adherencePercentage ?? selectedUserForDetail.adherencePercent ?? 0}% ({selectedUserForDetail.completedDaysCount ?? selectedUserForDetail.completedDays ?? 0}/30)
+                  </span>
                 </div>
+
+                <div className="grid grid-cols-6 sm:grid-cols-10 gap-1.5 pt-1">
+                  {Array.from({ length: 30 }, (_, i) => i + 1).map(dayNum => {
+                    const isCompleted = 
+                      (Array.isArray(selectedUserForDetail.completedDaysList) && selectedUserForDetail.completedDaysList.includes(dayNum)) ||
+                      dayNum <= (selectedUserForDetail.completedDaysCount ?? selectedUserForDetail.completedDays ?? 0);
+                    const isCurrent = dayNum === (selectedUserForDetail.currentDay || 1);
+
+                    return (
+                      <div 
+                        key={dayNum}
+                        className={`p-1.5 rounded-lg text-center font-bold text-[10px] flex flex-col items-center justify-center transition-all ${
+                          isCompleted
+                            ? 'bg-emerald-950 border border-emerald-500/50 text-emerald-300'
+                            : isCurrent
+                            ? 'bg-cyan-950 border border-cyan-400 text-cyan-300 ring-1 ring-cyan-400'
+                            : 'bg-slate-900 border border-slate-800 text-slate-500'
+                        }`}
+                        title={isCompleted ? `Día ${dayNum} Completado` : isCurrent ? `Día ${dayNum} Activo Hoy` : `Día ${dayNum} Pendiente`}
+                      >
+                        <span>{dayNum}</span>
+                        {isCompleted ? (
+                          <Check className="w-2.5 h-2.5 text-emerald-400 mt-0.5" />
+                        ) : (
+                          <span className="w-1.5 h-1.5 rounded-full bg-slate-700 mt-1" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Real-time Chronological History Log */}
+              <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <History className="w-4 h-4 text-cyan-400" />
+                  <span className="text-[10px] text-slate-400 uppercase font-bold">
+                    Historial Cronológico de Actividad en Tiempo Real
+                  </span>
+                </div>
+
+                {Array.isArray(selectedUserForDetail.historyLog) && selectedUserForDetail.historyLog.length > 0 ? (
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {selectedUserForDetail.historyLog.slice().reverse().map((log, idx) => (
+                      <div key={idx} className="flex items-start gap-2.5 bg-slate-900/90 border border-slate-800 p-2 rounded-lg text-[11px]">
+                        <span className="text-[10px] font-mono text-cyan-400 shrink-0 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                          {log.timestamp}
+                        </span>
+                        <span className="text-slate-200 leading-tight font-medium">
+                          {log.event}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-slate-500 text-[11px] italic">
+                    Sin eventos registrados aún.
+                  </p>
+                )}
               </div>
 
               {/* Notes & Status Reason */}
@@ -1045,7 +1164,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               <button
                 type="button"
                 onClick={() => handleDeleteUser(selectedUserForDetail)}
-                className="text-xs text-rose-400 hover:underline flex items-center gap-1 font-bold"
+                className="text-xs text-rose-400 hover:underline flex items-center gap-1 font-bold cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Eliminar Usuaria</span>
@@ -1057,7 +1176,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                   onClick={() => {
                     const user = selectedUserForDetail;
                     setSelectedUserForDetail(null);
-                    handleOpenStatusModal(user, user.status === 'activa' ? 'suspendida' : 'activa');
+                    handleOpenStatusModal(
+                      user, 
+                      user.status === 'active' || user.status === 'activa' ? 'suspended' : 'active'
+                    );
                   }}
                   className="px-3 py-1.5 bg-cyan-950 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-900 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
@@ -1093,7 +1215,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               </div>
               <button
                 onClick={() => setIsNewUserModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-slate-400 hover:text-white p-1 cursor-pointer"
               >
                 ✕
               </button>

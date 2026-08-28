@@ -344,11 +344,24 @@ export default function App() {
       sendBrowserNotification(notif.title, notif.message, notif.icon);
 
       // Update currentDay and lastCompletedTimestamp
-      setUserProfile(curr => curr ? { 
-        ...curr, 
-        lastCompletedTimestamp: timestamp,
-        currentDay: Math.min(30, dayNumber + 1) 
-      } : null);
+      setUserProfile(curr => {
+        const updatedProfile = curr ? { 
+          ...curr, 
+          lastCompletedTimestamp: timestamp,
+          currentDay: Math.min(30, dayNumber + 1) 
+        } : null;
+
+        // Real-time sync to central server and admin panel
+        if (updatedProfile && !updatedProfile.isAdmin) {
+          syncUserSessionToServer(
+            updatedProfile, 
+            updated, 
+            `Completó Test Día ${dayNumber} - Toma Tyruss Full confirmada (Progreso: ${totalCompleted}/30 días)`
+          );
+        }
+        
+        return updatedProfile;
+      });
       
       return updated;
     });

@@ -33,7 +33,9 @@ import {
   ADMIN_CREDENTIALS, 
   findUserByCodeOrEmail, 
   saveRegisteredUser, 
-  RegisteredUser 
+  RegisteredUser,
+  formatCurrentTimestamp,
+  getAngleLabel
 } from '../data/usersDatabase';
 
 interface OnboardingQuizProps {
@@ -227,7 +229,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
               primaryAngle: existingUser.primaryAngle || 'tiroides_metabolismo',
               symptoms: existingUser.symptoms || ['Soporte nutricional Tyruss Full'],
               hasCompletedOnboarding: true,
-              startDate: existingUser.startDate || new Date().toISOString(),
+              startDate: existingUser.registrationDate || existingUser.registeredAt || new Date().toISOString(),
               currentDay: existingUser.currentDay || 1,
               unlockedBadges: ['badge_start', 'badge_vip'],
               status: 'activa',
@@ -298,20 +300,32 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
     // Save to master centralized users database for admin tracking
     const registeredUser: RegisteredUser = {
       id: `usr_${accessCode.trim()}`,
+      vipCode: accessCode.trim(),
+      accessCode: accessCode.trim(),
+      fullName: newProfile.name,
       name: newProfile.name,
       email: newProfile.email || '',
       phone: newProfile.phone || '',
-      accessCode: newProfile.accessCode || '',
-      ageGroup: newProfile.ageGroup || '35-44 años',
+      registrationDate: newProfile.startDate,
+      registeredAt: newProfile.startDate,
+      healthGoal: getAngleLabel(newProfile.primaryAngle),
       primaryAngle: newProfile.primaryAngle,
       symptoms: newProfile.symptoms,
-      startDate: newProfile.startDate,
+      ageGroup: newProfile.ageGroup || '35-44 años',
       currentDay: 1,
+      completedDaysCount: 0,
       completedDays: 0,
+      completedDaysList: [],
+      adherencePercentage: 0,
       adherencePercent: 0,
-      status: 'activa',
-      registeredAt: new Date().toISOString(),
+      status: 'active',
+      lastActivityTimestamp: Date.now(),
       lastActivityAt: new Date().toISOString(),
+      lastAction: `Registro completado (${getAngleLabel(newProfile.primaryAngle)})`,
+      historyLog: [
+        { timestamp: formatCurrentTimestamp(), event: `Login con Código VIP #${accessCode.trim()}` },
+        { timestamp: formatCurrentTimestamp(), event: `Registro y Onboarding completado (${getAngleLabel(newProfile.primaryAngle)})` }
+      ],
       notes: 'Registro verificado desde Onboarding TyroFem 30D.'
     };
     saveRegisteredUser(registeredUser);
