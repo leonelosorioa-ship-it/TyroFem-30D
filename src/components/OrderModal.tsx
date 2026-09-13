@@ -35,16 +35,16 @@ export const OrderModal: React.FC<OrderModalProps> = ({
   onClose,
   isReorder
 }) => {
-  if (!isOpen) return null;
-
   const [selectedPackId, setSelectedPackId] = useState<string>('pack-2'); // default 2 tarros
   const [addBatidoVerde, setAddBatidoVerde] = useState<boolean>(true);
-  const [fullName, setFullName] = useState<string>(userProfile.name !== 'Amiga' ? userProfile.name : '');
+  const [fullName, setFullName] = useState<string>(userProfile?.name && userProfile.name !== 'Amiga' ? userProfile.name : '');
   const [phone, setPhone] = useState<string>('');
   const [city, setCity] = useState<string>('');
   const [department, setDepartment] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [isRural, setIsRural] = useState<boolean>(false);
+
+  if (!isOpen) return null;
 
   const selectedPack = OFFICIAL_PACKAGES.find(p => p.id === selectedPackId) || OFFICIAL_PACKAGES[1];
   const totalPrice = selectedPack.price + (addBatidoVerde ? BATIDO_VERDE_INFO.promoPrice : 0);

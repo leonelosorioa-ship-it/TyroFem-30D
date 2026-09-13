@@ -66,8 +66,6 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   onNavigateToCalendar,
   onOpenRecipes
 }) => {
-  if (!dayPlan) return null;
-
   const [, setTick] = useState<number>(Date.now());
 
   useEffect(() => {
@@ -76,12 +74,6 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     }, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  const dayStatus = getDayStatus(dayPlan.dayNumber, progressMap, userProfile);
-  const isDayUnlocked = dayStatus.status === 'ACTIVE';
-  const isDayAlreadyLocked = dayStatus.status === 'COMPLETED';
-  const isDayCountdown = dayStatus.status === 'COUNTDOWN';
-  const isDaySequenceLocked = dayStatus.status === 'LOCKED';
 
   const [tyrussTaken, setTyrussTaken] = useState(currentProgress?.tyrussTaken || false);
   const [water2L, setWater2L] = useState(currentProgress?.water2L || false);
@@ -106,7 +98,15 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
       setDigestion(currentProgress.digestion || 'liviana');
       setMood(currentProgress.mood || 'tranquila');
     }
-  }, [currentProgress, dayPlan.dayNumber]);
+  }, [currentProgress, dayPlan?.dayNumber]);
+
+  if (!dayPlan) return null;
+
+  const dayStatus = getDayStatus(dayPlan.dayNumber, progressMap, userProfile);
+  const isDayUnlocked = dayStatus.status === 'ACTIVE';
+  const isDayAlreadyLocked = dayStatus.status === 'COMPLETED';
+  const isDayCountdown = dayStatus.status === 'COUNTDOWN';
+  const isDaySequenceLocked = dayStatus.status === 'LOCKED';
 
   const handleCheckboxToggle = (type: 'tyruss' | 'water' | 'meal' | 'extra') => {
     if (!isDayUnlocked || isDayAlreadyLocked) return;

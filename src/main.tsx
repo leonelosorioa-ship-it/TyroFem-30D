@@ -14,6 +14,8 @@ if ('serviceWorker' in navigator) {
       .register('/sw.js')
       .then((reg) => {
         console.log('TyroFem PWA: Service Worker registered successfully', reg.scope);
+        // Force immediate check for updated Service Worker
+        reg.update();
       })
       .catch((err) => {
         console.warn('TyroFem PWA: Service Worker registration failed', err);

@@ -810,6 +810,16 @@ async function startServer() {
         const personalizedTitle = title.replace(/\{nombre\}/gi, userFirstName);
         const personalizedBody = message.replace(/\{nombre\}/gi, userFirstName);
 
+        const sanitizedPushUrl = (() => {
+          if (!url || typeof url !== 'string') return '/#calendario';
+          const t = url.trim();
+          if (t.startsWith('http://') || t.startsWith('https://')) return t;
+          if (t.startsWith('#')) return `/${t}`;
+          if (!t.startsWith('/')) return `/${t}`;
+          if (t === '/sw.js' || t.startsWith('/sw.js')) return '/#calendario';
+          return t;
+        })();
+
         // 1. If user has a real PushSubscription object, trigger native Web Push via VAPID
         if (u.pushSubscription && u.pushSubscription.endpoint && u.pushSubscription.keys) {
           const pushPayload = JSON.stringify({
@@ -819,7 +829,7 @@ async function startServer() {
             icon: icon || '/circulo-marie.png',
             badge: badge || '/colshopi-logo.png',
             tag: `tyrofem-push-${Date.now()}`,
-            data: { url: url || '#calendario' }
+            data: { url: sanitizedPushUrl }
           });
 
           try {

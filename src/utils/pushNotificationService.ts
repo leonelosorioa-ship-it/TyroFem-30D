@@ -91,7 +91,7 @@ export function preparePersonalizedPayload(
   templateTitle: string,
   templateBody: string,
   user: { fullName?: string; name?: string; id?: string },
-  selectedRouteUrl: string = '#calendario',
+  selectedRouteUrl: string = '/#calendario',
   icon: string = '/circulo-marie.png'
 ) {
   const name = user.fullName || user.name || '';
@@ -303,7 +303,7 @@ export function triggerWelcomeNotification(swReg?: ServiceWorkerRegistration | n
     icon: '/circulo-marie.png',
     badge: '/colshopi-logo.png',
     vibrate: [200, 100, 200],
-    data: { url: '#calendario' }
+    data: { url: '/#calendario' }
   };
 
   try {
@@ -348,7 +348,7 @@ export function broadcastInAppNotification(targetUserId?: string, payload?: any)
 /**
  * Triggers a local or in-app notification for the active user
  */
-export function triggerLocalPush(title: string, message: string, url = '#calendario', icon = '/circulo-marie.png'): void {
+export function triggerLocalPush(title: string, message: string, url = '/#calendario', icon = '/circulo-marie.png'): void {
   if (typeof window === 'undefined') return;
 
   const payload = {

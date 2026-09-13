@@ -82,8 +82,20 @@ export default function App() {
     return {};
   });
 
+  // Helper to determine initial tab from URL hash (e.g. from Push Notification click)
+  const getInitialTab = (): 'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos' => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const clean = window.location.hash.replace('#', '').toLowerCase();
+      if (clean === 'recetas') return 'recetas';
+      if (clean === 'tracker' || clean === 'registro') return 'tracker';
+      if (clean === 'chat' || clean === 'marie') return 'chat';
+      if (clean === 'pedidos' || clean === 'tienda') return 'pedidos';
+    }
+    return 'calendario';
+  };
+
   // Navigation tab and history stack
-  const [activeTab, setActiveTab] = useState<'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos'>('calendario');
+  const [activeTab, setActiveTab] = useState<'calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos'>(getInitialTab);
   const [navigationHistory, setNavigationHistory] = useState<('calendario' | 'tracker' | 'recetas' | 'chat' | 'pedidos')[]>([]);
 
   const TAB_LABELS: Record<string, { label: string; icon: any }> = {
@@ -203,9 +215,10 @@ export default function App() {
 
   // Intercept Device Hardware "Back" Button via popstate event
   useEffect(() => {
-    // Initialize base history state on load
+    // Initialize base history state on load respecting any incoming hash from notification
+    const initialSection = getInitialTab();
     if (!window.history.state || !window.history.state.section) {
-      window.history.replaceState({ section: 'calendario' }, '', '#calendario');
+      window.history.replaceState({ section: initialSection }, '', `#${initialSection}`);
     }
 
     const handlePopState = (event: PopStateEvent) => {
@@ -269,6 +282,49 @@ export default function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Listen for push notification click events forwarded by the Service Worker or hash changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleServiceWorkerMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'PUSH_NOTIFICATION_CLICKED') {
+        const raw = (event.data.rawUrl || event.data.url || '').toLowerCase();
+        if (raw.includes('receta')) {
+          navigateToSection('recetas', true);
+        } else if (raw.includes('tracker') || raw.includes('registro')) {
+          navigateToSection('tracker', true);
+        } else if (raw.includes('chat') || raw.includes('marie')) {
+          navigateToSection('chat', true);
+        } else if (raw.includes('pedido') || raw.includes('recompra') || raw.includes('tienda')) {
+          navigateToSection('pedidos', true);
+        } else if (raw.includes('calendario')) {
+          navigateToSection('calendario', true);
+        }
+      }
+    };
+
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '').toLowerCase();
+      if (['calendario', 'tracker', 'recetas', 'chat', 'pedidos'].includes(hash)) {
+        if (hash !== activeTab) {
+          navigateToSection(hash as any, false);
+        }
+      }
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+    }
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      }
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [activeTab]);
 
   // Automatic timer trigger for Friendly Push Consent Modal on established users
   useEffect(() => {

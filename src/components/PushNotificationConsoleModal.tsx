@@ -62,7 +62,7 @@ const TEMPLATES: Array<{
     type: 'recordatorio',
     title: '¡{nombre}, hora de tu Tyruss Full! 🌿',
     message: 'Toma tu dosis diaria de Tyruss Full con agua tibia o infusión para potenciar tu metabolismo y tiroides.',
-    url: '#calendario',
+    url: '/#calendario',
     icon: '/circulo-marie.png'
   },
   {
@@ -70,7 +70,7 @@ const TEMPLATES: Array<{
     type: 'tip_nutricional',
     title: '¡{nombre}, Marié tiene un consejo para ti! 🥑',
     message: 'Hoy tu cuerpo necesita hidratación extra con tu Tyruss Full. Toca aquí para ver tu receta antiinflamatoria.',
-    url: '#recetas',
+    url: '/#recetas',
     icon: '/circulo-marie.png'
   },
   {
@@ -86,7 +86,7 @@ const TEMPLATES: Array<{
     type: 'testimonio',
     title: '⭐ ¡{nombre}, tu constancia transforma tu energía!',
     message: 'Cada día con Tyruss Full cuenta. Toca aquí para registrar tu avance de hoy con la Nutricionista Marié.',
-    url: '#calendario',
+    url: '/#calendario',
     icon: '/circulo-marie.png'
   }
 ];
@@ -112,7 +112,7 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
   const [title, setTitle] = useState('¡Marié tiene un consejo para tu digestión! 🌿');
   const [message, setMessage] = useState('Hoy tu cuerpo necesita hidratación extra con tu Tyruss Full. Toca aquí para ver tu receta del día.');
   const [messageType, setMessageType] = useState<PushMessageType>('recordatorio');
-  const [destinationUrl, setDestinationUrl] = useState<string>('#calendario');
+  const [destinationUrl, setDestinationUrl] = useState<string>('/#calendario');
   const [customUrl, setCustomUrl] = useState<string>('');
   const [iconChoice, setIconChoice] = useState<string>('/circulo-marie.png');
 
@@ -249,7 +249,7 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
       title: title.trim().slice(0, 50),
       message: message.trim().slice(0, 140),
       type: messageType,
-      url: finalUrl || '#calendario',
+      url: finalUrl || '/#calendario',
       icon: iconChoice,
       badge: '/colshopi-logo.png',
       audienceType,
@@ -747,9 +747,9 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <button
                         type="button"
-                        onClick={() => setDestinationUrl('#calendario')}
+                        onClick={() => setDestinationUrl('/#calendario')}
                         className={`p-2 text-xs rounded-xl border font-semibold text-center cursor-pointer transition-colors ${
-                          destinationUrl === '#calendario'
+                          destinationUrl === '/#calendario' || destinationUrl === '#calendario'
                             ? 'bg-cyan-950 border-cyan-400 text-cyan-200'
                             : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
                         }`}
@@ -758,9 +758,9 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDestinationUrl('#recetas')}
+                        onClick={() => setDestinationUrl('/#recetas')}
                         className={`p-2 text-xs rounded-xl border font-semibold text-center cursor-pointer transition-colors ${
-                          destinationUrl === '#recetas'
+                          destinationUrl === '/#recetas' || destinationUrl === '#recetas'
                             ? 'bg-cyan-950 border-cyan-400 text-cyan-200'
                             : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
                         }`}
@@ -769,9 +769,9 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDestinationUrl('#chat')}
+                        onClick={() => setDestinationUrl('/#chat')}
                         className={`p-2 text-xs rounded-xl border font-semibold text-center cursor-pointer transition-colors ${
-                          destinationUrl === '#chat'
+                          destinationUrl === '/#chat' || destinationUrl === '#chat'
                             ? 'bg-cyan-950 border-cyan-400 text-cyan-200'
                             : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
                         }`}
@@ -785,7 +785,7 @@ export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModal
                         type="text"
                         placeholder="O ingresa un enlace externo (Ej: WhatsApp Recompra ColShopi https://wa.me/...)"
                         value={destinationUrl.startsWith('http') || destinationUrl === 'custom' ? destinationUrl : ''}
-                        onChange={(e) => setDestinationUrl(e.target.value || '#calendario')}
+                        onChange={(e) => setDestinationUrl(e.target.value || '/#calendario')}
                         className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300 focus:outline-hidden focus:border-cyan-400 font-mono"
                       />
                     </div>

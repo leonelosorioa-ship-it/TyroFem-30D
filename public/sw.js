@@ -1,5 +1,5 @@
 // Service Worker Oficial - TyroFem 30D PWA (ColShopi)
-const CACHE_NAME = 'tyrofem-v5';
+const CACHE_NAME = 'tyrofem-v6';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -9,6 +9,38 @@ const STATIC_ASSETS = [
   '/icon-192.png',
   '/icon-512.png'
 ];
+
+// Helper para sanear y resolver URLs de destino de forma absoluta
+function getSanitizedDestinationUrl(rawUrl) {
+  try {
+    if (!rawUrl || typeof rawUrl !== 'string') {
+      return self.location.origin + '/';
+    }
+
+    const trimmed = rawUrl.trim();
+
+    // Enlaces externos absolutos (ej: WhatsApp https://wa.me/...)
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+
+    let pathOrHash = trimmed;
+    if (pathOrHash.startsWith('#')) {
+      pathOrHash = '/' + pathOrHash;
+    } else if (!pathOrHash.startsWith('/')) {
+      pathOrHash = '/' + pathOrHash;
+    }
+
+    // Blindaje crítico: Jamás permitir navegar hacia el archivo de código sw.js
+    if (pathOrHash === '/sw.js' || pathOrHash.startsWith('/sw.js#') || pathOrHash.startsWith('/sw.js?')) {
+      return self.location.origin + '/';
+    }
+
+    return new URL(pathOrHash, self.location.origin).href;
+  } catch (e) {
+    return self.location.origin + '/';
+  }
+}
 
 // Instalación
 self.addEventListener('install', (event) => {
@@ -44,6 +76,13 @@ self.addEventListener('fetch', (event) => {
 
   // Para navegaciones (HTML), intentar red primero
   if (event.request.mode === 'navigate') {
+    const reqUrl = new URL(event.request.url);
+    // Blindaje anti-error: Si un navegador intenta navegar a sw.js como documento HTML, redirigir a la raíz
+    if (reqUrl.pathname === '/sw.js' || reqUrl.pathname.endsWith('/sw.js')) {
+      event.respondWith(Response.redirect(self.location.origin + '/', 302));
+      return;
+    }
+
     event.respondWith(
       fetch(event.request).catch(() => {
         return caches.match('/index.html') || caches.match('/');
@@ -79,7 +118,7 @@ self.addEventListener('push', (event) => {
     icon: '/circulo-marie.png',
     badge: '/colshopi-logo.png',
     tag: `tyrofem-push-${Date.now()}`,
-    data: { url: '#calendario' }
+    data: { url: '/#calendario' }
   };
 
   if (event.data) {
@@ -91,6 +130,10 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  const sanitizedTargetUrl = getSanitizedDestinationUrl(
+    payload.url || (payload.data && payload.data.url) || '/#calendario'
+  );
+
   const notificationOptions = {
     body: payload.body || payload.message || 'Consulta tu guía diaria en la App.',
     icon: payload.icon || '/circulo-marie.png',
@@ -100,7 +143,7 @@ self.addEventListener('push', (event) => {
     renotify: true,
     requireInteraction: false,
     data: {
-      url: payload.url || (payload.data && payload.data.url) || '#calendario',
+      url: sanitizedTargetUrl,
       timestamp: Date.now()
     }
   };
@@ -115,24 +158,53 @@ self.addEventListener('push', (event) => {
 // =========================================================================
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
+
+  const rawUrl = (event.notification.data && event.notification.data.url)
+    ? event.notification.data.url
+    : '/';
+  const targetUrl = getSanitizedDestinationUrl(rawUrl);
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Si la ventana ya está abierta, enfocarla y navegar
+    (async () => {
+      // 1. Si es enlace externo (ej: WhatsApp), abrir ventana nueva directamente
+      if (targetUrl.startsWith('http') && !targetUrl.startsWith(self.location.origin)) {
+        if (clients.openWindow) {
+          return await clients.openWindow(targetUrl);
+        }
+        return;
+      }
+
+      // 2. Buscar ventanas de la PWA que ya estén abiertas en este origen
+      const clientList = await clients.matchAll({ type: 'window', includeUncontrolled: true });
       for (const client of clientList) {
-        if (client.url && 'focus' in client) {
-          if (targetUrl && 'navigate' in client && !targetUrl.startsWith('http')) {
-            client.navigate(targetUrl);
+        if (client.url && client.url.startsWith(self.location.origin) && 'focus' in client) {
+          await client.focus();
+
+          // Enviar mensaje a la App React para activar la pestaña correspondiente
+          client.postMessage({
+            type: 'PUSH_NOTIFICATION_CLICKED',
+            url: targetUrl,
+            rawUrl: rawUrl,
+            data: event.notification.data
+          });
+
+          // Navegar si la URL de la ventana es distinta
+          if ('navigate' in client && client.url !== targetUrl) {
+            try {
+              await client.navigate(targetUrl);
+            } catch (navErr) {
+              console.warn('[SW] No se pudo navegar client:', navErr);
+            }
           }
-          return client.focus();
+          return;
         }
       }
-      // Si la PWA está cerrada, abrir nueva ventana
+
+      // 3. Si la PWA estaba cerrada, abrirla con la URL absoluta correcta (nunca sw.js)
       if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
+        return await clients.openWindow(targetUrl);
       }
-    })
+    })()
   );
 });
 
@@ -142,6 +214,10 @@ self.addEventListener('notificationclick', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'TRIGGER_LOCAL_PUSH') {
     const { title, options } = event.data;
+    const sanitizedUrl = getSanitizedDestinationUrl(
+      options?.data?.url || options?.url || '/#calendario'
+    );
+
     self.registration.showNotification(title || 'TyroFem 30D', {
       body: options?.body || 'Tienes un nuevo mensaje de bienestar.',
       icon: options?.icon || '/circulo-marie.png',
@@ -149,7 +225,10 @@ self.addEventListener('message', (event) => {
       vibrate: [200, 100, 200],
       tag: options?.tag || `local-push-${Date.now()}`,
       renotify: true,
-      data: options?.data || { url: '#calendario' }
+      data: {
+        url: sanitizedUrl,
+        ...(options?.data || {})
+      }
     });
   }
 });

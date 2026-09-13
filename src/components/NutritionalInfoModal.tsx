@@ -23,9 +23,9 @@ export const NutritionalInfoModal: React.FC<NutritionalInfoModalProps> = ({
   onClose,
   onOpenOrder
 }) => {
-  if (!isOpen) return null;
-
   const [activeTab, setActiveTab] = useState<'tabla' | 'ingredientes' | 'invima' | 'obsequio'>('tabla');
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-start sm:justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto pt-3 sm:pt-6 pb-12 animate-fadeIn">
