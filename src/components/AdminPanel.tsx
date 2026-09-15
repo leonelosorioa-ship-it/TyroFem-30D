@@ -51,7 +51,7 @@ import {
   formatCurrentTimestamp,
   ADMIN_CREDENTIALS
 } from '../data/usersDatabase';
-import { getCodesStatusSummary, addCustomAuthorizedCode } from '../data/authorizedCodes';
+import { getCodesStatusSummary, addCustomAuthorizedCode, NEW_BATCH_30_CODES } from '../data/authorizedCodes';
 import { ColshopiLogo } from './ColshopiLogo';
 import { PushNotificationConsoleModal } from './PushNotificationConsoleModal';
 import { HealthAngle } from '../types';
@@ -92,9 +92,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
   // Codes management modal state
   const [isCodesModalOpen, setIsCodesModalOpen] = useState(false);
   const [codeFilterSearch, setCodeFilterSearch] = useState('');
+  const [codesTabFilter, setCodesTabFilter] = useState<'all' | 'batch30' | 'available' | 'used'>('all');
   const [newManualCodeToAuthorize, setNewManualCodeToAuthorize] = useState('');
   const [codeAuthorizeMsg, setCodeAuthorizeMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [copiedBatch, setCopiedBatch] = useState(false);
 
   const reloadUsers = async (showLoadingSpinner = false) => {
     if (showLoadingSpinner) setIsSyncing(true);
@@ -1552,22 +1554,112 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               )}
             </form>
 
-            {/* Filter / Search Bar */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                value={codeFilterSearch}
-                onChange={(e) => setCodeFilterSearch(e.target.value)}
-                placeholder="Buscar código de 6 dígitos o nombre de usuaria..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-cyan-400 font-mono"
-              />
+            {/* Filter / Search Bar & Tabs */}
+            <div className="space-y-2">
+              <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    value={codeFilterSearch}
+                    onChange={(e) => setCodeFilterSearch(e.target.value)}
+                    placeholder="Buscar código de 6 dígitos o nombre de usuaria..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-cyan-400 font-mono"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const textToCopy = NEW_BATCH_30_CODES.map((c, idx) => `${idx + 1}. ${c}`).join('\n');
+                    navigator.clipboard.writeText(textToCopy);
+                    setCopiedBatch(true);
+                    setTimeout(() => setCopiedBatch(false), 2500);
+                  }}
+                  className="px-3 py-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
+                  title="Copiar los 30 códigos nuevos numerados para WhatsApp"
+                >
+                  {copiedBatch ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-300" />
+                      <span className="text-emerald-200">¡30 Códigos Copiados!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copiar Lote 30 Nuevos</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setCodesTabFilter('all')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    codesTabFilter === 'all'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  Todos ({codesSummary.total})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCodesTabFilter('batch30')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
+                    codesTabFilter === 'batch30'
+                      ? 'bg-cyan-600 text-white shadow-xs'
+                      : 'bg-slate-950 text-cyan-300 hover:text-white border border-cyan-500/40'
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3 text-cyan-400" />
+                  <span>Lote 30 Nuevos</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCodesTabFilter('available')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    codesTabFilter === 'available'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  Disponibles ({codesSummary.availableCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCodesTabFilter('used')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    codesTabFilter === 'used'
+                      ? 'bg-slate-700 text-white shadow-xs'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  Canjeados ({codesSummary.usedCount})
+                </button>
+              </div>
             </div>
 
             {/* Codes List */}
             <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[220px]">
               {codesSummary.masterList
                 .filter(code => {
+                  // Tab filter
+                  if (codesTabFilter === 'batch30' && !NEW_BATCH_30_CODES.includes(code)) {
+                    return false;
+                  }
+                  const redemptionInfo = codesSummary.registry[code];
+                  if (codesTabFilter === 'available' && !!redemptionInfo) {
+                    return false;
+                  }
+                  if (codesTabFilter === 'used' && !redemptionInfo) {
+                    return false;
+                  }
+
+                  // Search filter
                   if (!codeFilterSearch) return true;
                   const query = codeFilterSearch.toLowerCase().trim();
                   const info = codesSummary.registry[code];
@@ -1576,6 +1668,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                 .map((code) => {
                   const redemptionInfo = codesSummary.registry[code];
                   const isRedeemed = !!redemptionInfo;
+                  const isFromNewBatch = NEW_BATCH_30_CODES.includes(code);
                   const isSpecialNewlyAuthorized = code === '125294' || code === '138371';
 
                   return (
@@ -1584,6 +1677,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                       className={`p-3 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition-colors ${
                         isRedeemed
                           ? 'bg-slate-950/40 border-slate-800/80'
+                          : isFromNewBatch
+                          ? 'bg-cyan-950/25 border-cyan-600/40 shadow-xs'
                           : isSpecialNewlyAuthorized
                           ? 'bg-cyan-950/30 border-cyan-500/50 shadow-xs'
                           : 'bg-slate-950/90 border-slate-800'
@@ -1593,18 +1688,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-mono text-xs font-black ${
                           isRedeemed 
                             ? 'bg-slate-800 text-slate-400' 
+                            : isFromNewBatch
+                            ? 'bg-cyan-950 border border-cyan-500/50 text-cyan-300'
                             : 'bg-emerald-950 border border-emerald-500/40 text-emerald-300'
                         }`}>
                           #
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-mono text-sm font-black text-cyan-300 tracking-wider">
                               {code}
                             </span>
+                            {isFromNewBatch && (
+                              <span className="px-1.5 py-0.5 bg-cyan-950 border border-cyan-400 text-cyan-300 text-[10px] font-bold rounded-md flex items-center gap-1">
+                                <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
+                                Lote 30 Nuevos
+                              </span>
+                            )}
                             {isSpecialNewlyAuthorized && (
                               <span className="px-1.5 py-0.5 bg-cyan-950 border border-cyan-400 text-cyan-300 text-[10px] font-bold rounded-md">
-                                Recién Autorizado
+                                Autorizado Reciente
                               </span>
                             )}
                             {isRedeemed ? (
@@ -1625,7 +1728,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                             </p>
                           ) : (
                             <p className="text-[11px] text-slate-400 mt-0.5">
-                              Habilitado para ingresar y completar el Onboarding de TyroFem 30D.
+                              Habilitado para ingresar y completar el Onboarding de TyroFem 30D (Uso Único).
                             </p>
                           )}
                         </div>

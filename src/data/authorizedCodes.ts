@@ -11,8 +11,21 @@ export interface CodeRedemptionInfo {
   userEmail: string;
 }
 
+export const NEW_BATCH_30_CODES: string[] = [
+  '204815', '315926', '426137', '537248', '648359',
+  '759461', '861572', '972683', '183794', '294105',
+  '305216', '416327', '527438', '638549', '749651',
+  '851762', '962873', '173495', '284506', '395617',
+  '406728', '517839', '628941', '739152', '841263',
+  '952374', '163485', '274596', '385607', '496718'
+];
+
 export const MASTER_AUTHORIZED_CODES: string[] = [
-  '125294', '138371', // Usuarias autorizadas solicitadas por ColShopi
+  // Lote 30 Códigos Nuevos de Entrega Manual (Uso Único)
+  ...NEW_BATCH_30_CODES,
+
+  // Códigos autorizados anteriores
+  '125294', '138371',
   '849201', '623914', '518472', '934165', '412893',
   '735628', '294817', '658231', '381946', '947253',
   '163892', '529471', '837164', '249583', '618395',
