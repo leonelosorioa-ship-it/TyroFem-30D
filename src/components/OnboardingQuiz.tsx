@@ -214,7 +214,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       }
 
       // If returning active user with matching credentials, restore session directly
-      if (existingUser.status === 'activa') {
+      if (existingUser.status === 'activa' || existingUser.status === 'active') {
         const emailMatches = existingUser.email && existingUser.email.toLowerCase() === cleanEmail;
         const codeMatches = existingUser.accessCode && existingUser.accessCode === cleanCode;
         if (emailMatches || codeMatches) {

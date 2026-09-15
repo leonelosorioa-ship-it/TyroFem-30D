@@ -12,6 +12,7 @@ export interface CodeRedemptionInfo {
 }
 
 export const MASTER_AUTHORIZED_CODES: string[] = [
+  '125294', '138371', // Usuarias autorizadas solicitadas por ColShopi
   '849201', '623914', '518472', '934165', '412893',
   '735628', '294817', '658231', '381946', '947253',
   '163892', '529471', '837164', '249583', '618395',
@@ -25,6 +26,50 @@ export const MASTER_AUTHORIZED_CODES: string[] = [
 ];
 
 const STORAGE_KEY_USED_CODES = 'tyrofem_used_codes_registry';
+const STORAGE_KEY_CUSTOM_AUTHORIZED_CODES = 'tyrofem_custom_authorized_codes';
+
+/**
+ * Obtener códigos adicionales autorizados manualmente
+ */
+export function getCustomAuthorizedCodes(): string[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_CUSTOM_AUTHORIZED_CODES);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error('Error reading custom authorized codes', error);
+    return [];
+  }
+}
+
+/**
+ * Agrega un nuevo código a la lista de autorizados dinámicamente
+ */
+export function addCustomAuthorizedCode(code: string): boolean {
+  const cleanCode = code.replace(/\D/g, '').trim();
+  if (cleanCode.length !== 6) return false;
+  try {
+    const current = getCustomAuthorizedCodes();
+    if (!current.includes(cleanCode) && !MASTER_AUTHORIZED_CODES.includes(cleanCode)) {
+      current.push(cleanCode);
+      localStorage.setItem(STORAGE_KEY_CUSTOM_AUTHORIZED_CODES, JSON.stringify(current));
+    }
+    return true;
+  } catch (e) {
+    console.error('Error adding custom authorized code', e);
+    return false;
+  }
+}
+
+/**
+ * Obtiene todos los códigos autorizados (maestros + dinámicos)
+ */
+export function getAllAuthorizedCodes(): string[] {
+  const custom = getCustomAuthorizedCodes();
+  const set = new Set([...MASTER_AUTHORIZED_CODES, ...custom]);
+  return Array.from(set);
+}
 
 /**
  * Obtener el historial de códigos canjeados almacenados localmente
@@ -41,11 +86,13 @@ export function getRedeemedCodesRegistry(): Record<string, CodeRedemptionInfo> {
 }
 
 /**
- * Verifica si un código de 6 dígitos pertenece a la base de datos oficial de los 50 códigos
+ * Verifica si un código de 6 dígitos pertenece a la base de datos oficial de códigos autorizados
  */
 export function isAuthorizedCode(code: string): boolean {
   const cleanCode = code.replace(/\D/g, '').trim();
-  return MASTER_AUTHORIZED_CODES.includes(cleanCode);
+  if (MASTER_AUTHORIZED_CODES.includes(cleanCode)) return true;
+  const custom = getCustomAuthorizedCodes();
+  return custom.includes(cleanCode);
 }
 
 /**
@@ -127,7 +174,8 @@ export function getCodesStatusSummary(registeredUsers?: Array<{ accessCode?: str
     });
   }
 
-  const total = MASTER_AUTHORIZED_CODES.length;
+  const allCodes = getAllAuthorizedCodes();
+  const total = allCodes.length;
   const usedCodesList = Object.keys(registry);
   const usedCount = usedCodesList.length;
   const availableCount = Math.max(0, total - usedCount);
@@ -137,6 +185,6 @@ export function getCodesStatusSummary(registeredUsers?: Array<{ accessCode?: str
     usedCount,
     availableCount,
     registry,
-    masterList: MASTER_AUTHORIZED_CODES
+    masterList: allCodes
   };
 }
