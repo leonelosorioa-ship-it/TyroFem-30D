@@ -535,7 +535,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                     <div className={`w-5 h-5 rounded-md flex items-center justify-center ${extraHabit ? 'bg-slate-700 text-white' : 'border border-slate-300'}`}>
                       {extraHabit && <CheckCircle2 className="w-3.5 h-3.5" />}
                     </div>
-                    <span className="text-xs">{dayPlan.tasks[dayPlan.tasks.length - 1]?.label || 'Actividad de autocuidado y descanso'}</span>
+                    <span className="text-xs">{(dayPlan.tasks && dayPlan.tasks.length > 0) ? dayPlan.tasks[dayPlan.tasks.length - 1]?.label : 'Actividad de autocuidado y descanso'}</span>
                   </div>
                   <Smile className={`w-4 h-4 shrink-0 ${extraHabit ? 'text-slate-700' : 'text-slate-300'}`} />
                 </button>

@@ -94,7 +94,7 @@ const TEMPLATES: Array<{
 export const PushNotificationConsoleModal: React.FC<PushNotificationConsoleModalProps> = ({
   isOpen,
   onClose,
-  users,
+  users = [],
   preSelectedUser,
   onPushSent
 }) => {

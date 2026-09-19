@@ -15,9 +15,9 @@ declare global {
 if (typeof window !== 'undefined') {
   // Check standalone mode
   if (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true ||
-    document.referrer.includes('android-app://')
+    (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches) ||
+    (window.navigator as any)?.standalone === true ||
+    (typeof document !== 'undefined' && typeof document.referrer === 'string' && document.referrer.includes('android-app://'))
   ) {
     window.__pwaInstalled = true;
   }
