@@ -103,7 +103,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={onInstallPWA}
                 className="flex items-center gap-1 text-[10px] bg-gradient-to-r from-emerald-800/90 to-teal-800/90 hover:from-emerald-700 hover:to-teal-700 border border-emerald-400/50 px-2 py-0.5 rounded-full text-emerald-200 font-bold transition-all cursor-pointer shadow-xs active:scale-95"
-                title="Instalar TyroFem 30D en tu pantalla de inicio"
+                title="Instalar TyrussFull en tu pantalla de inicio"
               >
                 <Smartphone className="w-3 h-3 text-cyan-300 animate-pulse" />
                 <span className="hidden xs:inline">Instalar App</span>

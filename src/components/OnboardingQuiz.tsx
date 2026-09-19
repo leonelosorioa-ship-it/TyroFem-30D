@@ -374,11 +374,11 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   if (window.__deferredPwaPrompt) {
                     await promptPWAInstall();
                   } else {
-                    alert('Para instalar TyroFem 30D: Abre el menú ⋮ de Chrome y presiona "Instalar aplicación", o en Safari toca "Compartir" y "Agregar al inicio".');
+                    alert('Para instalar TyrussFull: Abre el menú ⋮ de Chrome y presiona "Instalar aplicación", o en Safari toca "Compartir" y "Agregar al inicio".');
                   }
                 }}
                 className="p-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/40 text-cyan-300 transition-all cursor-pointer shadow-sm active:scale-95 flex items-center gap-1 text-[10px] font-bold"
-                title="Descargar e Instalar App TyroFem 30D"
+                title="Descargar e Instalar App TyrussFull"
               >
                 <Download className="w-3.5 h-3.5 text-cyan-300" />
                 <span className="hidden sm:inline">Instalar App</span>

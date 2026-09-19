@@ -1,5 +1,5 @@
-// Service Worker Oficial - TyroFem 30D PWA (ColShopi)
-const CACHE_NAME = 'tyrofem-v6';
+// Service Worker Oficial - TyrussFull PWA
+const CACHE_NAME = 'tyrofem-v7';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -113,11 +113,11 @@ self.addEventListener('fetch', (event) => {
 // =========================================================================
 self.addEventListener('push', (event) => {
   let payload = {
-    title: 'TyroFem 30D • ColShopi',
+    title: 'TyrussFull',
     body: 'Tienes un nuevo mensaje de bienestar y hábitos con Marié ✨',
     icon: '/circulo-marie.png',
     badge: '/colshopi-logo.png',
-    tag: `tyrofem-push-${Date.now()}`,
+    tag: `tyrussfull-push-${Date.now()}`,
     data: { url: '/#calendario' }
   };
 

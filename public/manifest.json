@@ -1,7 +1,7 @@
 {
-  "name": "ColShopi Tienda - TyroFem 30D con Tyruss Full",
-  "short_name": "ColShopi Tienda",
-  "description": "App Exclusiva de ColShopi Tienda By Leps Digital para acompañamiento nutricional de TyroFem 30D y Tyruss Full con la Nutricionista Marié.",
+  "name": "TyrussFull",
+  "short_name": "TyrussFull",
+  "description": "App oficial TyrussFull para el reto de 30 días, guía nutricional y bienestar de la mano de Marié.",
   "id": "/",
   "start_url": "/",
   "scope": "/",

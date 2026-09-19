@@ -108,12 +108,12 @@ export const PWAInstallModal: React.FC<PWAInstallModalProps> = ({ isOpen, onClos
 
           {/* App Presentation Card */}
           <div className="flex flex-col items-center text-center space-y-2 py-2 bg-slate-950/60 rounded-2xl p-4 border border-cyan-500/20">
-            {/* Glowing App Icon - ColShopi Tienda */}
+            {/* Glowing App Icon - TyrussFull */}
             <div className="relative group">
               <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-cyan-600 via-slate-900 to-black p-0.5 shadow-lg shadow-cyan-500/30 flex items-center justify-center border border-cyan-400/50">
                 <img
                   src="/icon-192.png"
-                  alt="ColShopi Tienda By Leps Digital"
+                  alt="TyrussFull"
                   className="w-full h-full rounded-[14px] object-cover"
                 />
               </div>
@@ -125,14 +125,14 @@ export const PWAInstallModal: React.FC<PWAInstallModalProps> = ({ isOpen, onClos
             {/* App Titles */}
             <div>
               <h4 className="text-base sm:text-lg font-black text-white tracking-tight">
-                ColShopi Tienda • TyroFem™ 30D
+                TyrussFull
               </h4>
               <p className="text-xs text-cyan-300/90 font-medium">
-                App Exclusiva • Balance Hormonal & Tiroides
+                App Oficial • Guía Nutricional & Balance 30D
               </p>
               <div className="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1.5 mt-1">
                 <Globe className="w-3 h-3 text-cyan-400" />
-                <span className="font-mono text-cyan-300">colshopi-tyrofem-30d.ai.studio</span>
+                <span className="font-mono text-cyan-300">tyrussfull.app</span>
               </div>
             </div>
           </div>
@@ -219,7 +219,7 @@ export const PWAInstallModal: React.FC<PWAInstallModalProps> = ({ isOpen, onClos
                 </div>
                 <div className="flex items-start gap-2">
                   <span className="w-4 h-4 rounded-full bg-emerald-900/90 text-emerald-300 font-bold flex items-center justify-center shrink-0 text-[10px]">3</span>
-                  <span>Confirma y ¡listo! TyroFem 30D quedará instalada como una app nativa en tu celular.</span>
+                  <span>Confirma y ¡listo! <strong>TyrussFull</strong> quedará instalada como una app nativa en tu dispositivo.</span>
                 </div>
               </div>
             </div>

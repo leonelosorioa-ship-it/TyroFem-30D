@@ -81,9 +81,9 @@ export const PWAInstallBanner: React.FC<PWAInstallBannerProps> = ({ onOpenModal 
         
         <div className="flex-1 pr-3 space-y-1.5">
           <div className="flex items-center gap-1.5 font-black text-white">
-            <span>Instalar TyroFem 30D</span>
+            <span>Instalar TyrussFull</span>
             <span className="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-1.5 py-0.2 rounded font-bold uppercase">
-              App Móvil
+              App Móvil & PC
             </span>
           </div>
           
