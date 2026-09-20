@@ -517,11 +517,21 @@ export function findUserByCodeOrEmail(query: string): MasterUserData | undefined
   const clean = query.trim().toLowerCase();
   const cleanCode = query.replace(/\D/g, '').trim();
   const users = getRegisteredUsers();
-  return users.find(u => 
-    u.email.toLowerCase() === clean || 
-    (cleanCode && (u.vipCode === cleanCode || u.accessCode === cleanCode)) ||
-    (cleanCode.length >= 6 && u.phone.replace(/\D/g, '').includes(cleanCode))
-  );
+  return users.find(u => {
+    const userEmail = (u.email || '').trim().toLowerCase();
+    const userVip = (u.vipCode || '').toString().replace(/\D/g, '').trim();
+    const userAccess = (u.accessCode || '').toString().replace(/\D/g, '').trim();
+    
+    // Match exact email
+    if (clean && userEmail && userEmail === clean) {
+      return true;
+    }
+    // Match exact access or VIP 6-digit code
+    if (cleanCode && (userVip === cleanCode || userAccess === cleanCode)) {
+      return true;
+    }
+    return false;
+  });
 }
 
 /**

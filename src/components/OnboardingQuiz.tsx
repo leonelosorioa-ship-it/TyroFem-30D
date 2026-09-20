@@ -210,7 +210,25 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       return;
     }
 
-    // C. Check if user already exists in centralized database and is suspended or disabled
+    // C. First validate code status with central server and authorized registry
+    setIsValidatingCode(true);
+    try {
+      const validation = await validateCodeOnline(cleanCode, cleanEmail, cleanName, cleanPhone);
+      if (!validation.valid) {
+        setCodeError(
+          validation.message ||
+            '⛔ Código NO autorizado o no existe en la base de datos de ColShopi. Solo las compradoras verificadas de Tyruss Full reciben un código de acceso. Solicita tu código oficial por WhatsApp a ColShopi: +57 310 400 7428.'
+        );
+        setIsValidatingCode(false);
+        return;
+      }
+    } catch {
+      // Handled inside validateCodeOnline
+    } finally {
+      setIsValidatingCode(false);
+    }
+
+    // D. Check if this specific email/code already has an active or suspended account
     const existingUser = findUserByCodeOrEmail(cleanEmail) || findUserByCodeOrEmail(cleanCode);
     if (existingUser) {
       if (existingUser.status === 'suspendida') {
@@ -233,7 +251,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       // If returning active user with matching credentials, restore session directly
       if (existingUser.status === 'activa' || existingUser.status === 'active') {
         const emailMatches = existingUser.email && existingUser.email.toLowerCase() === cleanEmail;
-        const codeMatches = existingUser.accessCode && existingUser.accessCode === cleanCode;
+        const codeMatches = (existingUser.accessCode && existingUser.accessCode === cleanCode) || (existingUser.vipCode && existingUser.vipCode === cleanCode);
         if (emailMatches || codeMatches) {
           setIsGenerating(true);
           setTimeout(() => {
@@ -257,24 +275,6 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
           return;
         }
       }
-    }
-
-    // D. Dual Online & Local code validation (6 months permanence & single-use guarantee)
-    setIsValidatingCode(true);
-    try {
-      const validation = await validateCodeOnline(cleanCode, cleanEmail, cleanName, cleanPhone);
-      if (!validation.valid) {
-        setCodeError(
-          validation.message ||
-            '⛔ Código NO autorizado o no existe en la base de datos de ColShopi. Solo las compradoras verificadas de Tyruss Full reciben un código de acceso. Solicita tu código oficial por WhatsApp a ColShopi: +57 310 400 7428.'
-        );
-        setIsValidatingCode(false);
-        return;
-      }
-    } catch {
-      // Handled inside validateCodeOnline
-    } finally {
-      setIsValidatingCode(false);
     }
 
     setIsCodeVerified(true);
