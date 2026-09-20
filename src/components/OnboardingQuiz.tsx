@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   ArrowRight, 
@@ -26,7 +26,9 @@ import { promptPWAInstall } from '../utils/pwaManager';
 import { 
   isAuthorizedCode, 
   isCodeAlreadyUsed, 
-  markCodeAsRedeemed 
+  markCodeAsRedeemed,
+  validateCodeOnline,
+  syncAuthorizedCodesFromRemote
 } from '../data/authorizedCodes';
 import { 
   isAdminCredentials, 
@@ -53,6 +55,21 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
   const [accessCode, setAccessCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
   const [isCodeVerified, setIsCodeVerified] = useState(false);
+  const [isValidatingCode, setIsValidatingCode] = useState(false);
+
+  // Sincronizar códigos autorizados en segundo plano desde el servidor
+  useEffect(() => {
+    fetch('/api/authorized-codes')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.codes && Array.isArray(data.codes)) {
+          syncAuthorizedCodesFromRemote(data.codes);
+        }
+      })
+      .catch((err) => {
+        console.log('Sincronización en segundo plano de códigos autorizados:', err);
+      });
+  }, []);
 
   // Clinical Diagnostic States
   const [primaryAngle, setPrimaryAngle] = useState<HealthAngle>('tiroides_metabolismo');
@@ -141,7 +158,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
   };
 
   // Code validation handler with Admin credentials support and status checks
-  const handleValidateStep1 = (e: React.FormEvent) => {
+  const handleValidateStep1 = async (e: React.FormEvent) => {
     e.preventDefault();
     setCodeError(null);
 
@@ -242,20 +259,22 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       }
     }
 
-    // 1. Check if the code is in the 50 authorized master database
-    if (!isAuthorizedCode(cleanCode)) {
-      setCodeError(
-        '⛔ Código NO autorizado o no existe en la base de datos de ColShopi. Solo las compradoras verificadas de Tyruss Full reciben un código de acceso. Solicita tu código oficial por WhatsApp a ColShopi: +57 310 400 7428.'
-      );
-      return;
-    }
-
-    // 2. Check if the code was already redeemed / used by another user
-    if (isCodeAlreadyUsed(cleanCode, undefined, cleanEmail)) {
-      setCodeError(
-        '⚠️ Este código de 6 dígitos ya fue canjeado y activado previamente por otra compradora. Cada código es de USO ÚNICO e intransferible. Si necesitas activar tu acceso para tu nuevo pedido, escríbenos a WhatsApp para asignarte un código libre.'
-      );
-      return;
+    // D. Dual Online & Local code validation (6 months permanence & single-use guarantee)
+    setIsValidatingCode(true);
+    try {
+      const validation = await validateCodeOnline(cleanCode, cleanEmail, cleanName, cleanPhone);
+      if (!validation.valid) {
+        setCodeError(
+          validation.message ||
+            '⛔ Código NO autorizado o no existe en la base de datos de ColShopi. Solo las compradoras verificadas de Tyruss Full reciben un código de acceso. Solicita tu código oficial por WhatsApp a ColShopi: +57 310 400 7428.'
+        );
+        setIsValidatingCode(false);
+        return;
+      }
+    } catch {
+      // Handled inside validateCodeOnline
+    } finally {
+      setIsValidatingCode(false);
     }
 
     setIsCodeVerified(true);
@@ -610,10 +629,20 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
               {/* Submit / Continue Button */}
               <button
                 type="submit"
-                className="w-full py-4 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-800 text-white flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20 active:scale-98 transition-all cursor-pointer"
+                disabled={isValidatingCode}
+                className="w-full py-4 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 hover:from-emerald-800 hover:to-teal-800 text-white flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/20 active:scale-98 transition-all cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
               >
-                <span>Validar Código VIP & Iniciar Diagnóstico</span>
-                <ArrowRight className="w-4 h-4" />
+                {isValidatingCode ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Verificando con Servidor Oficial...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Validar Código VIP & Iniciar Diagnóstico</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
 
               {/* ColShopi VIP Customer Guarantee Badge & Admin Access */}

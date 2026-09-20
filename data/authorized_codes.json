@@ -1,0 +1,319 @@
+{
+  "description": "Base de datos oficial y permanente de códigos de activación VIP para Tyruss Full",
+  "validityMonths": 6,
+  "lastUpdated": "2026-09-19T23:55:46.685Z",
+  "codes": {
+    "125294": {
+      "code": "125294",
+      "batch": "previo",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-18T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "138371": {
+      "code": "138371",
+      "batch": "previo",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-18T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "163485": {
+      "code": "163485",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "173495": {
+      "code": "173495",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "183794": {
+      "code": "183794",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "204815": {
+      "code": "204815",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z"
+    },
+    "274596": {
+      "code": "274596",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "284506": {
+      "code": "284506",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "294105": {
+      "code": "294105",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "305216": {
+      "code": "305216",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "315926": {
+      "code": "315926",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "385607": {
+      "code": "385607",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "395617": {
+      "code": "395617",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "406728": {
+      "code": "406728",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "416327": {
+      "code": "416327",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "426137": {
+      "code": "426137",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "496718": {
+      "code": "496718",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "517839": {
+      "code": "517839",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "527438": {
+      "code": "527438",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "537248": {
+      "code": "537248",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "623914": {
+      "code": "623914",
+      "batch": "previo",
+      "status": "redeemed",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "redeemedAt": "2026-08-22T22:47:00.000Z",
+      "redeemedBy": {
+        "name": "Sandra Patricia Morales",
+        "phone": "+57 310 987 6543",
+        "email": "sandra.morales@hotmail.com"
+      }
+    },
+    "628941": {
+      "code": "628941",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "638549": {
+      "code": "638549",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "648359": {
+      "code": "648359",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "739152": {
+      "code": "739152",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "749651": {
+      "code": "749651",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "759461": {
+      "code": "759461",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "841263": {
+      "code": "841263",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "849201": {
+      "code": "849201",
+      "batch": "previo",
+      "status": "redeemed",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-08-22T00:00:00.000Z",
+      "redeemedAt": "2026-08-22T22:47:00.000Z",
+      "redeemedBy": {
+        "name": "María Camila Gómez",
+        "phone": "+57 312 456 7890",
+        "email": "mariagomez@gmail.com"
+      }
+    },
+    "851762": {
+      "code": "851762",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "861572": {
+      "code": "861572",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "952374": {
+      "code": "952374",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "962873": {
+      "code": "962873",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    },
+    "972683": {
+      "code": "972683",
+      "batch": "oficial_30_vip",
+      "status": "active",
+      "validUntil": "2027-03-31T23:59:59.000Z",
+      "createdAt": "2026-09-19T00:00:00.000Z",
+      "redeemedAt": null,
+      "redeemedBy": null
+    }
+  }
+}

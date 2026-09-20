@@ -31,6 +31,7 @@ async function startServer() {
   const DATA_DIR = path.join(process.cwd(), 'data');
   const USERS_FILE = path.join(DATA_DIR, 'registered_users.json');
   const CODES_FILE = path.join(DATA_DIR, 'redeemed_codes.json');
+  const AUTHORIZED_CODES_FILE = path.join(DATA_DIR, 'authorized_codes.json');
   const PUSH_FILE = path.join(DATA_DIR, 'push_notifications.json');
 
   if (!fs.existsSync(DATA_DIR)) {
@@ -65,6 +66,37 @@ async function startServer() {
   } catch (err) {
     console.error('Error reading codes file:', err);
     redeemedCodesCache = {};
+  }
+
+  // Load or initialize authorized codes in memory
+  let authorizedCodesCache: Record<string, any> = {};
+  function loadAuthorizedCodes() {
+    try {
+      if (fs.existsSync(AUTHORIZED_CODES_FILE)) {
+        const raw = fs.readFileSync(AUTHORIZED_CODES_FILE, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.codes && typeof parsed.codes === 'object') {
+          authorizedCodesCache = parsed.codes;
+        }
+      }
+    } catch (err) {
+      console.error('Error reading authorized codes file:', err);
+    }
+  }
+  loadAuthorizedCodes();
+
+  function persistAuthorizedCodes() {
+    try {
+      const payload = {
+        description: "Base de datos oficial y permanente de códigos de activación VIP para Tyruss Full",
+        validityMonths: 6,
+        lastUpdated: new Date().toISOString(),
+        codes: authorizedCodesCache
+      };
+      fs.writeFileSync(AUTHORIZED_CODES_FILE, JSON.stringify(payload, null, 2), 'utf-8');
+    } catch (err) {
+      console.error('Error persisting authorized codes file:', err);
+    }
   }
 
   // Load or initialize push notifications history
@@ -624,6 +656,105 @@ async function startServer() {
     res.json({ success: true, deleted: initialLen !== usersCache.length, count: usersCache.length });
   });
 
+  // GET all authorized VIP codes (official list and metadata)
+  app.get('/api/authorized-codes', (req, res) => {
+    const list = Object.keys(authorizedCodesCache);
+    res.json({
+      success: true,
+      count: list.length,
+      codes: list,
+      details: authorizedCodesCache
+    });
+  });
+
+  // POST validate VIP code (Server-authoritative check)
+  app.post('/api/codes/validate', (req, res) => {
+    const { code, email, name, phone } = req.body;
+    if (!code) {
+      return res.status(400).json({ valid: false, reason: 'missing_code', message: 'El código es requerido.' });
+    }
+    const cleanCode = code.toString().replace(/\D/g, '').trim();
+    const cleanEmail = (email || '').toString().trim().toLowerCase();
+
+    // Check if user is suspended or disabled in usersCache
+    const foundUser = usersCache.find(
+      (u: any) =>
+        (cleanEmail && u.email && u.email.toLowerCase() === cleanEmail) ||
+        (cleanCode && u.accessCode && u.accessCode === cleanCode)
+    );
+
+    if (foundUser) {
+      if (foundUser.status === 'suspendida') {
+        return res.json({
+          valid: false,
+          reason: 'account_suspended',
+          message: `⚠️ Tu cuenta ha sido SUSPENDIDA temporalmente por la administración de ColShopi. ${
+            foundUser.statusReason ? `Motivo: "${foundUser.statusReason}".` : ''
+          } Comunícate con soporte al WhatsApp +57 310 400 7428 para reactivar tu acceso.`
+        });
+      }
+      if (foundUser.status === 'inhabilitada') {
+        return res.json({
+          valid: false,
+          reason: 'account_disabled',
+          message: `⛔ Tu cuenta ha sido INHABILITADA de forma permanente por la administración de ColShopi. ${
+            foundUser.statusReason ? `Motivo: "${foundUser.statusReason}".` : ''
+          } Comunícate con soporte al WhatsApp +57 310 400 7428 si consideras que es un error.`
+        });
+      }
+    }
+
+    // 1. Check if the code exists in authorized codes
+    const authorizedEntry = authorizedCodesCache[cleanCode];
+    if (!authorizedEntry) {
+      return res.json({
+        valid: false,
+        reason: 'unauthorized',
+        message: '⛔ Código NO autorizado o no existe en la base de datos de ColShopi. Solo las compradoras verificadas de Tyruss Full reciben un código de acceso. Solicita tu código oficial por WhatsApp a ColShopi: +57 310 400 7428.'
+      });
+    }
+
+    // 2. Check if code has expired (6 months validity)
+    if (authorizedEntry.validUntil) {
+      const expiry = new Date(authorizedEntry.validUntil).getTime();
+      if (Date.now() > expiry) {
+        return res.json({
+          valid: false,
+          reason: 'expired',
+          message: '⚠️ Este código de activación ha superado su vigencia de 6 meses. Solicita un código renovado por WhatsApp a ColShopi: +57 310 400 7428.'
+        });
+      }
+    }
+
+    // 3. Check if already redeemed
+    const redeemedInfo = redeemedCodesCache[cleanCode] || (authorizedEntry.status === 'redeemed' ? authorizedEntry : null);
+    if (redeemedInfo) {
+      // If redeemed by the exact same user email, allow re-entry
+      if (cleanEmail && redeemedInfo.userEmail && redeemedInfo.userEmail.toLowerCase() === cleanEmail) {
+        return res.json({
+          valid: true,
+          status: 'returning_user',
+          code: cleanCode,
+          message: 'Código verificado con éxito para tu cuenta.'
+        });
+      }
+
+      return res.json({
+        valid: false,
+        reason: 'already_used',
+        message: '⚠️ Este código de 6 dígitos ya fue canjeado y activado previamente por otra compradora. Cada código es de USO ÚNICO e intransferible. Si necesitas activar tu acceso para tu nuevo pedido, escríbenos a WhatsApp para asignarte un código libre.'
+      });
+    }
+
+    // Authorized and available!
+    return res.json({
+      valid: true,
+      status: 'active',
+      code: cleanCode,
+      message: 'Código verificado con éxito en la base de datos oficial.'
+    });
+  });
+
   // GET all redeemed VIP codes
   app.get('/api/codes', (req, res) => {
     res.json({
@@ -640,14 +771,28 @@ async function startServer() {
       return res.status(400).json({ error: 'Code is required' });
     }
     const cleanCode = code.toString().replace(/\D/g, '').trim();
-    redeemedCodesCache[cleanCode] = {
+    const redemptionData = {
       code: cleanCode,
       redeemedAt: new Date().toISOString(),
       userName: userName || 'Compradora VIP',
       userPhone: userPhone || '',
       userEmail: userEmail || ''
     };
+    redeemedCodesCache[cleanCode] = redemptionData;
     persistCodes();
+
+    // Also update authorizedCodesCache if present
+    if (authorizedCodesCache[cleanCode]) {
+      authorizedCodesCache[cleanCode].status = 'redeemed';
+      authorizedCodesCache[cleanCode].redeemedAt = redemptionData.redeemedAt;
+      authorizedCodesCache[cleanCode].redeemedBy = {
+        name: redemptionData.userName,
+        phone: redemptionData.userPhone,
+        email: redemptionData.userEmail
+      };
+      persistAuthorizedCodes();
+    }
+
     res.json({ success: true, code: redeemedCodesCache[cleanCode] });
   });
 
@@ -897,8 +1042,15 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html') || filePath.endsWith('sw.js')) {
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        }
+      }
+    }));
     app.get('*', (req, res) => {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

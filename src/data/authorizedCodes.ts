@@ -201,3 +201,95 @@ export function getCodesStatusSummary(registeredUsers?: Array<{ accessCode?: str
     masterList: allCodes
   };
 }
+
+/**
+ * Sincroniza códigos autorizados recibidos del servidor remoto en el almacenamiento local
+ */
+export function syncAuthorizedCodesFromRemote(remoteCodes: string[]): void {
+  if (!Array.isArray(remoteCodes) || remoteCodes.length === 0) return;
+  try {
+    const current = getCustomAuthorizedCodes();
+    const set = new Set([...current]);
+    remoteCodes.forEach((c) => {
+      const clean = c.replace(/\D/g, '').trim();
+      if (clean.length === 6 && !MASTER_AUTHORIZED_CODES.includes(clean)) {
+        set.add(clean);
+      }
+    });
+    localStorage.setItem(STORAGE_KEY_CUSTOM_AUTHORIZED_CODES, JSON.stringify(Array.from(set)));
+  } catch (err) {
+    console.warn('Error syncing remote authorized codes:', err);
+  }
+}
+
+/**
+ * Validador dual (remoto con fallback local ultra-seguro) de códigos de 6 dígitos
+ */
+export async function validateCodeOnline(
+  code: string,
+  email: string,
+  name?: string,
+  phone?: string
+): Promise<{ valid: boolean; reason?: string; message?: string }> {
+  const cleanCode = code.replace(/\D/g, '').trim();
+  const cleanEmail = (email || '').trim().toLowerCase();
+
+  // 1. Intento de validación con servidor central vía API
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+    const res = await fetch('/api/codes/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: cleanCode,
+        email: cleanEmail,
+        name: (name || '').trim(),
+        phone: (phone || '').trim()
+      }),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.valid) {
+        // Asegurar que el código quede autorizado en local para siempre
+        addCustomAuthorizedCode(cleanCode);
+        return { valid: true };
+      } else {
+        return {
+          valid: false,
+          reason: data.reason || 'unauthorized',
+          message: data.message || 'Código no válido.'
+        };
+      }
+    }
+  } catch (err) {
+    console.log('Validación offline fallback:', err);
+  }
+
+  // 2. Fallback local: Comprobación contra base maestra local
+  if (!isAuthorizedCode(cleanCode)) {
+    return {
+      valid: false,
+      reason: 'unauthorized',
+      message:
+        '⛔ Código NO autorizado o no existe en la base de datos de ColShopi. Solo las compradoras verificadas de Tyruss Full reciben un código de acceso. Solicita tu código oficial por WhatsApp a ColShopi: +57 310 400 7428.'
+    };
+  }
+
+  if (isCodeAlreadyUsed(cleanCode, undefined, cleanEmail)) {
+    return {
+      valid: false,
+      reason: 'already_used',
+      message:
+        '⚠️ Este código de 6 dígitos ya fue canjeado y activado previamente por otra compradora. Cada código es de USO ÚNICO e intransferible. Si necesitas activar tu acceso para tu nuevo pedido, escríbenos a WhatsApp para asignarte un código libre.'
+    };
+  }
+
+  return { valid: true };
+}
+

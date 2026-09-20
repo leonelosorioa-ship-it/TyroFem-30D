@@ -1,5 +1,5 @@
 // Service Worker Oficial - TyrussFull PWA
-const CACHE_NAME = 'tyrofem-v7';
+const CACHE_NAME = 'tyrofem-v8';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -70,13 +70,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch con estrategia Stale-While-Revalidate
+// Fetch con estrategia Network-First para activos y exclusión total de /api/
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  // Para navegaciones (HTML), intentar red primero
+  const reqUrl = new URL(event.request.url);
+
+  // 1. Exclusión total de rutas de API: la red manda directamente sin interferencia de caché
+  if (reqUrl.pathname.startsWith('/api/')) {
+    return;
+  }
+
+  // 2. Para navegaciones (HTML), intentar red primero para asegurar código actualizado
   if (event.request.mode === 'navigate') {
-    const reqUrl = new URL(event.request.url);
     // Blindaje anti-error: Si un navegador intenta navegar a sw.js como documento HTML, redirigir a la raíz
     if (reqUrl.pathname === '/sw.js' || reqUrl.pathname.endsWith('/sw.js')) {
       event.respondWith(Response.redirect(self.location.origin + '/', 302));
@@ -91,20 +97,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // 3. Para scripts, módulos Vite y estilos: Network First con fallback a caché
+  // Esto garantiza que cualquier nuevo código de acceso o actualización se aplique de inmediato en móviles
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && (networkResponse.type === 'basic' || networkResponse.type === 'cors')) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache);
           });
         }
         return networkResponse;
-      }).catch(() => cachedResponse);
-
-      return cachedResponse || fetchPromise;
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });
 
