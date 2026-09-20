@@ -1,9 +1,14 @@
 // Service Worker Oficial - TyrussFull PWA
-const CACHE_NAME = 'tyrofem-v10';
+const CACHE_NAME = 'tyrofem-v11';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/favicon.ico',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/favicon-48x48.png',
+  '/apple-touch-icon.png',
   '/circulo-marie.png',
   '/colshopi-logo.png',
   '/icon-192.png',
