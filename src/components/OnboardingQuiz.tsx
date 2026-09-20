@@ -603,9 +603,19 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                         if (codeError) setCodeError(null);
                       }}
                       placeholder="• • • • • •"
-                      className="w-full text-center tracking-[0.6em] font-mono text-2xl font-black px-4 py-3 rounded-xl border-2 border-emerald-500/60 bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900 placeholder:tracking-normal placeholder:text-slate-300"
+                      className={`w-full text-center tracking-[0.6em] font-mono text-2xl font-black px-4 py-3 rounded-xl border-2 ${
+                        codeError ? 'border-rose-400 bg-rose-50/30' : 'border-emerald-500/60 bg-white'
+                      } focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-600 text-slate-900 placeholder:tracking-normal placeholder:text-slate-300 transition-all`}
                     />
                   </div>
+
+                  {/* Immediate Error Message if any right below code input */}
+                  {codeError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2 animate-fadeIn">
+                      <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                      <p className="font-semibold leading-relaxed">{codeError}</p>
+                    </div>
+                  )}
 
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] text-slate-600">
                     <span className="flex items-center gap-1">
