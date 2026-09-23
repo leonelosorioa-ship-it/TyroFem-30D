@@ -127,7 +127,56 @@ export function triggerDayCompletionConfetti({ dayNumber, totalCompletedDays }: 
         });
       }, 180);
     }
+
+    // Reproducir una sutil fanfarria auditiva de éxito usando Web Audio API sintetizada (sin dependencias de archivos externos)
+    playCelebrationAudio(isGraduation ? 'graduation' : isMajorMilestone ? 'milestone' : 'standard');
   } catch (error) {
     console.warn('Canvas confetti execution skipped:', error);
+  }
+}
+
+/**
+ * Generador de acorde armónico sintetizado de celebración (Web Audio API)
+ * Produce notas cálidas y reconfortantes de campana/arpa celebrando el logro
+ */
+export function playCelebrationAudio(type: 'standard' | 'milestone' | 'graduation' = 'standard') {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+
+    const now = ctx.currentTime;
+
+    // Frecuencias pentatónicas mayores luminosas (Do - Mi - Sol - La - Do agudo)
+    const notes = type === 'graduation' 
+      ? [523.25, 659.25, 783.99, 1046.50, 1318.51] // C5, E5, G5, C6, E6
+      : type === 'milestone'
+      ? [440.00, 554.37, 659.25, 880.00]           // A4, C#5, E5, A5
+      : [523.25, 659.25, 783.99];                  // C5, E5, G5
+
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+
+      // Envolvente de volumen suave estilo campana zen
+      gain.gain.setValueAtTime(0, now + idx * 0.12);
+      gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.12 + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.12 + 0.9);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now + idx * 0.12);
+      osc.stop(now + idx * 0.12 + 0.95);
+    });
+  } catch (e) {
+    // Si el navegador bloquea audio sin interacción previa, falla en silencio
   }
 }

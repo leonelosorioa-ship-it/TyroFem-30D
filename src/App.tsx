@@ -972,8 +972,7 @@ export default function App() {
         progressMap={progressMap}
       />
 
-      {/* PWA Installation Helper & Modal */}
-      <PWAInstallBanner onOpenModal={handleTriggerPWAInstall} />
+      {/* PWA Installation Modal (Triggerable from Header or Profile) */}
       <PWAInstallModal
         isOpen={isPwaInstallModalOpen}
         onClose={() => setIsPwaInstallModalOpen(false)}

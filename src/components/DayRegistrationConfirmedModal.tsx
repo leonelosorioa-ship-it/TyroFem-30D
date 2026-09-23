@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
   Lock, 
@@ -11,7 +11,9 @@ import {
   Calendar as CalendarIcon,
   BookOpen,
   MessageCircle,
-  Clock
+  Clock,
+  Heart,
+  PartyPopper
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -40,7 +42,8 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
   onOpenRecipes,
   onNavigateToCalendar
 }) => {
-  if (!isOpen) return null;
+  const [countdown, setCountdown] = useState<number>(4);
+  const [autoRedirectPaused, setAutoRedirectPaused] = useState<boolean>(false);
 
   const progressPercent = Math.min(100, Math.round((completedDaysCount / 30) * 100));
   const isMilestone = dayNumber === 7 || dayNumber === 14 || dayNumber === 21 || dayNumber === 30;
@@ -51,6 +54,31 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
       onNavigateToCalendar();
     }
   };
+
+  // Temporizador automático para devolver a la usuaria al calendario principal tras celebrar su registro
+  useEffect(() => {
+    if (!isOpen) {
+      setCountdown(4);
+      setAutoRedirectPaused(false);
+      return;
+    }
+
+    // Si la usuaria no pausó la redirección, hacer cuenta regresiva
+    if (autoRedirectPaused) return;
+
+    if (countdown <= 0) {
+      handleReturnToCalendar();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCountdown(prev => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [isOpen, countdown, autoRedirectPaused]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn overflow-y-auto">
@@ -90,15 +118,60 @@ export const DayRegistrationConfirmedModal: React.FC<DayRegistrationConfirmedMod
         {/* Scrollable Content Body */}
         <div className="p-5 sm:p-6 space-y-4 text-xs text-slate-700 overflow-y-auto">
           
-          {/* Top Primary Call to Action Button */}
-          <button
-            type="button"
-            onClick={handleReturnToCalendar}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-bold text-sm rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-emerald-500/30"
-          >
-            <CalendarIcon className="w-4 h-4 text-amber-300" />
-            <span>Volver al Calendario Principal</span>
-          </button>
+          {/* Top Primary Call to Action Button with Live Auto-redirect Countdown */}
+          <div className="space-y-1.5">
+            <button
+              type="button"
+              onClick={handleReturnToCalendar}
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 hover:from-emerald-700 hover:to-teal-900 text-white font-bold text-sm rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer border border-emerald-400/30 active:scale-[0.98]"
+            >
+              <CalendarIcon className="w-4 h-4 text-amber-300" />
+              <span>Volver a la Sección Principal (Calendario)</span>
+              {!autoRedirectPaused && (
+                <span className="ml-1 text-[11px] bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full shadow-xs">
+                  {countdown}s
+                </span>
+              )}
+            </button>
+
+            <div className="flex items-center justify-between px-1 text-[10px] text-slate-500">
+              <span className="flex items-center gap-1 text-emerald-800 font-semibold">
+                <Sparkles className="w-3 h-3 text-amber-500 animate-spin" style={{ animationDuration: '4s' }} />
+                <span>
+                  {!autoRedirectPaused 
+                    ? `Regresando automáticamente al inicio en ${countdown} segundos...` 
+                    : 'Pausa activada. Toca el botón cuando desees volver.'}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setAutoRedirectPaused(prev => !prev)}
+                className="text-slate-400 hover:text-slate-600 underline cursor-pointer"
+              >
+                {autoRedirectPaused ? 'Reanudar conteo' : 'Pausar'}
+              </button>
+            </div>
+          </div>
+
+          {/* Special Celebration Card with Marie */}
+          <div className="bg-gradient-to-br from-amber-50 via-emerald-50/80 to-teal-50 border-2 border-emerald-300/80 rounded-2xl p-4 shadow-sm flex items-center gap-3.5 relative overflow-hidden">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-emerald-500 text-white flex items-center justify-center text-2xl shrink-0 shadow-md">
+              🎉
+            </div>
+            <div className="flex-1 space-y-0.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-800 text-emerald-100 px-2 py-0.5 rounded-md shadow-2xs">
+                  ¡Excelente Trabajo, {userProfile.name}!
+                </span>
+                <span className="text-[10px] font-bold text-amber-800">
+                  Día {dayNumber} Consolidado ✨
+                </span>
+              </div>
+              <p className="text-[11.5px] text-slate-700 leading-snug">
+                ¡Felicidades por tu constancia! Tu registro somático y toma de <strong>Tyruss Full</strong> han quedado grabados con éxito. Tu disciplina es la clave de tu transformación metabólica.
+              </p>
+            </div>
+          </div>
 
           {/* Progress Celebration Strip */}
           <div className="bg-gradient-to-r from-emerald-900 to-teal-900 text-white rounded-2xl p-4 space-y-2.5 shadow-xs">

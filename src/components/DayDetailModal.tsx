@@ -36,6 +36,7 @@ import { DayCountdownClock } from './DayCountdownClock';
 import { DayRegistrationConfirmedModal } from './DayRegistrationConfirmedModal';
 import { Day15CelebrationModal } from './Day15CelebrationModal';
 import { Day30CelebrationModal } from './Day30CelebrationModal';
+import { triggerDayCompletionConfetti } from '../utils/confettiCelebration';
 
 interface DayDetailModalProps {
   dayPlan: DayPlan | null;
@@ -175,15 +176,11 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
 
     onSaveProgress(dayPlan.dayNumber, finalData);
 
-    try {
-      confetti({
-        particleCount: 80,
-        spread: 80,
-        origin: { y: 0.55 }
-      });
-    } catch (e) {
-      // silent
-    }
+    const currentCompleted = getConsecutiveCompletedDays(progressMap).length;
+    triggerDayCompletionConfetti({
+      dayNumber: dayPlan.dayNumber,
+      totalCompletedDays: currentCompleted + 1
+    });
 
     if (dayPlan.dayNumber === 30) {
       setShowDay30CelebrationModal(true);

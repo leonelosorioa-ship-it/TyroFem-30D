@@ -4,26 +4,20 @@ import {
   Calendar as CalendarIcon, 
   Sparkles, 
   Flame, 
-  AlertCircle,
-  ShoppingBag,
-  Droplet,
-  Utensils,
-  Filter,
-  Lock,
-  Clock,
-  ShieldCheck,
-  HelpCircle,
-  ChevronDown,
-  ChevronUp,
-  Award,
-  Check
+  AlertCircle, 
+  ShoppingBag, 
+  Droplet, 
+  Utensils, 
+  Lock, 
+  Clock, 
+  ChevronDown, 
+  X
 } from 'lucide-react';
 import { DayPlan, DayProgress, UserProfile } from '../types';
 import { CALENDAR_DAYS } from '../data/calendarData';
 import { 
   getDayStatus, 
-  getConsecutiveCompletedDays, 
-  TimeRemaining 
+  getConsecutiveCompletedDays 
 } from '../utils/timeLock';
 import { DayCountdownClock } from './DayCountdownClock';
 import { SuccessStoriesCarousel } from './SuccessStoriesCarousel';
@@ -43,8 +37,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onOpenOrder,
   onOpenChat
 }) => {
-  const [selectedPhase, setSelectedPhase] = useState<number | 'all'>('all');
-  const [isGuideExpanded, setIsGuideExpanded] = useState<boolean>(true);
   const [, setTick] = useState<number>(Date.now());
 
   // Live timer tick every 1000ms to update all countdowns in real-time
@@ -66,89 +58,62 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   // Active display day
   const displayCurrentDay = isTargetActive ? targetDay : (completedCount > 0 ? completedDays[completedCount - 1] : 1);
 
-  const phases = [
-    { id: 1, name: 'Semana 1', label: 'Limpieza & Desinflamación', range: 'Días 1-7', icon: '🌿', color: 'from-emerald-600 to-teal-700' },
-    { id: 2, name: 'Semana 2', label: 'Nutrición Tiroidea & Metabolismo', range: 'Días 8-14', icon: '🦋', color: 'from-teal-600 to-cyan-700' },
-    { id: 3, name: 'Semana 3', label: 'Balance Hormonal & Sofocos', range: 'Días 15-21', icon: '🌸', color: 'from-rose-500 to-pink-700' },
-    { id: 4, name: 'Semana 4', label: 'Fijación Metabólica & Vitalidad', range: 'Días 22-30', icon: '💎', color: 'from-amber-600 to-emerald-700' },
-  ];
-
-  const filteredDays = selectedPhase === 'all' 
-    ? CALENDAR_DAYS 
-    : CALENDAR_DAYS.filter(d => d.phaseNumber === selectedPhase);
-
   const isReorderActive = displayCurrentDay >= 22;
 
+  // Detectar si la usuaria acaba de registrar un día (en los últimos 10 minutos)
+  const lastRecordedDayNumber = completedCount > 0 ? completedDays[completedCount - 1] : null;
+  const lastCompletedDayData = lastRecordedDayNumber ? progressMap[lastRecordedDayNumber] : null;
+  const [showCelebrationBanner, setShowCelebrationBanner] = useState<boolean>(true);
+
+  const isRecentCompletion = Boolean(
+    lastCompletedDayData?.completedAt && 
+    (Date.now() - new Date(lastCompletedDayData.completedAt).getTime() < 1000 * 60 * 15)
+  );
+
   return (
-    <div className="space-y-6 pb-20">
-      {/* Educational Mini-Tour Banner: ¿Cómo funciona tu reto de 30 días? */}
-      <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100/70 border border-emerald-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-5 text-emerald-950 shadow-xs">
-        <div className="flex items-center justify-between gap-3 cursor-pointer" onClick={() => setIsGuideExpanded(prev => !prev)}>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold shrink-0 shadow-xs">
-              💡
+    <div className="space-y-5 pb-20">
+      {/* Banner de Celebración Inmediata de Éxito al volver a la sección principal */}
+      {isRecentCompletion && showCelebrationBanner && lastRecordedDayNumber && (
+        <div className="bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xl border border-emerald-300/40 animate-scaleUp relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="flex items-start sm:items-center justify-between gap-3 relative z-10">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold text-2xl shadow-lg shrink-0">
+                🎉
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider bg-emerald-950 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/30">
+                    ¡Registro del Día {lastRecordedDayNumber} Confirmado! ✨
+                  </span>
+                  <span className="text-[11px] text-emerald-200 font-semibold hidden sm:inline">
+                    {completedCount} de 30 días acumulados
+                  </span>
+                </div>
+                <h3 className="text-sm sm:text-lg font-bold font-serif-luxury text-white">
+                  ¡Bravo, {userProfile.name}! Tus datos diarios quedaron guardados con éxito 🌿
+                </h3>
+                <p className="text-[11px] sm:text-xs text-emerald-100/90 leading-snug">
+                  Tu progreso de hoy está seguro. Ya puedes revisar tus recetas, ver tu bitácora o descansar: tu siguiente día se habilitará en 24 horas exactas.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-bold font-serif-luxury text-emerald-950">
-                ¿Cómo funciona tu reto de 30 días?
-              </h3>
-              <p className="text-[11px] text-emerald-800">
-                Aprende la dinámica de desbloqueo diario y registro para completar con éxito tu reto.
-              </p>
-            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowCelebrationBanner(false)}
+              className="p-1.5 text-white/70 hover:text-white bg-black/20 hover:bg-black/30 rounded-full transition-colors cursor-pointer shrink-0"
+              title="Cerrar aviso"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button 
-            type="button"
-            className="p-1.5 rounded-lg bg-emerald-200/60 hover:bg-emerald-300/60 text-emerald-900 transition-colors"
-            aria-label="Alternar guía"
-          >
-            {isGuideExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
         </div>
-
-        {isGuideExpanded && (
-          <div className="mt-3.5 pt-3.5 border-t border-emerald-200/80 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs animate-fadeIn">
-            <div className="bg-white/80 rounded-xl p-3 border border-emerald-100 flex items-start gap-2.5 shadow-2xs">
-              <span className="w-6 h-6 rounded-full bg-emerald-700 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
-                1
-              </span>
-              <div>
-                <strong className="text-slate-900 block font-bold text-xs">Paso 1: Revisa tu pauta</strong>
-                <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
-                  Abre el día activo para consultar tu dosis de <strong>Tyruss Full</strong>, pautas alimentarias y meta de hidratación.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white/80 rounded-xl p-3 border border-emerald-100 flex items-start gap-2.5 shadow-2xs">
-              <span className="w-6 h-6 rounded-full bg-teal-700 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
-                2
-              </span>
-              <div>
-                <strong className="text-slate-900 block font-bold text-xs">Paso 2: Registra tu progreso</strong>
-                <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
-                  Al final del día completa tu test somático. Tu día quedará <strong>sellado</strong> y el siguiente se activará en 24h.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white/80 rounded-xl p-3 border border-emerald-100 flex items-start gap-2.5 shadow-2xs">
-              <span className="w-6 h-6 rounded-full bg-amber-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">
-                3
-              </span>
-              <div>
-                <strong className="text-slate-900 block font-bold text-xs">Paso 3: Aprovecha los módulos</strong>
-                <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
-                  Explora recetas antiinflamatorias, monitorea tus gráficos de energía y resuelve dudas en vivo con <strong>Marié IA</strong>.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Hero Welcome & Phase Overview */}
-      <div className="bg-gradient-to-br from-emerald-800 via-teal-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-br from-emerald-800 via-teal-900 to-emerald-950 text-white rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-xl relative overflow-hidden">
         {/* Subtle decorative background circles */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-60 h-60 bg-teal-500/10 rounded-full blur-2xl pointer-events-none" />
@@ -157,13 +122,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <div className="space-y-1.5 sm:space-y-2">
             <div className="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 text-[11px] sm:text-xs font-semibold px-2.5 py-0.5 sm:py-1 rounded-full border border-emerald-400/30">
               <Sparkles className="w-3 h-3 text-amber-400" />
-              <span>Programa Oficial TyroFem 30D</span>
+              <span>Programa Oficial TyroFem 30D • ColShopi</span>
             </div>
             <h2 className="text-xl sm:text-3xl font-bold tracking-tight font-serif-luxury">
               Tu Viaje de 30 Días, {userProfile.name} 🌿
             </h2>
             <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl leading-relaxed">
-              Cada día se desbloquea secuencialmente cada <strong>24 horas exactas</strong> para garantizar la asimilación biológica de tu porción de <strong>Tyruss Full</strong> y asegurar el éxito de tu transformación.
+              Visualiza en la cuadrícula tu camino de 30 días: aquellos días que ya registraste (en verde), el día activo (en dorado) y los próximos días por desbloquear cada 24 horas.
             </p>
           </div>
 
@@ -182,13 +147,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <span className="text-[11px] sm:text-xs font-semibold text-emerald-200">Progreso 30D</span>
                 <span className="text-xs sm:text-sm font-bold text-white">{completedCount}/30 Días</span>
               </div>
-              <div className="w-full bg-emerald-950/60 rounded-full h-2 overflow-hidden border border-emerald-400/20">
+              <div className="w-full bg-emerald-950/60 rounded-full h-2.5 overflow-hidden border border-emerald-400/20">
                 <div 
-                  className="bg-gradient-to-r from-amber-400 to-emerald-400 h-2 rounded-full transition-all duration-700"
+                  className="bg-gradient-to-r from-amber-400 to-emerald-400 h-full rounded-full transition-all duration-700"
                   style={{ width: `${(completedCount / 30) * 100}%` }}
                 />
               </div>
-              <span className="text-[10px] text-emerald-200/80 mt-1 block font-medium">
+              <span className="text-[10px] text-emerald-200/90 mt-1 block font-medium">
                 {isAllProgramCompleted 
                   ? '🎉 ¡Felicidades! Reto 100% Completado' 
                   : isTargetActive
@@ -292,69 +257,128 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </div>
       )}
 
-      {/* Phase Filter Selector */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-            <Filter className="w-4 h-4 text-emerald-700" />
-            <span>Fases del Programa</span>
-          </h3>
-          <button
-            onClick={() => setSelectedPhase('all')}
-            className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
-              selectedPhase === 'all' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:text-emerald-700'
-            }`}
-          >
-            Ver Todos los 30 Días
-          </button>
+      {/* SECCIÓN PRINCIPAL: CUADRÍCULA DIRECTA DE LOS 30 DÍAS */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-emerald-100/90 shadow-md space-y-4">
+        {/* Header de la Cuadrícula */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-100 pb-3.5">
+          <div>
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="w-5 h-5 text-emerald-700" />
+              <h3 className="text-base sm:text-lg font-bold font-serif-luxury text-slate-900">
+                Tu Reto de 30 Días al Detalle
+              </h3>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Toca directamente cualquier casilla para abrir su test, guía nutricional o ver su cuenta regresiva.
+            </p>
+          </div>
+
+          {/* Mini Leyenda Rápida */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap text-[11px] font-semibold">
+            <span className="inline-flex items-center gap-1 text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block" />
+              Realizados ({completedCount})
+            </span>
+            <span className="inline-flex items-center gap-1 text-amber-900 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-300">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block animate-pulse" />
+              Activo Hoy
+            </span>
+            <span className="inline-flex items-center gap-1 text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-300 inline-block" />
+              Por Registrar ({30 - completedCount})
+            </span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {phases.map((phase) => {
-            const isSelected = selectedPhase === phase.id;
+        {/* Cuadrícula Visual de los 30 Días (5 x 6 o 6 x 5 responsiva) */}
+        <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-2 sm:gap-2.5 pt-1">
+          {CALENDAR_DAYS.map((day) => {
+            const dayStatus = getDayStatus(day.dayNumber, progressMap, userProfile);
+            const isCompleted = dayStatus.status === 'COMPLETED';
+            const isCurrent = dayStatus.status === 'ACTIVE';
+            const isCountdown = dayStatus.status === 'COUNTDOWN';
+            const isLocked = dayStatus.status === 'LOCKED';
+
             return (
               <button
-                key={phase.id}
-                onClick={() => setSelectedPhase(phase.id)}
-                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                  isSelected
-                    ? 'bg-emerald-50 border-emerald-600 ring-2 ring-emerald-500/20 shadow-xs'
-                    : 'bg-white border-slate-200/80 hover:border-emerald-300 hover:bg-slate-50/50'
+                key={day.dayNumber}
+                type="button"
+                onClick={() => onSelectDay(day)}
+                className={`relative aspect-square sm:aspect-auto sm:h-20 rounded-2xl p-1.5 sm:p-2 flex flex-col items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 text-center border ${
+                  isCompleted
+                    ? 'bg-gradient-to-b from-emerald-600 to-teal-700 text-white border-emerald-500 shadow-xs hover:from-emerald-500 hover:to-teal-600'
+                    : isCurrent
+                    ? 'bg-gradient-to-b from-amber-400 to-amber-500 text-slate-950 font-black border-amber-300 ring-4 ring-amber-400/30 shadow-md hover:scale-105'
+                    : isCountdown
+                    ? 'bg-gradient-to-b from-slate-900 to-cyan-950 text-cyan-200 border-cyan-500/40 hover:border-cyan-400 hover:bg-slate-800'
+                    : 'bg-slate-50 text-slate-500 border-slate-200 hover:border-emerald-300 hover:bg-white'
                 }`}
+                title={`Día ${day.dayNumber}: ${day.title}`}
               >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-lg">{phase.icon}</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
-                    {phase.range}
-                  </span>
+                {/* Indicador de Número de Día */}
+                <span className={`text-xs sm:text-base font-black ${isCurrent ? 'text-slate-950 text-sm sm:text-lg' : ''}`}>
+                  {day.dayNumber}
+                </span>
+
+                {/* Subtítulo / Ícono de Estado */}
+                <div className="mt-0.5 sm:mt-1 flex items-center justify-center">
+                  {isCompleted ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
+                  ) : isCurrent ? (
+                    <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-tight bg-slate-950 text-amber-300 px-1 py-0.2 rounded-md">
+                      HOY
+                    </span>
+                  ) : isCountdown ? (
+                    <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-cyan-300 animate-pulse" />
+                  ) : (
+                    <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" />
+                  )}
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900">{phase.name}</h4>
-                  <p className="text-[11px] text-slate-500 truncate">{phase.label}</p>
-                </div>
+
+                {/* Micro etiqueta visible en pantallas mayores */}
+                <span className="hidden sm:block text-[9px] truncate max-w-full px-1 mt-0.5 opacity-85">
+                  {isCompleted ? 'Listo' : isCurrent ? 'Registrar' : isCountdown ? '24h' : 'Pronto'}
+                </span>
               </button>
             );
           })}
         </div>
+
+        {/* Resumen Informativo de Progreso y Fases */}
+        <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-base">🌿</span>
+            <span className="text-slate-700">
+              Progreso actual: <strong>{completedCount} de 30 días realizados</strong> ({Math.round((completedCount / 30) * 100)}%).
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              const currentPlan = CALENDAR_DAYS.find(d => d.dayNumber === displayCurrentDay) || CALENDAR_DAYS[0];
+              onSelectDay(currentPlan);
+            }}
+            className="w-full sm:w-auto px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <span>Continuar con el Día {displayCurrentDay}</span>
+            <ChevronDown className="w-3.5 h-3.5 -rotate-90" />
+          </button>
+        </div>
       </div>
 
-      {/* 30-Day Grid */}
-      <div className="space-y-3">
+      {/* GUÍA DETALLADA DÍA A DÍA */}
+      <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
             <CalendarIcon className="w-4 h-4 text-emerald-700" />
-            <span>
-              {selectedPhase === 'all' 
-                ? 'Calendario Completo (30 Días)' 
-                : `Días de la ${phases.find(p => p.id === selectedPhase)?.name}`}
-            </span>
+            <span>Guía Nutricional & Test Somático de Cada Día</span>
           </h3>
-          <span className="text-xs text-slate-500">Toca cualquier día para ver tu guía o tiempo restante</span>
+          <span className="text-xs text-slate-500">Toca para abrir cualquier día</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filteredDays.map((day) => {
-            const progress = progressMap[day.dayNumber];
+          {CALENDAR_DAYS.map((day) => {
             const dayStatus = getDayStatus(day.dayNumber, progressMap, userProfile);
             const isCompleted = dayStatus.status === 'COMPLETED';
             const isCurrent = dayStatus.status === 'ACTIVE';
