@@ -44,6 +44,14 @@ const STORAGE_KEY_USED_CODES = 'tyrofem_used_codes_registry';
 const STORAGE_KEY_CUSTOM_AUTHORIZED_CODES = 'tyrofem_custom_authorized_codes';
 const STORAGE_KEY_RENEWAL_EPOCH = 'tyrofem_codes_renewal_epoch';
 
+export function getCurrentRenewalEpoch(): number {
+  try {
+    return Number(localStorage.getItem(STORAGE_KEY_RENEWAL_EPOCH) || '3') || 3;
+  } catch {
+    return 3;
+  }
+}
+
 /**
  * Sincroniza la época de renovación y el registro oficial de códigos canjeados desde el servidor.
  * Si el servidor tiene una época de renovación superior, libera de inmediato cualquier bloqueo local previo
@@ -71,44 +79,50 @@ export function applyCodeRenewalSync(
         }
       });
 
-      // Desvincular códigos previos en la caché local de usuarias registradas
-      const rawUsers = localStorage.getItem('tyrofem_registered_users_db');
-      if (rawUsers) {
-        try {
-          const parsedUsers = JSON.parse(rawUsers);
-          if (Array.isArray(parsedUsers)) {
-            let usersChanged = false;
-            const cleanedUsers = parsedUsers.map((u: any) => {
-              const uCode = (u.vipCode || u.accessCode || '').toString().replace(/\D/g, '').trim();
-              if (uCode && NEW_BATCH_30_CODES.includes(uCode) && (u.codeRenewalEpoch ?? 1) < targetEpoch) {
-                usersChanged = true;
-                return {
-                  ...u,
-                  previousVipCode: uCode,
-                  vipCode: '',
-                  accessCode: '',
-                  codeRenewalEpoch: targetEpoch
-                };
-              }
-              return u;
-            });
-            if (usersChanged) {
-              localStorage.setItem('tyrofem_registered_users_db', JSON.stringify(cleanedUsers));
-            }
-          }
-        } catch {
-          // silent
-        }
-      }
-
       localStorage.setItem(STORAGE_KEY_RENEWAL_EPOCH, String(targetEpoch));
+    }
+
+    // Reconciliar también cachés locales de usuarias que mantengan bloqueos de épocas anteriores
+    const rawUsers = localStorage.getItem('tyrofem_registered_users_db');
+    if (rawUsers) {
+      try {
+        const parsedUsers = JSON.parse(rawUsers);
+        if (Array.isArray(parsedUsers)) {
+          let usersChanged = false;
+          const cleanedUsers = parsedUsers.map((u: any) => {
+            const uCode = (u.vipCode || u.accessCode || '').toString().replace(/\D/g, '').trim();
+            const isRedeemedOnServer = Boolean(serverRedeemedCodes && serverRedeemedCodes[uCode]);
+            if (
+              uCode &&
+              NEW_BATCH_30_CODES.includes(uCode) &&
+              ((u.codeRenewalEpoch ?? 1) < targetEpoch || (!isRedeemedOnServer && serverRedeemedCodes))
+            ) {
+              usersChanged = true;
+              return {
+                ...u,
+                previousVipCode: uCode,
+                vipCode: '',
+                accessCode: '',
+                codeRenewalEpoch: targetEpoch
+              };
+            }
+            return u;
+          });
+          if (usersChanged) {
+            localStorage.setItem('tyrofem_registered_users_db', JSON.stringify(cleanedUsers));
+          }
+        }
+      } catch {
+        // silent
+      }
     }
 
     // Reconciliar con los códigos realmente canjeados en el servidor en la época actual
     if (serverRedeemedCodes && typeof serverRedeemedCodes === 'object') {
       NEW_BATCH_30_CODES.forEach((code) => {
         const serverRecord = serverRedeemedCodes[code];
-        if (serverRecord && (serverRecord.renewalEpoch ?? targetEpoch) >= targetEpoch) {
+        const isCurrentEpoch = serverRecord && (serverRecord.renewalEpoch ?? targetEpoch) >= targetEpoch;
+        if (isCurrentEpoch) {
           updatedRegistry[code] = {
             code,
             redeemedAt: serverRecord.redeemedAt || new Date().toISOString(),
@@ -117,7 +131,7 @@ export function applyCodeRenewalSync(
             userEmail: serverRecord.userEmail || ''
           };
           changed = true;
-        } else if (updatedRegistry[code] && !serverRecord) {
+        } else if (updatedRegistry[code]) {
           // El servidor indica que el código está activo y libre en esta época
           delete updatedRegistry[code];
           changed = true;
@@ -363,6 +377,7 @@ export async function validateCodeOnline(
 
     const res = await fetch('/api/codes/validate', {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code: cleanCode,

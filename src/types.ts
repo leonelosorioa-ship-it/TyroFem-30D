@@ -27,6 +27,7 @@ export interface UserProfile {
   pushEnabled?: boolean;
   lastTokenUpdate?: number;
   pushPermissionStatus?: 'granted' | 'denied' | 'default';
+  codeRenewalEpoch?: number;
 }
 
 export interface DayTask {

@@ -24,11 +24,8 @@ import { ColshopiLogo } from './ColshopiLogo';
 import { MariePhoto } from './MariePhoto';
 import { promptPWAInstall } from '../utils/pwaManager';
 import { 
-  isAuthorizedCode, 
-  isCodeAlreadyUsed, 
   markCodeAsRedeemed,
-  validateCodeOnline,
-  syncAuthorizedCodesFromRemote
+  getCurrentRenewalEpoch
 } from '../data/authorizedCodes';
 import { 
   isAdminCredentials, 
@@ -39,7 +36,8 @@ import {
   getAngleLabel,
   validateAccessCodeRobust,
   consumeCodeOnFirstSuccessfulEntry,
-  syncCodesStateFromServer
+  syncCodesStateFromServer,
+  extractAccessCodeDigits
 } from '../data/usersDatabase';
 
 interface OnboardingQuizProps {
@@ -56,14 +54,32 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
   const [ageGroup, setAgeGroup] = useState('35-44 años');
   const [accessCode, setAccessCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
+  const [pwaInstallNotice, setPwaInstallNotice] = useState<string | null>(null);
   const [isCodeVerified, setIsCodeVerified] = useState(false);
   const [isValidatingCode, setIsValidatingCode] = useState(false);
 
-  // Sincronizar códigos autorizados y época de renovación desde el servidor
+  // Sincronizar códigos autorizados y época de renovación desde el servidor + restaurar registro en curso si recargó
   useEffect(() => {
     syncCodesStateFromServer().catch((err) => {
       console.log('Sincronización en segundo plano de códigos autorizados:', err);
     });
+
+    try {
+      const pendingRaw = sessionStorage.getItem('tyrofem_pending_onboarding');
+      if (pendingRaw) {
+        const pending = JSON.parse(pendingRaw);
+        if (pending && pending.accessCode) {
+          if (pending.name) setName(pending.name);
+          if (pending.phone) setPhone(pending.phone);
+          if (pending.email) setEmail(pending.email);
+          if (pending.ageGroup) setAgeGroup(pending.ageGroup);
+          setAccessCode(pending.accessCode);
+          setIsCodeVerified(true);
+        }
+      }
+    } catch {
+      // silent
+    }
   }, []);
 
   // Clinical Diagnostic States
@@ -160,7 +176,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
     const cleanName = name.trim();
     const cleanPhone = phone.trim();
     const cleanEmail = email.trim().toLowerCase();
-    const cleanCode = accessCode.replace(/\D/g, ''); // only digits
+    const cleanCode = extractAccessCodeDigits(accessCode);
 
     if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
       setCodeError('Por favor ingresa un correo electrónico válido.');
@@ -220,9 +236,14 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
         return;
       }
 
-      // If returning user, restore their existing session directly
+      // If returning user with completed registration, restore their existing session directly
       if (validation.isReturningUser && validation.user) {
         const existingUser = validation.user;
+        try {
+          sessionStorage.removeItem('tyrofem_pending_onboarding');
+        } catch {
+          // silent
+        }
         setIsGenerating(true);
         setTimeout(() => {
           const restoredProfile: UserProfile = {
@@ -238,7 +259,8 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
             currentDay: existingUser.currentDay || 1,
             unlockedBadges: ['badge_start', 'badge_vip'],
             status: 'activa',
-            isAdmin: false
+            isAdmin: false,
+            codeRenewalEpoch: getCurrentRenewalEpoch()
           };
           onComplete(restoredProfile);
         }, 1000);
@@ -253,8 +275,27 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
           email: cleanEmail
         });
       }
+
+      // Persist pending onboarding draft so user can go back or refresh before Step 4 safely
+      try {
+        sessionStorage.setItem(
+          'tyrofem_pending_onboarding',
+          JSON.stringify({
+            name: cleanName,
+            phone: cleanPhone,
+            email: cleanEmail,
+            ageGroup,
+            accessCode: cleanCode
+          })
+        );
+      } catch {
+        // silent
+      }
     } catch (err) {
       console.warn('Error during robust code validation:', err);
+      setCodeError('No pudimos validar tu código en este momento. Verifica tu conexión e inténtalo nuevamente.');
+      setIsValidatingCode(false);
+      return;
     } finally {
       setIsValidatingCode(false);
     }
@@ -275,18 +316,21 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
   const handleFinish = () => {
     setIsGenerating(true);
     
+    const cleanFinalCode = extractAccessCodeDigits(accessCode);
+
     // Register and burn the single-use 6-digit code in database
-    markCodeAsRedeemed(accessCode.trim(), {
+    markCodeAsRedeemed(cleanFinalCode, {
       userName: name.trim() || 'Compradora VIP',
       userPhone: phone.trim(),
       userEmail: email.trim()
     });
 
+    const currentEpoch = getCurrentRenewalEpoch();
     const newProfile: UserProfile = {
       name: name.trim() || 'Compradora VIP',
       phone: phone.trim(),
       email: email.trim(),
-      accessCode: accessCode.trim(),
+      accessCode: cleanFinalCode,
       ageGroup,
       primaryAngle,
       symptoms: selectedSymptoms.length > 0 ? selectedSymptoms : ['Fatiga matutina', 'Inflamación digestiva'],
@@ -295,14 +339,15 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       currentDay: 1,
       unlockedBadges: ['badge_start', 'badge_vip'],
       status: 'activa',
-      isAdmin: false
+      isAdmin: false,
+      codeRenewalEpoch: currentEpoch
     };
 
     // Save to master centralized users database for admin tracking
     const registeredUser: RegisteredUser = {
-      id: `usr_${accessCode.trim()}_${Date.now()}`,
-      vipCode: accessCode.trim(),
-      accessCode: accessCode.trim(),
+      id: `usr_${cleanFinalCode}_${Date.now()}`,
+      vipCode: cleanFinalCode,
+      accessCode: cleanFinalCode,
       fullName: newProfile.name,
       name: newProfile.name,
       email: newProfile.email || '',
@@ -320,16 +365,23 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       adherencePercentage: 0,
       adherencePercent: 0,
       status: 'active',
+      codeRenewalEpoch: currentEpoch,
       lastActivityTimestamp: Date.now(),
       lastActivityAt: new Date().toISOString(),
       lastAction: `Registro completado (${getAngleLabel(newProfile.primaryAngle)})`,
       historyLog: [
-        { timestamp: formatCurrentTimestamp(), event: `Login con Código VIP #${accessCode.trim()}` },
+        { timestamp: formatCurrentTimestamp(), event: `Login con Código VIP #${cleanFinalCode}` },
         { timestamp: formatCurrentTimestamp(), event: `Registro y Onboarding completado (${getAngleLabel(newProfile.primaryAngle)})` }
       ],
       notes: 'Registro verificado desde Onboarding TyroFem 30D.'
     };
     saveRegisteredUser(registeredUser);
+
+    try {
+      sessionStorage.removeItem('tyrofem_pending_onboarding');
+    } catch {
+      // silent
+    }
 
     setTimeout(() => {
       onComplete(newProfile);
@@ -375,7 +427,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   if (window.__deferredPwaPrompt) {
                     await promptPWAInstall();
                   } else {
-                    alert('Para instalar TyrussFull: Abre el menú ⋮ de Chrome y presiona "Instalar aplicación", o en Safari toca "Compartir" y "Agregar al inicio".');
+                    setPwaInstallNotice('Para instalar TyrussFull: abre el menú ⋮ de Chrome y presiona "Instalar aplicación", o en Safari toca "Compartir" y "Agregar al inicio".');
                   }
                 }}
                 className="p-2 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/40 text-cyan-300 transition-all cursor-pointer shadow-sm active:scale-95 flex items-center gap-1 text-[10px] font-bold"
@@ -404,6 +456,19 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
 
         {/* Form Body */}
         <div className="p-5 sm:p-8">
+
+          {pwaInstallNotice && (
+            <div className="mb-4 p-3 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-950 text-xs flex items-start justify-between gap-2">
+              <p className="leading-relaxed font-medium">{pwaInstallNotice}</p>
+              <button
+                type="button"
+                onClick={() => setPwaInstallNotice(null)}
+                className="text-cyan-800 font-bold hover:underline shrink-0 cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          )}
 
           {/* ============================================================ */}
           {/* STEP 1: VIP ACCESS CODE & BUYER REGISTRATION FORM */}
@@ -574,15 +639,21 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
                   <div className="relative">
                     <input
                       type="text"
-                      maxLength={6}
-                      pattern="[0-9]*"
                       inputMode="numeric"
                       required
                       value={accessCode}
                       onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        const val = extractAccessCodeDigits(e.target.value);
                         setAccessCode(val);
                         if (codeError) setCodeError(null);
+                      }}
+                      onPaste={(e) => {
+                        const pasted = e.clipboardData?.getData('text');
+                        if (pasted) {
+                          e.preventDefault();
+                          setAccessCode(extractAccessCodeDigits(pasted));
+                          if (codeError) setCodeError(null);
+                        }
                       }}
                       placeholder="• • • • • •"
                       className={`w-full text-center tracking-[0.6em] font-mono text-2xl font-black px-4 py-3 rounded-xl border-2 ${

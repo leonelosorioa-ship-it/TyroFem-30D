@@ -1,5 +1,5 @@
 // Service Worker Oficial - TyrussFull PWA
-const CACHE_NAME = 'tyrofem-v11';
+const CACHE_NAME = 'tyrofem-v12';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

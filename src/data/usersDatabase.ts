@@ -4,6 +4,7 @@ import {
   MASTER_AUTHORIZED_CODES,
   getRedeemedCodesRegistry,
   applyCodeRenewalSync,
+  getCurrentRenewalEpoch,
   isAuthorizedCode,
   syncAuthorizedCodesFromRemote
 } from './authorizedCodes';
@@ -82,6 +83,7 @@ export interface MasterUserData {
   pushEnabled?: boolean;
   lastTokenUpdate?: number;
   pushPermissionStatus?: 'granted' | 'denied' | 'default';
+  codeRenewalEpoch?: number;
 }
 
 export type RegisteredUser = MasterUserData;
@@ -284,7 +286,8 @@ export function saveRegisteredUser(user: Partial<MasterUserData>): void {
       pushSubscription: user.pushSubscription !== undefined ? user.pushSubscription : (existingIndex >= 0 ? users[existingIndex].pushSubscription : null),
       pushEnabled: user.pushEnabled !== undefined ? user.pushEnabled : (existingIndex >= 0 ? users[existingIndex].pushEnabled : false),
       lastTokenUpdate: user.lastTokenUpdate || (existingIndex >= 0 ? users[existingIndex].lastTokenUpdate : undefined),
-      pushPermissionStatus: user.pushPermissionStatus || (existingIndex >= 0 ? users[existingIndex].pushPermissionStatus : undefined)
+      pushPermissionStatus: user.pushPermissionStatus || (existingIndex >= 0 ? users[existingIndex].pushPermissionStatus : undefined),
+      codeRenewalEpoch: user.codeRenewalEpoch ?? getCurrentRenewalEpoch()
     };
 
     if (existingIndex >= 0) {
@@ -647,13 +650,28 @@ export interface ServerCodesSnapshot {
 }
 
 /**
+ * Extrae limpiamente un código de 6 dígitos incluso si la usuaria pega texto con prefijos o dos puntos (ej. "01. 204815:")
+ */
+export function extractAccessCodeDigits(rawInput: string): string {
+  const raw = (rawInput || '').toString();
+  const sixDigitTokens = raw.match(/\d{6}/g);
+  if (sixDigitTokens && sixDigitTokens.length > 0) {
+    return sixDigitTokens[sixDigitTokens.length - 1];
+  }
+  return raw.replace(/\D/g, '').slice(0, 6);
+}
+
+/**
  * Sincroniza el estado de códigos autorizados, época de renovación y canjes desde el servidor central
  */
 export async function syncCodesStateFromServer(): Promise<ServerCodesSnapshot | null> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000);
-    const res = await fetch('/api/authorized-codes', { signal: controller.signal });
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const res = await fetch(`/api/authorized-codes?_t=${Date.now()}`, {
+      cache: 'no-store',
+      signal: controller.signal
+    });
     clearTimeout(timeoutId);
 
     if (!res.ok) return null;
@@ -875,7 +893,7 @@ export async function validateAccessCodeRobust(
   code: string,
   userDetails?: { fullName?: string; phone?: string; email?: string }
 ): Promise<CodeValidationResult> {
-  const cleanCode = (code || '').toString().replace(/\D/g, '').trim();
+  const cleanCode = extractAccessCodeDigits(code);
   const cleanEmail = (userDetails?.email || '').trim().toLowerCase();
   const cleanName = (userDetails?.fullName || '').trim();
   const cleanPhone = (userDetails?.phone || '').trim();
@@ -922,7 +940,7 @@ export async function validateAccessCodeRobust(
   const existingUser = userByCode || userByEmail;
 
   if (existingUser) {
-    if (existingUser.status === 'suspendida') {
+    if (existingUser.status === 'suspendida' || existingUser.status === 'suspended') {
       return {
         isValid: false,
         status: 'cuenta_suspendida',
@@ -953,6 +971,7 @@ export async function validateAccessCodeRobust(
 
     const response = await fetch('/api/codes/validate', {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code: cleanCode,
