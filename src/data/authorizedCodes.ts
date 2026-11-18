@@ -20,6 +20,8 @@ export const NEW_BATCH_30_CODES: string[] = [
   '952374', '163485', '274596', '385607', '496718'
 ];
 
+export const OFFICIAL_30_VIP_CODES = NEW_BATCH_30_CODES;
+
 export const MASTER_AUTHORIZED_CODES: string[] = [
   // Lote 30 Códigos Nuevos de Entrega Manual (Uso Único)
   ...NEW_BATCH_30_CODES,
@@ -40,6 +42,99 @@ export const MASTER_AUTHORIZED_CODES: string[] = [
 
 const STORAGE_KEY_USED_CODES = 'tyrofem_used_codes_registry';
 const STORAGE_KEY_CUSTOM_AUTHORIZED_CODES = 'tyrofem_custom_authorized_codes';
+const STORAGE_KEY_RENEWAL_EPOCH = 'tyrofem_codes_renewal_epoch';
+
+/**
+ * Sincroniza la época de renovación y el registro oficial de códigos canjeados desde el servidor.
+ * Si el servidor tiene una época de renovación superior, libera de inmediato cualquier bloqueo local previo
+ * sobre los 30 códigos oficiales para permitir su nuevo ingreso único.
+ */
+export function applyCodeRenewalSync(
+  serverEpoch?: number,
+  serverRedeemedCodes?: Record<string, any>
+): boolean {
+  try {
+    const localEpoch = Number(localStorage.getItem(STORAGE_KEY_RENEWAL_EPOCH) || '1');
+    const targetEpoch = typeof serverEpoch === 'number' && serverEpoch > 0 ? serverEpoch : localEpoch;
+    const isNewEpoch = targetEpoch > localEpoch;
+
+    const currentRegistry = getRedeemedCodesRegistry();
+    let updatedRegistry: Record<string, CodeRedemptionInfo> = { ...currentRegistry };
+    let changed = false;
+
+    if (isNewEpoch) {
+      // Liberar bloqueos locales anteriores sobre el lote oficial de 30 códigos
+      NEW_BATCH_30_CODES.forEach((code) => {
+        if (updatedRegistry[code]) {
+          delete updatedRegistry[code];
+          changed = true;
+        }
+      });
+
+      // Desvincular códigos previos en la caché local de usuarias registradas
+      const rawUsers = localStorage.getItem('tyrofem_registered_users_db');
+      if (rawUsers) {
+        try {
+          const parsedUsers = JSON.parse(rawUsers);
+          if (Array.isArray(parsedUsers)) {
+            let usersChanged = false;
+            const cleanedUsers = parsedUsers.map((u: any) => {
+              const uCode = (u.vipCode || u.accessCode || '').toString().replace(/\D/g, '').trim();
+              if (uCode && NEW_BATCH_30_CODES.includes(uCode) && (u.codeRenewalEpoch ?? 1) < targetEpoch) {
+                usersChanged = true;
+                return {
+                  ...u,
+                  previousVipCode: uCode,
+                  vipCode: '',
+                  accessCode: '',
+                  codeRenewalEpoch: targetEpoch
+                };
+              }
+              return u;
+            });
+            if (usersChanged) {
+              localStorage.setItem('tyrofem_registered_users_db', JSON.stringify(cleanedUsers));
+            }
+          }
+        } catch {
+          // silent
+        }
+      }
+
+      localStorage.setItem(STORAGE_KEY_RENEWAL_EPOCH, String(targetEpoch));
+    }
+
+    // Reconciliar con los códigos realmente canjeados en el servidor en la época actual
+    if (serverRedeemedCodes && typeof serverRedeemedCodes === 'object') {
+      NEW_BATCH_30_CODES.forEach((code) => {
+        const serverRecord = serverRedeemedCodes[code];
+        if (serverRecord && (serverRecord.renewalEpoch ?? targetEpoch) >= targetEpoch) {
+          updatedRegistry[code] = {
+            code,
+            redeemedAt: serverRecord.redeemedAt || new Date().toISOString(),
+            userName: serverRecord.userName || 'Compradora VIP',
+            userPhone: serverRecord.userPhone || '',
+            userEmail: serverRecord.userEmail || ''
+          };
+          changed = true;
+        } else if (updatedRegistry[code] && !serverRecord) {
+          // El servidor indica que el código está activo y libre en esta época
+          delete updatedRegistry[code];
+          changed = true;
+        }
+      });
+    }
+
+    if (changed || isNewEpoch) {
+      localStorage.setItem(STORAGE_KEY_USED_CODES, JSON.stringify(updatedRegistry));
+    }
+
+    return isNewEpoch;
+  } catch (err) {
+    console.warn('Error syncing renewal epoch:', err);
+    return false;
+  }
+}
 
 /**
  * Obtener códigos adicionales autorizados manualmente
@@ -68,6 +163,14 @@ export function addCustomAuthorizedCode(code: string): boolean {
       current.push(cleanCode);
       localStorage.setItem(STORAGE_KEY_CUSTOM_AUTHORIZED_CODES, JSON.stringify(current));
     }
+    // Persistir también en el servidor central
+    fetch('/api/codes/authorize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: cleanCode })
+    }).catch(() => {
+      // fallback offline
+    });
     return true;
   } catch (e) {
     console.error('Error adding custom authorized code', e);
@@ -166,19 +269,38 @@ export function markCodeAsRedeemed(code: string, info: { userName: string; userP
 /**
  * Obtiene lista de códigos disponibles y usados calculando la unión entre el registro local y la lista de usuarias
  */
-export function getCodesStatusSummary(registeredUsers?: Array<{ accessCode?: string; name?: string; phone?: string; email?: string; registeredAt?: string }>) {
+export function getCodesStatusSummary(
+  registeredUsers?: Array<{ accessCode?: string; vipCode?: string; name?: string; fullName?: string; phone?: string; email?: string; registeredAt?: string }>,
+  serverRedeemedCodes?: Record<string, any>
+) {
   const registry = { ...getRedeemedCodesRegistry() };
 
-  // Sync users into registry summary
+  // Merge authoritative server redeemed codes if provided
+  if (serverRedeemedCodes && typeof serverRedeemedCodes === 'object') {
+    Object.entries(serverRedeemedCodes).forEach(([rawCode, info]: [string, any]) => {
+      const cleanCode = rawCode.replace(/\D/g, '').trim();
+      if (cleanCode && info) {
+        registry[cleanCode] = {
+          code: cleanCode,
+          redeemedAt: info.redeemedAt || new Date().toISOString(),
+          userName: info.userName || 'Compradora VIP',
+          userPhone: info.userPhone || '',
+          userEmail: info.userEmail || ''
+        };
+      }
+    });
+  }
+
+  // Sync users into registry summary (only users with non-empty active codes)
   if (registeredUsers && Array.isArray(registeredUsers)) {
     registeredUsers.forEach(u => {
-      if (u.accessCode && isAuthorizedCode(u.accessCode)) {
-        const cleanCode = u.accessCode.replace(/\D/g, '').trim();
-        if (!registry[cleanCode]) {
-          registry[cleanCode] = {
-            code: cleanCode,
+      const candidateCode = (u.accessCode || u.vipCode || '').toString().replace(/\D/g, '').trim();
+      if (candidateCode && isAuthorizedCode(candidateCode)) {
+        if (!registry[candidateCode]) {
+          registry[candidateCode] = {
+            code: candidateCode,
             redeemedAt: u.registeredAt || new Date().toISOString(),
-            userName: u.name || 'Compradora VIP',
+            userName: u.fullName || u.name || 'Compradora VIP',
             userPhone: u.phone || '',
             userEmail: u.email || ''
           };

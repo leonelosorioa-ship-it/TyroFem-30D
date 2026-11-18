@@ -49,7 +49,10 @@ import {
   exportUsersToExcelFile, 
   getAngleLabel,
   formatCurrentTimestamp,
-  ADMIN_CREDENTIALS
+  ADMIN_CREDENTIALS,
+  syncCodesStateFromServer,
+  renewOfficial30CodesOnServer,
+  ServerCodesSnapshot
 } from '../data/usersDatabase';
 import { getCodesStatusSummary, addCustomAuthorizedCode, NEW_BATCH_30_CODES } from '../data/authorizedCodes';
 import { ColshopiLogo } from './ColshopiLogo';
@@ -97,11 +100,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
   const [codeAuthorizeMsg, setCodeAuthorizeMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [copiedBatch, setCopiedBatch] = useState(false);
+  const [serverCodesSnapshot, setServerCodesSnapshot] = useState<ServerCodesSnapshot | null>(null);
+  const [isRenewConfirmOpen, setIsRenewConfirmOpen] = useState(false);
+  const [isRenewingBatch, setIsRenewingBatch] = useState(false);
 
   const reloadUsers = async (showLoadingSpinner = false) => {
     if (showLoadingSpinner) setIsSyncing(true);
     try {
-      const serverUsers = await fetchRegisteredUsersFromServer();
+      const [serverUsers, codesSnapshot] = await Promise.all([
+        fetchRegisteredUsersFromServer(),
+        syncCodesStateFromServer()
+      ]);
+      if (codesSnapshot) {
+        setServerCodesSnapshot(codesSnapshot);
+      }
       setUsers(serverUsers);
       setLastSyncedAt(new Date().toLocaleTimeString('es-CO'));
       // Keep selected user detail in sync if open
@@ -117,6 +129,32 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
       if (showLoadingSpinner) {
         setTimeout(() => setIsSyncing(false), 500);
       }
+    }
+  };
+
+  const handleRenewBatch30 = async () => {
+    setIsRenewingBatch(true);
+    setCodeAuthorizeMsg(null);
+    try {
+      const result = await renewOfficial30CodesOnServer(6);
+      if (result.success) {
+        await reloadUsers(false);
+        const expiryLabel = result.validUntil
+          ? new Date(result.validUntil).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: '2-digit' })
+          : '6 meses';
+        setCodeAuthorizeMsg({
+          type: 'success',
+          text: `¡Los 30 códigos VIP fueron renovados y autorizados para un ingreso único! Vigencia hasta ${expiryLabel}.`
+        });
+        setIsRenewConfirmOpen(false);
+      } else {
+        setCodeAuthorizeMsg({
+          type: 'error',
+          text: result.message || 'No se pudo completar la renovación de los 30 códigos.'
+        });
+      }
+    } finally {
+      setIsRenewingBatch(false);
     }
   };
 
@@ -140,7 +178,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
     };
   }, []);
 
-  const codesSummary = useMemo(() => getCodesStatusSummary(users), [users]);
+  const codesSummary = useMemo(
+    () => getCodesStatusSummary(users, serverCodesSnapshot?.redeemedCodes),
+    [users, serverCodesSnapshot]
+  );
+
+  const batch30AvailableCount = useMemo(
+    () => NEW_BATCH_30_CODES.filter((c) => !codesSummary.registry[c]).length,
+    [codesSummary]
+  );
 
   // Statistics calculation
   const totalUsers = users.length;
@@ -1479,18 +1525,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
             </div>
 
             {/* Quick Stats Bar */}
-            <div className="grid grid-cols-3 gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 text-center">
+            <div className="grid grid-cols-3 gap-2 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 text-center tabular-nums">
               <div>
                 <span className="text-[10px] text-slate-400 font-semibold block uppercase">Total Autorizados</span>
-                <span className="text-lg font-black text-white">{codesSummary.total}</span>
+                <span className="text-lg font-black text-white font-mono">{codesSummary.total}</span>
               </div>
               <div>
                 <span className="text-[10px] text-cyan-400 font-semibold block uppercase">Canjeados / En uso</span>
-                <span className="text-lg font-black text-cyan-300">{codesSummary.usedCount}</span>
+                <span className="text-lg font-black text-cyan-300 font-mono">{codesSummary.usedCount}</span>
               </div>
               <div>
-                <span className="text-[10px] text-emerald-400 font-semibold block uppercase">Disponibles</span>
-                <span className="text-lg font-black text-emerald-400">{codesSummary.availableCount}</span>
+                <span className="text-[10px] text-emerald-400 font-semibold block uppercase">Lote 30 Disponibles</span>
+                <span className="text-lg font-black text-emerald-400 font-mono">{batch30AvailableCount}/30</span>
               </div>
             </div>
 
@@ -1532,14 +1578,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                 />
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm whitespace-nowrap shrink-0"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Autorizar</span>
                 </button>
               </div>
               {codeAuthorizeMsg && (
-                <div className={`p-2 rounded-xl text-xs flex items-center gap-2 ${
+                <div className={`p-2.5 rounded-xl text-xs flex items-center gap-2 ${
                   codeAuthorizeMsg.type === 'success' 
                     ? 'bg-emerald-950/60 border border-emerald-500/50 text-emerald-300'
                     : 'bg-rose-950/60 border border-rose-500/50 text-rose-300'
@@ -1554,7 +1600,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
               )}
             </form>
 
-            {/* Filter / Search Bar & Tabs */}
+            {/* Filter / Search Bar & Batch Actions */}
             <div className="space-y-2">
               <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
                 <div className="relative flex-1">
@@ -1568,30 +1614,82 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                   />
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    const textToCopy = NEW_BATCH_30_CODES.map((c, idx) => `${idx + 1}. ${c}`).join('\n');
-                    navigator.clipboard.writeText(textToCopy);
-                    setCopiedBatch(true);
-                    setTimeout(() => setCopiedBatch(false), 2500);
-                  }}
-                  className="px-3 py-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer shrink-0"
-                  title="Copiar los 30 códigos nuevos numerados para WhatsApp"
-                >
-                  {copiedBatch ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-300" />
-                      <span className="text-emerald-200">¡30 Códigos Copiados!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copiar Lote 30 Nuevos</span>
-                    </>
-                  )}
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsRenewConfirmOpen((prev) => !prev)}
+                    className="px-3 py-2 bg-amber-600/90 hover:bg-amber-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                    title="Renovar los 30 códigos por 6 meses y habilitar su uso único"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isRenewingBatch ? 'animate-spin' : ''}`} />
+                    <span>Renovar 30 Códigos (6M)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const textToCopy = NEW_BATCH_30_CODES.map((c, idx) => `${idx + 1}. ${c}`).join('\n');
+                      navigator.clipboard.writeText(textToCopy);
+                      setCopiedBatch(true);
+                      setTimeout(() => setCopiedBatch(false), 2500);
+                    }}
+                    className="px-3 py-2 bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap shrink-0"
+                    title="Copiar los 30 códigos nuevos numerados para WhatsApp"
+                  >
+                    {copiedBatch ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-300" />
+                        <span className="text-emerald-200">¡30 Copiados!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copiar Lote 30</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
+
+              {/* Inline Renewal Confirmation Bar */}
+              {isRenewConfirmOpen && (
+                <div className="p-3 bg-amber-950/50 border border-amber-500/40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="text-xs text-amber-100">
+                    <p className="font-bold">¿Renovar y reautorizar los 30 códigos por 6 meses?</p>
+                    <p className="text-[11px] text-amber-200/80 mt-0.5">
+                      Liberará canjes previos de este lote y permitirá 1 ingreso único por cada código.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setIsRenewConfirmOpen(false)}
+                      disabled={isRenewingBatch}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg cursor-pointer transition-colors whitespace-nowrap"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRenewBatch30}
+                      disabled={isRenewingBatch}
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white text-xs font-bold rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                    >
+                      {isRenewingBatch ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Renovando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Confirmar Renovación</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Tabs */}
               <div className="flex flex-wrap gap-1.5 pt-1">
@@ -1670,6 +1768,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                   const isRedeemed = !!redemptionInfo;
                   const isFromNewBatch = NEW_BATCH_30_CODES.includes(code);
                   const isSpecialNewlyAuthorized = code === '125294' || code === '138371';
+                  const serverDetail = serverCodesSnapshot?.details?.[code];
+                  const validUntilStr = serverDetail?.validUntil
+                    ? new Date(serverDetail.validUntil).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: '2-digit' })
+                    : null;
 
                   return (
                     <div
@@ -1696,39 +1798,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToApp, onLogoutAdm
                         </div>
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-mono text-sm font-black text-cyan-300 tracking-wider">
+                            <span className="font-mono text-sm font-black text-cyan-300 tracking-wider tabular-nums">
                               {code}
                             </span>
-                            {isFromNewBatch && (
-                              <span className="px-1.5 py-0.5 bg-cyan-950 border border-cyan-400 text-cyan-300 text-[10px] font-bold rounded-md flex items-center gap-1">
-                                <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
-                                Lote 30 Nuevos
+                            <span className="text-[11px] text-slate-400">
+                              {isFromNewBatch ? 'Lote 30 Oficial' : isSpecialNewlyAuthorized ? 'Autorizado Reciente' : 'Lote Maestro'}
+                              {' · '}
+                              <span className={isRedeemed ? 'text-slate-400 font-semibold' : 'text-emerald-400 font-semibold'}>
+                                {isRedeemed ? 'Utilizado' : 'Disponible (1 ingreso)'}
                               </span>
-                            )}
-                            {isSpecialNewlyAuthorized && (
-                              <span className="px-1.5 py-0.5 bg-cyan-950 border border-cyan-400 text-cyan-300 text-[10px] font-bold rounded-md">
-                                Autorizado Reciente
-                              </span>
-                            )}
-                            {isRedeemed ? (
-                              <span className="px-2 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-bold rounded-md">
-                                Canjeado
-                              </span>
-                            ) : (
-                              <span className="px-2 py-0.5 bg-emerald-950 border border-emerald-600/50 text-emerald-300 text-[10px] font-bold rounded-md flex items-center gap-1">
-                                <CheckCircle2 className="w-2.5 h-2.5" />
-                                Disponible para entrega
-                              </span>
-                            )}
+                              {validUntilStr && (
+                                <span className="font-mono tabular-nums text-slate-400"> · Vigente hasta {validUntilStr}</span>
+                              )}
+                            </span>
                           </div>
                           {isRedeemed ? (
                             <p className="text-[11px] text-slate-400 mt-0.5">
                               Usuaria: <strong className="text-white">{redemptionInfo.userName}</strong>
-                              {redemptionInfo.userPhone && ` • WA: ${redemptionInfo.userPhone}`}
+                              {redemptionInfo.userEmail && ` · ${redemptionInfo.userEmail}`}
+                              {redemptionInfo.userPhone && ` · WA: ${redemptionInfo.userPhone}`}
                             </p>
                           ) : (
                             <p className="text-[11px] text-slate-400 mt-0.5">
-                              Habilitado para ingresar y completar el Onboarding de TyroFem 30D (Uso Único).
+                              Autorizado para un ingreso único en TyroFem 30D. Se marcará como utilizado al primer ingreso.
                             </p>
                           )}
                         </div>

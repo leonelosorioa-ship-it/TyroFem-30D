@@ -33,11 +33,13 @@ import {
 import { 
   isAdminCredentials, 
   ADMIN_CREDENTIALS, 
-  findUserByCodeOrEmail, 
   saveRegisteredUser, 
   RegisteredUser,
   formatCurrentTimestamp,
-  getAngleLabel
+  getAngleLabel,
+  validateAccessCodeRobust,
+  consumeCodeOnFirstSuccessfulEntry,
+  syncCodesStateFromServer
 } from '../data/usersDatabase';
 
 interface OnboardingQuizProps {
@@ -57,18 +59,11 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
   const [isCodeVerified, setIsCodeVerified] = useState(false);
   const [isValidatingCode, setIsValidatingCode] = useState(false);
 
-  // Sincronizar códigos autorizados en segundo plano desde el servidor
+  // Sincronizar códigos autorizados y época de renovación desde el servidor
   useEffect(() => {
-    fetch('/api/authorized-codes')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.codes && Array.isArray(data.codes)) {
-          syncAuthorizedCodesFromRemote(data.codes);
-        }
-      })
-      .catch((err) => {
-        console.log('Sincronización en segundo plano de códigos autorizados:', err);
-      });
+    syncCodesStateFromServer().catch((err) => {
+      console.log('Sincronización en segundo plano de códigos autorizados:', err);
+    });
   }, []);
 
   // Clinical Diagnostic States
@@ -210,71 +205,58 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
       return;
     }
 
-    // C. First validate code status with central server and authorized registry
+    // C. First validate code status with robust multi-stage validator (checking 30 unique codes, server and local state)
     setIsValidatingCode(true);
     try {
-      const validation = await validateCodeOnline(cleanCode, cleanEmail, cleanName, cleanPhone);
-      if (!validation.valid) {
-        setCodeError(
-          validation.message ||
-            '⛔ Código NO autorizado o no existe en la base de datos de ColShopi. Solo las compradoras verificadas de Tyruss Full reciben un código de acceso. Solicita tu código oficial por WhatsApp a ColShopi: +57 310 400 7428.'
-        );
+      const validation = await validateAccessCodeRobust(cleanCode, {
+        fullName: cleanName,
+        phone: cleanPhone,
+        email: cleanEmail
+      });
+
+      if (!validation.isValid) {
+        setCodeError(validation.message || 'Código no válido o no autorizado.');
         setIsValidatingCode(false);
         return;
       }
-    } catch {
-      // Handled inside validateCodeOnline
+
+      // If returning user, restore their existing session directly
+      if (validation.isReturningUser && validation.user) {
+        const existingUser = validation.user;
+        setIsGenerating(true);
+        setTimeout(() => {
+          const restoredProfile: UserProfile = {
+            name: existingUser.name || cleanName,
+            phone: existingUser.phone || cleanPhone,
+            email: existingUser.email || cleanEmail,
+            accessCode: existingUser.accessCode || cleanCode,
+            ageGroup: existingUser.ageGroup || '35-44 años',
+            primaryAngle: existingUser.primaryAngle || 'tiroides_metabolismo',
+            symptoms: existingUser.symptoms || ['Soporte nutricional Tyruss Full'],
+            hasCompletedOnboarding: true,
+            startDate: existingUser.registrationDate || existingUser.registeredAt || new Date().toISOString(),
+            currentDay: existingUser.currentDay || 1,
+            unlockedBadges: ['badge_start', 'badge_vip'],
+            status: 'activa',
+            isAdmin: false
+          };
+          onComplete(restoredProfile);
+        }, 1000);
+        return;
+      }
+
+      // If first successful entry, IMMEDIATELY consume code and mark as 'utilizado' to prevent re-use
+      if (validation.isFirstTimeUsage || validation.status === 'disponible') {
+        await consumeCodeOnFirstSuccessfulEntry(cleanCode, {
+          fullName: cleanName,
+          phone: cleanPhone,
+          email: cleanEmail
+        });
+      }
+    } catch (err) {
+      console.warn('Error during robust code validation:', err);
     } finally {
       setIsValidatingCode(false);
-    }
-
-    // D. Check if this specific email/code already has an active or suspended account
-    const existingUser = findUserByCodeOrEmail(cleanEmail) || findUserByCodeOrEmail(cleanCode);
-    if (existingUser) {
-      if (existingUser.status === 'suspendida') {
-        setCodeError(
-          `⚠️ Tu cuenta ha sido SUSPENDIDA temporalmente por la administración de ColShopi. ${
-            existingUser.statusReason ? `Motivo: "${existingUser.statusReason}".` : ''
-          } Comunícate con soporte al WhatsApp +57 310 400 7428 para reactivar tu acceso.`
-        );
-        return;
-      }
-      if (existingUser.status === 'inhabilitada') {
-        setCodeError(
-          `⛔ Tu cuenta ha sido INHABILITADA de forma permanente por la administración de ColShopi. ${
-            existingUser.statusReason ? `Motivo: "${existingUser.statusReason}".` : ''
-          } Comunícate con soporte al WhatsApp +57 310 400 7428 si consideras que es un error.`
-        );
-        return;
-      }
-
-      // If returning active user with matching credentials, restore session directly
-      if (existingUser.status === 'activa' || existingUser.status === 'active') {
-        const emailMatches = existingUser.email && existingUser.email.toLowerCase() === cleanEmail;
-        const codeMatches = (existingUser.accessCode && existingUser.accessCode === cleanCode) || (existingUser.vipCode && existingUser.vipCode === cleanCode);
-        if (emailMatches || codeMatches) {
-          setIsGenerating(true);
-          setTimeout(() => {
-            const restoredProfile: UserProfile = {
-              name: existingUser.name || cleanName,
-              phone: existingUser.phone || cleanPhone,
-              email: existingUser.email || cleanEmail,
-              accessCode: existingUser.accessCode || cleanCode,
-              ageGroup: existingUser.ageGroup || '35-44 años',
-              primaryAngle: existingUser.primaryAngle || 'tiroides_metabolismo',
-              symptoms: existingUser.symptoms || ['Soporte nutricional Tyruss Full'],
-              hasCompletedOnboarding: true,
-              startDate: existingUser.registrationDate || existingUser.registeredAt || new Date().toISOString(),
-              currentDay: existingUser.currentDay || 1,
-              unlockedBadges: ['badge_start', 'badge_vip'],
-              status: 'activa',
-              isAdmin: false
-            };
-            onComplete(restoredProfile);
-          }, 1000);
-          return;
-        }
-      }
     }
 
     setIsCodeVerified(true);
@@ -318,7 +300,7 @@ export const OnboardingQuiz: React.FC<OnboardingQuizProps> = ({ onComplete }) =>
 
     // Save to master centralized users database for admin tracking
     const registeredUser: RegisteredUser = {
-      id: `usr_${accessCode.trim()}`,
+      id: `usr_${accessCode.trim()}_${Date.now()}`,
       vipCode: accessCode.trim(),
       accessCode: accessCode.trim(),
       fullName: newProfile.name,

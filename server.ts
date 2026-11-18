@@ -68,8 +68,20 @@ async function startServer() {
     redeemedCodesCache = {};
   }
 
+  const OFFICIAL_30_VIP_CODES: string[] = [
+    '204815', '315926', '426137', '537248', '648359',
+    '759461', '861572', '972683', '183794', '294105',
+    '305216', '416327', '527438', '638549', '749651',
+    '851762', '962873', '173495', '284506', '395617',
+    '406728', '517839', '628941', '739152', '841263',
+    '952374', '163485', '274596', '385607', '496718'
+  ];
+
   // Load or initialize authorized codes in memory
   let authorizedCodesCache: Record<string, any> = {};
+  let codesRenewalEpoch = 2;
+  let codesRenewedAt = '2026-11-17T17:35:00.000Z';
+
   function loadAuthorizedCodes() {
     try {
       if (fs.existsSync(AUTHORIZED_CODES_FILE)) {
@@ -77,6 +89,12 @@ async function startServer() {
         const parsed = JSON.parse(raw);
         if (parsed && parsed.codes && typeof parsed.codes === 'object') {
           authorizedCodesCache = parsed.codes;
+        }
+        if (typeof parsed?.renewalEpoch === 'number') {
+          codesRenewalEpoch = parsed.renewalEpoch;
+        }
+        if (typeof parsed?.renewedAt === 'string') {
+          codesRenewedAt = parsed.renewedAt;
         }
       }
     } catch (err) {
@@ -90,6 +108,8 @@ async function startServer() {
       const payload = {
         description: "Base de datos oficial y permanente de códigos de activación VIP para Tyruss Full",
         validityMonths: 6,
+        renewalEpoch: codesRenewalEpoch,
+        renewedAt: codesRenewedAt,
         lastUpdated: new Date().toISOString(),
         codes: authorizedCodesCache
       };
@@ -175,14 +195,45 @@ async function startServer() {
   }
   persistPushNotifications();
 
-  // Auto-sync codes from users cache if any user has an access code
+  // Ensure any stale pre-renewal redemptions or user locks on renewed 30-batch codes are released
+  let releasedOldLocks = false;
+  OFFICIAL_30_VIP_CODES.forEach((code) => {
+    const authEntry = authorizedCodesCache[code];
+    if (authEntry && authEntry.status === 'active') {
+      const redeemedEntry = redeemedCodesCache[code];
+      if (redeemedEntry && (redeemedEntry.renewalEpoch ?? 1) < codesRenewalEpoch) {
+        delete redeemedCodesCache[code];
+        releasedOldLocks = true;
+      }
+      usersCache.forEach((u: any) => {
+        const uCode = (u.accessCode || u.vipCode || '').toString().trim();
+        if (uCode === code && (u.codeRenewalEpoch ?? 1) < codesRenewalEpoch) {
+          u.previousVipCode = uCode;
+          u.accessCode = '';
+          u.vipCode = '';
+          u.codeRenewalEpoch = codesRenewalEpoch;
+          releasedOldLocks = true;
+        }
+      });
+    }
+  });
+  if (releasedOldLocks) {
+    persistUsers();
+  }
+
+  // Auto-sync codes from users cache if any user has an active access code
   usersCache.forEach((u: any) => {
-    if (u.accessCode && u.accessCode !== '250816') {
-      const cleanCode = u.accessCode.trim();
-      if (!redeemedCodesCache[cleanCode]) {
-        redeemedCodesCache[cleanCode] = {
-          code: cleanCode,
+    const rawCode = (u.accessCode || u.vipCode || '').toString().trim();
+    if (rawCode && rawCode !== '250816') {
+      const authEntry = authorizedCodesCache[rawCode];
+      if (authEntry && authEntry.status === 'active' && OFFICIAL_30_VIP_CODES.includes(rawCode) && (u.codeRenewalEpoch ?? 1) < codesRenewalEpoch) {
+        return;
+      }
+      if (!redeemedCodesCache[rawCode]) {
+        redeemedCodesCache[rawCode] = {
+          code: rawCode,
           redeemedAt: u.registeredAt || new Date().toISOString(),
+          renewalEpoch: u.codeRenewalEpoch ?? codesRenewalEpoch,
           userName: u.name,
           userPhone: u.phone,
           userEmail: u.email
@@ -656,20 +707,123 @@ async function startServer() {
     res.json({ success: true, deleted: initialLen !== usersCache.length, count: usersCache.length });
   });
 
+  // Helper: Renew all 30 official VIP codes for 6 months and clear prior redemptions
+  function renewOfficial30CodesBatch(validityMonths = 6) {
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const expiryDate = new Date(now);
+    expiryDate.setMonth(expiryDate.getMonth() + validityMonths);
+    expiryDate.setUTCHours(23, 59, 59, 0);
+    const validUntil = expiryDate.toISOString();
+
+    codesRenewalEpoch += 1;
+    codesRenewedAt = nowIso;
+
+    OFFICIAL_30_VIP_CODES.forEach((code) => {
+      const existing = authorizedCodesCache[code] || {};
+      authorizedCodesCache[code] = {
+        code,
+        batch: 'oficial_30_vip',
+        status: 'active',
+        validUntil,
+        createdAt: existing.createdAt || '2026-09-19T00:00:00.000Z',
+        renewedAt: nowIso,
+        renewalEpoch: codesRenewalEpoch,
+        redeemedAt: null,
+        redeemedBy: null
+      };
+
+      if (redeemedCodesCache[code]) {
+        delete redeemedCodesCache[code];
+      }
+    });
+
+    // Release active code bindings from previous users while preserving their history
+    const logTime = formatLogTime(now);
+    usersCache.forEach((u: any) => {
+      const uCode = (u.accessCode || u.vipCode || '').toString().trim();
+      if (uCode && OFFICIAL_30_VIP_CODES.includes(uCode)) {
+        u.previousVipCode = uCode;
+        u.accessCode = '';
+        u.vipCode = '';
+        u.codeRenewalEpoch = codesRenewalEpoch;
+        if (Array.isArray(u.historyLog)) {
+          u.historyLog.push({
+            timestamp: logTime,
+            event: `Código VIP #${uCode} renovado y liberado por administración (Época ${codesRenewalEpoch})`
+          });
+        }
+      }
+    });
+
+    persistAuthorizedCodes();
+    persistCodes();
+    persistUsers();
+
+    return {
+      success: true,
+      renewalEpoch: codesRenewalEpoch,
+      renewedAt: codesRenewedAt,
+      validUntil,
+      renewedCount: OFFICIAL_30_VIP_CODES.length,
+      codes: OFFICIAL_30_VIP_CODES
+    };
+  }
+
   // GET all authorized VIP codes (official list and metadata)
   app.get('/api/authorized-codes', (req, res) => {
     const list = Object.keys(authorizedCodesCache);
     res.json({
       success: true,
       count: list.length,
+      renewalEpoch: codesRenewalEpoch,
+      renewedAt: codesRenewedAt,
       codes: list,
-      details: authorizedCodesCache
+      details: authorizedCodesCache,
+      redeemedCodes: redeemedCodesCache
     });
+  });
+
+  // POST renew official 30 VIP codes batch (6 months validity, single-use reset)
+  app.post('/api/codes/renew-batch', (req, res) => {
+    const months = Number(req.body?.validityMonths) || 6;
+    const result = renewOfficial30CodesBatch(months);
+    res.json(result);
+  });
+
+  // POST authorize a single custom 6-digit code from Admin Panel
+  app.post('/api/codes/authorize', (req, res) => {
+    const cleanCode = (req.body?.code || '').toString().replace(/\D/g, '').trim();
+    if (cleanCode.length !== 6) {
+      return res.status(400).json({ success: false, message: 'El código debe tener exactamente 6 dígitos numéricos.' });
+    }
+    const now = new Date();
+    const expiryDate = new Date(now);
+    expiryDate.setMonth(expiryDate.getMonth() + 6);
+    expiryDate.setUTCHours(23, 59, 59, 0);
+
+    authorizedCodesCache[cleanCode] = {
+      code: cleanCode,
+      batch: OFFICIAL_30_VIP_CODES.includes(cleanCode) ? 'oficial_30_vip' : 'manual_admin',
+      status: 'active',
+      validUntil: expiryDate.toISOString(),
+      createdAt: authorizedCodesCache[cleanCode]?.createdAt || now.toISOString(),
+      renewedAt: now.toISOString(),
+      renewalEpoch: codesRenewalEpoch,
+      redeemedAt: null,
+      redeemedBy: null
+    };
+    if (redeemedCodesCache[cleanCode]) {
+      delete redeemedCodesCache[cleanCode];
+      persistCodes();
+    }
+    persistAuthorizedCodes();
+    res.json({ success: true, code: cleanCode, entry: authorizedCodesCache[cleanCode] });
   });
 
   // POST validate VIP code (Server-authoritative check)
   app.post('/api/codes/validate', (req, res) => {
-    const { code, email, name, phone } = req.body;
+    const { code, email } = req.body;
     if (!code) {
       return res.status(400).json({ valid: false, reason: 'missing_code', message: 'El código es requerido.' });
     }
@@ -680,7 +834,7 @@ async function startServer() {
     const foundUser = usersCache.find(
       (u: any) =>
         (cleanEmail && u.email && u.email.toLowerCase() === cleanEmail) ||
-        (cleanCode && u.accessCode && u.accessCode === cleanCode)
+        (cleanCode && ((u.accessCode && u.accessCode === cleanCode) || (u.vipCode && u.vipCode === cleanCode)))
     );
 
     if (foundUser) {
@@ -726,15 +880,17 @@ async function startServer() {
       }
     }
 
-    // 3. Check if already redeemed
+    // 3. Check if already redeemed (Single-use check)
     const redeemedInfo = redeemedCodesCache[cleanCode] || (authorizedEntry.status === 'redeemed' ? authorizedEntry : null);
     if (redeemedInfo) {
+      const redeemedEmail = (redeemedInfo.userEmail || redeemedInfo.redeemedBy?.email || '').toLowerCase().trim();
       // If redeemed by the exact same user email, allow re-entry
-      if (cleanEmail && redeemedInfo.userEmail && redeemedInfo.userEmail.toLowerCase() === cleanEmail) {
+      if (cleanEmail && redeemedEmail && redeemedEmail === cleanEmail) {
         return res.json({
           valid: true,
           status: 'returning_user',
           code: cleanCode,
+          renewalEpoch: codesRenewalEpoch,
           message: 'Código verificado con éxito para tu cuenta.'
         });
       }
@@ -751,6 +907,8 @@ async function startServer() {
       valid: true,
       status: 'active',
       code: cleanCode,
+      renewalEpoch: codesRenewalEpoch,
+      validUntil: authorizedEntry.validUntil,
       message: 'Código verificado con éxito en la base de datos oficial.'
     });
   });
@@ -760,23 +918,27 @@ async function startServer() {
     res.json({
       success: true,
       count: Object.keys(redeemedCodesCache).length,
+      renewalEpoch: codesRenewalEpoch,
       codes: redeemedCodesCache
     });
   });
 
-  // POST redeem VIP code
+  // POST redeem VIP code (marks as utilized immediately upon first successful entry)
   app.post('/api/codes/redeem', (req, res) => {
     const { code, userName, userPhone, userEmail } = req.body;
     if (!code) {
       return res.status(400).json({ error: 'Code is required' });
     }
     const cleanCode = code.toString().replace(/\D/g, '').trim();
+    const cleanEmail = (userEmail || '').toString().trim().toLowerCase();
     const redemptionData = {
       code: cleanCode,
+      status: 'utilizado',
+      renewalEpoch: codesRenewalEpoch,
       redeemedAt: new Date().toISOString(),
       userName: userName || 'Compradora VIP',
       userPhone: userPhone || '',
-      userEmail: userEmail || ''
+      userEmail: cleanEmail
     };
     redeemedCodesCache[cleanCode] = redemptionData;
     persistCodes();
@@ -785,6 +947,7 @@ async function startServer() {
     if (authorizedCodesCache[cleanCode]) {
       authorizedCodesCache[cleanCode].status = 'redeemed';
       authorizedCodesCache[cleanCode].redeemedAt = redemptionData.redeemedAt;
+      authorizedCodesCache[cleanCode].renewalEpoch = codesRenewalEpoch;
       authorizedCodesCache[cleanCode].redeemedBy = {
         name: redemptionData.userName,
         phone: redemptionData.userPhone,
